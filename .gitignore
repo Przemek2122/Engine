@@ -11,6 +11,7 @@
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+
 # Prerequisites
 *.d
 
@@ -24,5 +25,8 @@
 *.gch
 *.pch
 
-#Output
+# Ignore Output
 Engine/out/
+
+# Ignore ThirdParty changes
+/ThirdParty
