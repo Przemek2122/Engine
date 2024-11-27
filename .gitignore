@@ -1,3 +1,17 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+*.suo
+*.VC.db
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
 # Prerequisites
 *.d
 
