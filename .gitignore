@@ -26,7 +26,7 @@
 *.pch
 
 # Ignore Output
-Engine/out/
+output/
 
 # Ignore ThirdParty changes
 /ThirdParty
