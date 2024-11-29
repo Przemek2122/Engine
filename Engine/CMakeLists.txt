@@ -41,9 +41,9 @@ set_target_properties(Engine PROPERTIES
 )
 
 # SDL build options
-set(SDL_SHARED OFF CACHE BOOL "Disable shared libraries" FORCE)
-set(SDL_STATIC ON CACHE BOOL "Enable static libraries" FORCE)
-set(SDL_TEST OFF CACHE BOOL "Disable SDL test programs" FORCE)
+set(SDL_SHARED ON CACHE BOOL "shared libraries" FORCE)
+set(SDL_STATIC ON CACHE BOOL "static libraries" FORCE)
+set(SDL_TEST OFF CACHE BOOL "SDL test programs" FORCE)
 
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
@@ -55,8 +55,6 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
     if(ENGINE_VENDORED)
         # This assumes you have added SDL as a submodule in vendored/SDL
         add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL" "${CMAKE_BINARY_DIR}/SDL_build")
-        #find_package(SDL2 REQUIRED)
-        
     else()
         # 1. Look for a SDL3 package,
         # 2. look for the SDL3-shared component, and
@@ -69,12 +67,11 @@ else()
 endif()
 
 # Add SDL_ttf
-#[[
 if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
     message(STATUS "Adding SDL_ttf...")
     
     if(ENGINE_VENDORED)
-        target_link_libraries(Exe ${SDL3_LIBRARIES} ${SDL3_IMAGE_LIBRARIES})
+        target_link_libraries(Engine PUBLIC SDL3-shared SDL_ttf)
 
         # This assumes you have added SDL as a submodule in vendored/SDL
         add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf" "${CMAKE_BINARY_DIR}/SDL_ttf_build")
@@ -86,7 +83,6 @@ else()
     message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
     message(FATAL_ERROR "Missing directory could mean missing git submodules.")
 endif()
-]]
 
 # Link SDL3 and SDL_image to your project
 target_link_libraries(Engine PUBLIC SDL3::SDL3)

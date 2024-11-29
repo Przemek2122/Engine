@@ -1,12 +1,12 @@
 [submodule "ThirdParty/SDL"]
 	path = ThirdParty/SDL
 	url = https://github.com/Przemek2122/SDL
-[submodule "ThirdParty/SDL_ttf"]
-	path = ThirdParty/SDL_ttf
-	url = https://github.com/Przemek2122/SDL_ttf
-[submodule "ThirdParty/SDL_image"]
-	path = ThirdParty/SDL_image
-	url = https://github.com/Przemek2122/SDL_image
 [submodule "ThirdParty/SDL_mixer"]
 	path = ThirdParty/SDL_mixer
 	url = https://github.com/Przemek2122/SDL_mixer
+[submodule "ThirdParty/SDL_image"]
+	path = ThirdParty/SDL_image
+	url = https://github.com/Przemek2122/SDL_image
+[submodule "ThirdParty/SDL_ttf"]
+	path = ThirdParty/SDL_ttf
+	url = https://github.com/Przemek2122/SDL_ttf

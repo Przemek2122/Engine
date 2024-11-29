@@ -27,6 +27,3 @@
 
 # Ignore Output
 output/
-
-# Ignore ThirdParty changes
-/ThirdParty
