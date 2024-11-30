@@ -76,31 +76,20 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
     
     if(ENGINE_VENDORED)
         target_link_libraries(Engine PUBLIC SDL3-shared SDL_ttf)
+        
+        set(SDL_TTF_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
+        set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
 
-        set(SDL_TTF_LIB_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
-
-        message(STATUS "SDL_TTF_LIB_PATH: ${SDL_TTF_LIB_PATH}")
+        message(STATUS "SDL_TTF_PATH: ${SDL_TTF_PATH}")
+        message(STATUS "SDL_TTF_BUILD_PATH: ${SDL_TTF_BUILD_PATH}")
 
         # This assumes you have added SDL as a submodule
-        add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf" ${SDL_TTF_LIB_PATH})
+        add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
 
         # Search for library
         find_library(SDL_TTF_LIBRARY SDL_ttf PATHS ${SDL_TTF_LIB_PATH} REQUIRED)
         if(NOT SDL_TTF_LIBRARY)
             message(FATAL_ERROR "SDL_ttf library not found!")
-        endif()
-
-        # Copy static libraries
-        if(WIN32)
-        #[[
-            add_custom_command(TARGET Engine PRE_LINK
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_LIB_PATH}/SDL3_ttf.lib
-                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3_ttf.lib)
-        ]]
-        
-            #target_link_libraries(Engine PUBLIC ${SDL_TTF_LIB_PATH})
-            #target_link_libraries(Engine PUBLIC SDL_ttf)
         endif()
 
         # Copy dynamic libraries
