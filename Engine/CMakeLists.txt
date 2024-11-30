@@ -9,6 +9,12 @@ endif()
 # Create project
 project(Engine LANGUAGES CXX)
 
+# Force CMake to Use NASM
+enable_language(ASM_NASM)
+set(CMAKE_ASM_MASM_COMPILER "nasm")
+set(CMAKE_ASM_NASM_COMPILER "nasm")
+set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -o <OBJECT> <SOURCE>")
+
 # Add directories with code
 include_directories(${CMAKE_SOURCE_DIR}/Source/Public)
 include_directories(${CMAKE_SOURCE_DIR}/Source/Private)
@@ -19,9 +25,26 @@ add_executable(Engine Source/Private/Engine.cpp)
 
 # Platform flags
 if(WIN32)
+    message(STATUS "Configuring for Windows...")
+    
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
-elseif(UNIX)
+elseif(APPLE)
+    message(STATUS "Configuring for macOS...")
+
+    target_compile_definitions(Engine PUBLIC PLATFORM_MAC)
+elseif(UNIX AND NOT APPLE)
+    message(STATUS "Configuring for Linux...")
+
     target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
+else()
+    message(FATAL_ERROR "Unsupported platform!")
+endif()
+
+# Set debug method
+if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT EditAndContinue)
+else()
+    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
 endif()
 
 # Debug/Production flag
@@ -65,26 +88,6 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
 
         # This assumes you have added SDL as a submodule in vendored/SDL
         add_subdirectory(${SDL_PATH} ${SDL_BUILD_PATH})
-
-        # Copy dynamic libraries
-        #[[
-        if(WIN32)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_BUILD_PATH}/SDL3.dll
-                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3.dll)
-        elseif(APPLE)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_BUILD_PATH}/libSDL3.dylib
-                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3.dylib)
-        elseif(UNIX)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_BUILD_PATH}/libSDL3.so
-                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3.so)
-        endif()
-        ]]
     else()
         # 1. Look for a SDL3 package,
         # 2. look for the SDL3-shared component, and
@@ -110,26 +113,6 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
 
         target_link_directories(Engine PRIVATE ${SDL_TTF_BUILD_PATH})
-
-        # Copy dynamic libraries
-        #[[
-        if(WIN32)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/SDL3_ttf.dll
-                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3_ttf.dll)
-        elseif(APPLE)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/libSDL3_ttf.dylib
-                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3_ttf.dylib)
-        elseif(UNIX)
-            add_custom_command(TARGET Engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/libSDL3_ttf.so
-                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3_ttf.so)
-        endif()
-        ]]
     else()
         # Not tested
         find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
@@ -139,8 +122,60 @@ else()
     message(FATAL_ERROR "Missing directory could mean missing git submodules.")
 endif()
 
+# Add SDL_image
+if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+    message(STATUS "Adding SDL_image...")
+    
+    if(ENGINE_VENDORED)
+        option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
+        set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
+
+        set(SDL_IMAGE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+        set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
+
+        add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
+
+        target_link_directories(Engine PRIVATE ${SDL_IMAGE_BUILD_PATH})
+    else()
+        # Not tested
+        find_package(SDL_image REQUIRED CONFIG REQUIRED COMPONENTS SDL_image-shared)
+    endif()
+else()
+    message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
+    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+endif()
+
+# Add SDL_mixer
+if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+    message(STATUS "Adding SDL_mixer...")
+    
+    if(ENGINE_VENDORED)
+        option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
+        set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
+
+        set(SDL_MIXER_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+        set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
+
+        add_subdirectory(${SDL_MIXER_PATH} ${SDL_MIXER_BUILD_PATH})
+
+        target_link_directories(Engine PRIVATE ${SDL_MIXER_BUILD_PATH})
+    else()
+        # Not tested
+        find_package(SDL_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL_mixer-shared)
+    endif()
+else()
+    message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
+    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+endif()
+
 # Link SDL3 to target
 target_link_libraries(Engine PUBLIC SDL3::SDL3)
+
+# Link SDL_ttf to target
+target_link_libraries(Engine PUBLIC SDL3_ttf)
+
+# Link SDL_mixer to target
+target_link_libraries(Engine PUBLIC SDL_image)
 
 # Link SDL_ttf to target
 target_link_libraries(Engine PUBLIC SDL3_ttf)
