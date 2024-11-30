@@ -75,40 +75,38 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
     message(STATUS "Adding SDL_ttf...")
     
     if(ENGINE_VENDORED)
-        target_link_libraries(Engine PUBLIC SDL3-shared SDL_ttf)
-        
+        option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
+        set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
+
         set(SDL_TTF_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
 
-        message(STATUS "SDL_TTF_PATH: ${SDL_TTF_PATH}")
-        message(STATUS "SDL_TTF_BUILD_PATH: ${SDL_TTF_BUILD_PATH}")
-
-        # This assumes you have added SDL as a submodule
         add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
 
-        # Search for library
-        find_library(SDL_TTF_LIBRARY SDL_ttf PATHS ${SDL_TTF_LIB_PATH} REQUIRED)
-        if(NOT SDL_TTF_LIBRARY)
-            message(FATAL_ERROR "SDL_ttf library not found!")
-        endif()
+        target_link_directories(Engine PRIVATE ${SDL_TTF_BUILD_PATH})
+
+        # Link SDL_ttf to your target
+        target_link_libraries(Engine PUBLIC SDL3_ttf)
 
         # Copy dynamic libraries
+        #[[
         if(WIN32)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_LIB_PATH}/SDL3_ttf.dll
+                ${SDL_TTF_BUILD_PATH}/install/lib/SDL3_ttf.dll
                 ${CMAKE_BINARY_DIR}/lib/SDL3_ttf.dll)
         elseif(APPLE)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_LIB_PATH}/libSDL3_ttf.dylib
+                ${SDL_TTF_BUILD_PATH}/install/lib/libSDL3_ttf.dylib
                 ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.dylib)
         elseif(UNIX)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_LIB_PATH}/libSDL3_ttf.so
+                ${SDL_TTF_BUILD_PATH}/install/lib/libSDL3_ttf.so
                 ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.so)
         endif()
+        ]]
     else()
         # Not tested
         find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
