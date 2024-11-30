@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.16)
+﻿cmake_minimum_required(VERSION 3.8)
 
 # Enable Hot Reload for MSVC compilers if supported
 if (POLICY CMP0141)
@@ -31,15 +31,6 @@ else()
     target_compile_definitions(Engine PUBLIC PRODUCTION)
 endif()
 
-# Set 34put directories
-set_target_properties(Engine PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release
-)
-
 # SDL build options
 set(SDL_SHARED ON CACHE BOOL "shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "static libraries" FORCE)
@@ -47,6 +38,19 @@ set(SDL_TEST OFF CACHE BOOL "SDL test programs" FORCE)
 
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
+
+# Set directories
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin/Debug")
+else()
+    set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin/Release")
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(ENGINE_LIB_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/lib/Debug")
+else()
+    set(ENGINE_LIB_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/lib/Release")
+endif()
 
 # Add SDL3
 if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
@@ -73,8 +77,49 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
     if(ENGINE_VENDORED)
         target_link_libraries(Engine PUBLIC SDL3-shared SDL_ttf)
 
-        # This assumes you have added SDL as a submodule in vendored/SDL
-        add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf" "${CMAKE_BINARY_DIR}/SDL_ttf_build")
+        set(SDL_TTF_LIB_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
+
+        message(STATUS "SDL_TTF_LIB_PATH: ${SDL_TTF_LIB_PATH}")
+
+        # This assumes you have added SDL as a submodule
+        add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf" ${SDL_TTF_LIB_PATH})
+
+        # Search for library
+        find_library(SDL_TTF_LIBRARY SDL_ttf PATHS ${SDL_TTF_LIB_PATH} REQUIRED)
+        if(NOT SDL_TTF_LIBRARY)
+            message(FATAL_ERROR "SDL_ttf library not found!")
+        endif()
+
+        # Copy static libraries
+        if(WIN32)
+        #[[
+            add_custom_command(TARGET Engine PRE_LINK
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_TTF_LIB_PATH}/SDL3_ttf.lib
+                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3_ttf.lib)
+        ]]
+        
+            #target_link_libraries(Engine PUBLIC ${SDL_TTF_LIB_PATH})
+            #target_link_libraries(Engine PUBLIC SDL_ttf)
+        endif()
+
+        # Copy dynamic libraries
+        if(WIN32)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_TTF_LIB_PATH}/SDL3_ttf.dll
+                ${CMAKE_BINARY_DIR}/lib/SDL3_ttf.dll)
+        elseif(APPLE)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_TTF_LIB_PATH}/libSDL3_ttf.dylib
+                ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.dylib)
+        elseif(UNIX)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_TTF_LIB_PATH}/libSDL3_ttf.so
+                ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.so)
+        endif()
     else()
         # Not tested
         find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
