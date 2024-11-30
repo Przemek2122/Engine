@@ -1,10 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 
-# Enable Hot Reload for MSVC compilers if supported
-if (POLICY CMP0141)
-    cmake_policy(SET CMP0141 NEW)
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
+# Config
+set(TOOL_NASM_PATH "C:/Tools/nasm/nasm.exe")
 
 # Create project
 project(Engine LANGUAGES CXX)
@@ -12,8 +9,7 @@ project(Engine LANGUAGES CXX)
 # Force CMake to Use NASM
 enable_language(ASM_NASM)
 set(CMAKE_ASM_MASM_COMPILER "nasm")
-set(CMAKE_ASM_NASM_COMPILER "nasm")
-set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -o <OBJECT> <SOURCE>")
+set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
 
 # Add directories with code
 include_directories(${CMAKE_SOURCE_DIR}/Source/Public)
@@ -28,21 +24,44 @@ if(WIN32)
     message(STATUS "Configuring for Windows...")
     
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
+
+    
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(CMAKE_ASM_NASM_OBJECT_FORMAT "win64") # 64-bit Windows
+    else()
+        set(CMAKE_ASM_NASM_OBJECT_FORMAT "win32") # 32-bit Windows
+    endif()
 elseif(APPLE)
     message(STATUS "Configuring for macOS...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_MAC)
+
+    set(CMAKE_ASM_NASM_OBJECT_FORMAT "macho64") # macOS (assumes 64-bit)
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
+
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64") # 64-bit Linux
+    else()
+        set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf32") # 32-bit Linux
+    endif()
 else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
+set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT> <SOURCE>")
+
 # Set debug method
 if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT EditAndContinue)
+
+    # Enable Hot Reload for MSVC compilers if supported
+    if (POLICY CMP0141)
+        cmake_policy(SET CMP0141 NEW)
+        set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+    endif()
 else()
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
 endif()
