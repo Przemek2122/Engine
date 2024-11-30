@@ -46,6 +46,9 @@ else()
     set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin/Release")
 endif()
 
+set(EXECUTABLE_OUTPUT_PATH ${ENGINE_BIN_DIRECTORY_PATH})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ENGINE_BIN_DIRECTORY_PATH})
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(ENGINE_LIB_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/lib/Debug")
 else()
@@ -57,8 +60,31 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
     message(STATUS "Adding SDL...")
     
     if(ENGINE_VENDORED)
+        set(SDL_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
+        set(SDL_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_build")
+
         # This assumes you have added SDL as a submodule in vendored/SDL
-        add_subdirectory("${CMAKE_SOURCE_DIR}/../ThirdParty/SDL" "${CMAKE_BINARY_DIR}/SDL_build")
+        add_subdirectory(${SDL_PATH} ${SDL_BUILD_PATH})
+
+        # Copy dynamic libraries
+        #[[
+        if(WIN32)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_BUILD_PATH}/SDL3.dll
+                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3.dll)
+        elseif(APPLE)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_BUILD_PATH}/libSDL3.dylib
+                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3.dylib)
+        elseif(UNIX)
+            add_custom_command(TARGET Engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SDL_BUILD_PATH}/libSDL3.so
+                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3.so)
+        endif()
+        ]]
     else()
         # 1. Look for a SDL3 package,
         # 2. look for the SDL3-shared component, and
@@ -85,26 +111,23 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
 
         target_link_directories(Engine PRIVATE ${SDL_TTF_BUILD_PATH})
 
-        # Link SDL_ttf to your target
-        target_link_libraries(Engine PUBLIC SDL3_ttf)
-
         # Copy dynamic libraries
         #[[
         if(WIN32)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/install/lib/SDL3_ttf.dll
-                ${CMAKE_BINARY_DIR}/lib/SDL3_ttf.dll)
+                ${SDL_TTF_BUILD_PATH}/SDL3_ttf.dll
+                ${ENGINE_BIN_DIRECTORY_PATH}/SDL3_ttf.dll)
         elseif(APPLE)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/install/lib/libSDL3_ttf.dylib
-                ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.dylib)
+                ${SDL_TTF_BUILD_PATH}/libSDL3_ttf.dylib
+                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3_ttf.dylib)
         elseif(UNIX)
             add_custom_command(TARGET Engine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${SDL_TTF_BUILD_PATH}/install/lib/libSDL3_ttf.so
-                ${CMAKE_BINARY_DIR}/lib/libSDL3_ttf.so)
+                ${SDL_TTF_BUILD_PATH}/libSDL3_ttf.so
+                ${ENGINE_BIN_DIRECTORY_PATH}/libSDL3_ttf.so)
         endif()
         ]]
     else()
@@ -116,5 +139,8 @@ else()
     message(FATAL_ERROR "Missing directory could mean missing git submodules.")
 endif()
 
-# Link SDL3 and SDL_image to your project
+# Link SDL3 to target
 target_link_libraries(Engine PUBLIC SDL3::SDL3)
+
+# Link SDL_ttf to target
+target_link_libraries(Engine PUBLIC SDL3_ttf)
