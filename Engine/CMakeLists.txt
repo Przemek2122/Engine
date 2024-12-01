@@ -24,7 +24,6 @@ if(WIN32)
     message(STATUS "Configuring for Windows...")
     
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
-
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(CMAKE_ASM_NASM_OBJECT_FORMAT "win64") # 64-bit Windows
@@ -196,5 +195,5 @@ target_link_libraries(Engine PUBLIC SDL3_ttf)
 # Link SDL_mixer to target
 target_link_libraries(Engine PUBLIC SDL_image)
 
-# Link SDL_ttf to target
-target_link_libraries(Engine PUBLIC SDL3_ttf)
+# Link SDL3_image to target
+target_link_libraries(Engine PUBLIC SDL3_image)
