@@ -6,11 +6,6 @@ set(TOOL_NASM_PATH "C:/Tools/nasm/nasm.exe")
 # Create project
 project(Engine LANGUAGES CXX)
 
-# Force CMake to Use NASM
-enable_language(ASM_NASM)
-set(CMAKE_ASM_MASM_COMPILER "nasm")
-set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
-
 # Add directories with code
 include_directories(${CMAKE_SOURCE_DIR}/Source/Public)
 include_directories(${CMAKE_SOURCE_DIR}/Source/Private)
@@ -18,6 +13,12 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/ThirdParty)
 
 # Add your main executable
 add_executable(Engine Source/Private/Engine.cpp)
+
+# Force CMake to Use NASM
+#enable_language(ASM_NASM)
+set(CMAKE_ASM_MASM_COMPILER "nasm")
+set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
+#set(CMAKE_ASM_NASM_FLAGS "<correct flags>")
 
 # Platform flags
 if(WIN32)
@@ -50,7 +51,9 @@ else()
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
-set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT> <SOURCE>")
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<command> -o <OBJECT> <SOURCE>")
+set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT>")
+set(CMAKE_ASM_NASM_LINK_EXECUTABLE "ld <FLAGS> <CMAKE_ASM_NASM_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
 
 # Set debug method
 if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
