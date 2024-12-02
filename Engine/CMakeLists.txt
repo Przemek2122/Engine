@@ -14,12 +14,6 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/ThirdParty)
 # Add your main executable
 add_executable(Engine Source/Private/Engine.cpp)
 
-# Force CMake to Use NASM
-#enable_language(ASM_NASM)
-set(CMAKE_ASM_MASM_COMPILER "nasm")
-set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
-#set(CMAKE_ASM_NASM_FLAGS "<correct flags>")
-
 # Platform flags
 if(WIN32)
     message(STATUS "Configuring for Windows...")
@@ -27,33 +21,44 @@ if(WIN32)
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_OBJECT_FORMAT "win64") # 64-bit Windows
+        set(CMAKE_ASM_NASM_FLAGS "-f win64")
     else()
-        set(CMAKE_ASM_NASM_OBJECT_FORMAT "win32") # 32-bit Windows
+        set(CMAKE_ASM_NASM_FLAGS "-f win32")
     endif()
 elseif(APPLE)
     message(STATUS "Configuring for macOS...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_MAC)
-
-    set(CMAKE_ASM_NASM_OBJECT_FORMAT "macho64") # macOS (assumes 64-bit)
+    
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(CMAKE_ASM_NASM_FLAGS "-f macho64")
+    else()
+        set(CMAKE_ASM_NASM_FLAGS "-f macho32")
+    endif()
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64") # 64-bit Linux
+        set(CMAKE_ASM_NASM_FLAGS "-f elf64")
     else()
-        set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf32") # 32-bit Linux
+        set(CMAKE_ASM_NASM_FLAGS "-f elf32")
     endif()
 else()
+    # Add CMAKE_ASM_NASM_FLAGS from link below
+    # See https://www.nasm.us/doc/nasmdoc2.html
+    #set(CMAKE_ASM_NASM_FLAGS "-f win32")
+
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
-set(CMAKE_ASM_NASM_COMPILE_OBJECT "<command> -o <OBJECT> <SOURCE>")
-set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT>")
-set(CMAKE_ASM_NASM_LINK_EXECUTABLE "ld <FLAGS> <CMAKE_ASM_NASM_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
+# Force CMake to Use NASM
+enable_language(ASM_NASM)
+#set(CMAKE_ASM_MASM_COMPILER "nasm")
+set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT> <SOURCE>")
+set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
 
 # Set debug method
 if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
@@ -196,7 +201,7 @@ target_link_libraries(Engine PUBLIC SDL3::SDL3)
 target_link_libraries(Engine PUBLIC SDL3_ttf)
 
 # Link SDL_mixer to target
-target_link_libraries(Engine PUBLIC SDL_image)
+target_link_libraries(Engine PUBLIC SDL3_mixer)
 
 # Link SDL3_image to target
 target_link_libraries(Engine PUBLIC SDL3_image)
