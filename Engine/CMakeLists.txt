@@ -3,6 +3,9 @@
 # Config
 set(TOOL_NASM_PATH "C:/Tools/nasm/nasm.exe")
 
+# Create an option to switch between a system sdl library and a vendored SDL library
+option(ENGINE_VENDORED "Use vendored libraries" ON)
+
 # Create project
 project(Engine LANGUAGES CXX)
 
@@ -21,9 +24,9 @@ if(WIN32)
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "-f win64")
+        set(CMAKE_ASM_NASM_FLAGS "win64")
     else()
-        set(CMAKE_ASM_NASM_FLAGS "-f win32")
+        set(CMAKE_ASM_NASM_FLAGS "win32")
     endif()
 elseif(APPLE)
     message(STATUS "Configuring for macOS...")
@@ -31,9 +34,9 @@ elseif(APPLE)
     target_compile_definitions(Engine PUBLIC PLATFORM_MAC)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "-f macho64")
+        set(CMAKE_ASM_NASM_FLAGS "macho64")
     else()
-        set(CMAKE_ASM_NASM_FLAGS "-f macho32")
+        set(CMAKE_ASM_NASM_FLAGS "macho32")
     endif()
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
@@ -41,23 +44,25 @@ elseif(UNIX AND NOT APPLE)
     target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "-f elf64")
+        set(CMAKE_ASM_NASM_FLAGS "elf64")
     else()
-        set(CMAKE_ASM_NASM_FLAGS "-f elf32")
+        set(CMAKE_ASM_NASM_FLAGS "elf32")
     endif()
 else()
     # Add CMAKE_ASM_NASM_FLAGS from link below
     # See https://www.nasm.us/doc/nasmdoc2.html
-    #set(CMAKE_ASM_NASM_FLAGS "-f win32")
+    #set(CMAKE_ASM_NASM_FLAGS "win32")
 
     message(FATAL_ERROR "Unsupported platform!")
 endif()
 
 # Force CMake to Use NASM
-enable_language(ASM_NASM)
+#enable_language(ASM)
+#enable_language(NASM)
+#enable_language(MASM)
 #set(CMAKE_ASM_MASM_COMPILER "nasm")
-set(CMAKE_ASM_NASM_COMPILER ${TOOL_NASM_PATH})
-set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT> <SOURCE>")
+set(CMAKE_NASM_COMPILER ${TOOL_NASM_PATH})
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
 set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
 
 # Set debug method
@@ -85,9 +90,6 @@ set(SDL_SHARED ON CACHE BOOL "shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "static libraries" FORCE)
 set(SDL_TEST OFF CACHE BOOL "SDL test programs" FORCE)
 
-# Create an option to switch between a system sdl library and a vendored SDL library
-option(ENGINE_VENDORED "Use vendored libraries" ON)
-
 # Set directories
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin/Debug")
@@ -105,31 +107,31 @@ else()
 endif()
 
 # Add SDL3
-if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
-    message(STATUS "Adding SDL...")
+message(STATUS "Adding SDL...")
     
-    if(ENGINE_VENDORED)
+if(ENGINE_VENDORED)
+    if (EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
         set(SDL_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
         set(SDL_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_build")
 
         # This assumes you have added SDL as a submodule in vendored/SDL
         add_subdirectory(${SDL_PATH} ${SDL_BUILD_PATH})
     else()
-        # 1. Look for a SDL3 package,
-        # 2. look for the SDL3-shared component, and
-        # 3. fail if the shared component cannot be found.
-        find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+        message(FATAL_ERROR "SDL directory not found. Please check the path.")
+        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
     endif()
 else()
-    message(FATAL_ERROR "SDL directory not found. Please check the path.")
-    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+    # 1. Look for a SDL3 package,
+    # 2. look for the SDL3-shared component, and
+    # 3. fail if the shared component cannot be found.
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
 endif()
 
 # Add SDL_ttf
-if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
-    message(STATUS "Adding SDL_ttf...")
+message(STATUS "Adding SDL_ttf...")
     
-    if(ENGINE_VENDORED)
+if(ENGINE_VENDORED)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
         set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
 
@@ -140,42 +142,19 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
 
         target_link_directories(Engine PRIVATE ${SDL_TTF_BUILD_PATH})
     else()
-        # Not tested
-        find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
+        message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
+        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
     endif()
 else()
-    message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
-    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-endif()
-
-# Add SDL_image
-if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
-    message(STATUS "Adding SDL_image...")
-    
-    if(ENGINE_VENDORED)
-        option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
-        set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
-
-        set(SDL_IMAGE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
-        set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
-
-        add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
-
-        target_link_directories(Engine PRIVATE ${SDL_IMAGE_BUILD_PATH})
-    else()
-        # Not tested
-        find_package(SDL_image REQUIRED CONFIG REQUIRED COMPONENTS SDL_image-shared)
-    endif()
-else()
-    message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
-    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+    # Not tested
+    find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
 endif()
 
 # Add SDL_mixer
-if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
-    message(STATUS "Adding SDL_mixer...")
+message(STATUS "Adding SDL_mixer...")
     
-    if(ENGINE_VENDORED)
+if(ENGINE_VENDORED)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
         set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
 
@@ -186,12 +165,36 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
 
         target_link_directories(Engine PRIVATE ${SDL_MIXER_BUILD_PATH})
     else()
-        # Not tested
-        find_package(SDL_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL_mixer-shared)
+        message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
+        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
     endif()
 else()
-    message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
-    message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+    # Not tested
+    find_package(SDL_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL_mixer-shared)
+endif()
+
+
+# Add SDL_image
+message(STATUS "Adding SDL_image...")
+    
+if(ENGINE_VENDORED)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+        option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
+        set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
+
+        set(SDL_IMAGE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+        set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
+
+        add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
+
+        target_link_directories(Engine PRIVATE ${SDL_IMAGE_BUILD_PATH})
+    else()
+        message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
+        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+    endif()
+else()
+    # Not tested
+    find_package(SDL_image REQUIRED CONFIG REQUIRED COMPONENTS SDL_image-shared)
 endif()
 
 # Link SDL3 to target
