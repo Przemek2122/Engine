@@ -2,6 +2,7 @@
 
 # Config
 set(TOOL_NASM_PATH "C:/Tools/nasm/nasm.exe")
+set(TOOL_MASM_PATH "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/ml64.exe")
 
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
@@ -59,11 +60,12 @@ endif()
 # Force CMake to Use NASM
 #enable_language(ASM)
 #enable_language(NASM)
-#enable_language(MASM)
 #set(CMAKE_ASM_MASM_COMPILER "nasm")
 set(CMAKE_NASM_COMPILER ${TOOL_NASM_PATH})
 set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
 set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
+set(CMAKE_MASM_COMPILER_ENV_VAR "ml64")
+#set(CMAKE_MASM_COMPILER ${TOOL_MASM_PATH})
 
 # Set debug method
 if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
@@ -147,7 +149,7 @@ if(ENGINE_VENDORED)
     endif()
 else()
     # Not tested
-    find_package(SDL_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
+    find_package(SDL3_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL_ttf-shared)
 endif()
 
 # Add SDL_mixer
@@ -170,15 +172,21 @@ if(ENGINE_VENDORED)
     endif()
 else()
     # Not tested
-    find_package(SDL_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL_mixer-shared)
+    find_package(SDL3_mixer REQUIRED CONFIG REQUIRED COMPONENTS SDL_mixer-shared)
 endif()
-
 
 # Add SDL_image
 message(STATUS "Adding SDL_image...")
     
 if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+        # Disable library which causes compilation issue on windows
+        set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+        # Disable optional SDL_Image
+        set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
+        set(SDLIMAGE_TESTS_INSTALL OFF CACHE BOOL "" FORCE)
+        set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+
         option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
         set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
 
@@ -194,7 +202,7 @@ if(ENGINE_VENDORED)
     endif()
 else()
     # Not tested
-    find_package(SDL_image REQUIRED CONFIG REQUIRED COMPONENTS SDL_image-shared)
+    find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL_image-shared)
 endif()
 
 # Link SDL3 to target
