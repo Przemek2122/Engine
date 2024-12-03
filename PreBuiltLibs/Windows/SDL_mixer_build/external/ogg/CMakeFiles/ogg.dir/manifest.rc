@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+2 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Repos/Engine/output/build/x64-debug/SDL_mixer_build/external/ogg/CMakeFiles/ogg.dir/embed.manifest"

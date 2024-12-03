@@ -11,16 +11,18 @@ option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable
 # Create project
 project(Engine LANGUAGES CXX)
 
-# Add directories with code
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Public)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Private)
-
 # Add your main executable
 if (ENGINE_BUILD_AS_LIBRARY)
     add_library(Engine STATIC Source/Private/Engine.cpp)
 else()
-    add_executable(Engine Source/Private/Engine.cpp)
+    add_executable(Engine Source/Public)
 endif()
+
+# Add directories with code
+target_include_directories( Engine
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source/Public
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source/Private
+)
  
 # Platform flags
 if(WIN32)
@@ -62,7 +64,6 @@ else()
 endif()
 
 # Force CMake to Use NASM
-set(CMAKE_ASM_MASM_COMPILER "nasm")
 set(CMAKE_NASM_COMPILER ${TOOL_NASM_PATH})
 set(CMAKE_NASM_COMPILER_ENV_VAR "nasm")
 set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
@@ -70,10 +71,13 @@ set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
 set(CMAKE_MASM_COMPILER_ENV_VAR "ml64")
 set(CMAKE_MASM_COMPILER ${TOOL_MASM_PATH})
 
-enable_language(ASM)
-enable_language(NASM)
+#enable_language(ASM)
+#enable_language(NASM)
+#enable_language(MASM)
+
 if (TARGET SDL_mixer)
-    #enable_language(MASM)
+    enable_language(ASM)
+    enable_language(MASM)
 endif()
 
 # Set debug method

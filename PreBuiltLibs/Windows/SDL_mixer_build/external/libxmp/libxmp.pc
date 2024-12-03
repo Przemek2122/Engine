@@ -1,0 +1,13 @@
+prefix=C:/Repos/Engine/Engine/../output/install/x64-debug
+exec_prefix=${prefix}
+libdir=C:/Repos/Engine/Engine/../output/install/x64-debug/lib
+includedir=C:/Repos/Engine/Engine/../output/install/x64-debug/include
+
+Name: libxmp
+Description: Xmp module player library
+Version: 4.6.0
+
+Requires:
+Libs: -L${libdir} -lxmp
+Cflags: -I${includedir}
+Libs.private: 

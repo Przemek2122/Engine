@@ -1,0 +1,16 @@
+# Opus codec reference implementation pkg-config file
+
+prefix=C:/Repos/Engine/Engine/../output/install/x64-debug
+exec_prefix=C:/Repos/Engine/Engine/../output/install/x64-debug
+libdir=C:/Repos/Engine/Engine/../output/install/x64-debug/lib
+includedir=C:/Repos/Engine/Engine/../output/install/x64-debug/include
+
+Name: Opus
+Description: Opus IETF audio codec ( build)
+URL: https://opus-codec.org/
+Version: 1.4
+Requires:
+Conflicts:
+Libs: -LC:/Repos/Engine/Engine/../output/install/x64-debug/lib -lopus
+Libs.private: 
+Cflags: -IC:/Repos/Engine/Engine/../output/install/x64-debug/include/opus
