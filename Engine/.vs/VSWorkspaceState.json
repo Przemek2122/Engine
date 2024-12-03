@@ -1,0 +1,21 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "..\\output\\build\\x64-debug",
+      "..\\output\\install\\x64-debug",
+      "..\\output\\build\\x64-release",
+      "..\\output\\install\\x64-release",
+      "..\\output\\build\\x86-debug",
+      "..\\output\\install\\x86-debug",
+      "..\\output\\build\\x86-release",
+      "..\\output\\install\\x86-release"
+    ]
+  },
+  "ExpandedNodes": [
+    "",
+    "\\Source",
+    "\\Source\\Private",
+    "\\Source\\Public"
+  ],
+  "PreviewInSolutionExplorer": false
+}
