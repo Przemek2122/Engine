@@ -14,7 +14,9 @@
   "ExpandedNodes": [
     "",
     "\\Source",
+    "\\Source\\Private",
     "\\Source\\Private\\Core"
   ],
+  "SelectedNode": "\\CMakeLists.txt",
   "PreviewInSolutionExplorer": false
 }

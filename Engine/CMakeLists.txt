@@ -62,14 +62,19 @@ else()
 endif()
 
 # Force CMake to Use NASM
-#enable_language(ASM)
-#enable_language(NASM)
-#set(CMAKE_ASM_MASM_COMPILER "nasm")
+set(CMAKE_ASM_MASM_COMPILER "nasm")
 set(CMAKE_NASM_COMPILER ${TOOL_NASM_PATH})
+set(CMAKE_NASM_COMPILER_ENV_VAR "nasm")
 set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
 set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
 set(CMAKE_MASM_COMPILER_ENV_VAR "ml64")
-#set(CMAKE_MASM_COMPILER ${TOOL_MASM_PATH})
+set(CMAKE_MASM_COMPILER ${TOOL_MASM_PATH})
+
+enable_language(ASM)
+enable_language(NASM)
+if (TARGET SDL_mixer)
+    #enable_language(MASM)
+endif()
 
 # Set debug method
 if(MSVC AND NOT CMAKE_ASM_NASM_COMPILER)
