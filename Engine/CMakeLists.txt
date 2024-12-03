@@ -177,7 +177,7 @@ endif()
 
 # Add SDL_image
 message(STATUS "Adding SDL_image...")
-    
+
 if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
         # Disable library which causes compilation issue on windows
