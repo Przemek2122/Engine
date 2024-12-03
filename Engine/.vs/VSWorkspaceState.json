@@ -10,5 +10,11 @@
       "..\\output\\build\\x86-release",
       "..\\output\\install\\x86-release"
     ]
-  }
+  },
+  "ExpandedNodes": [
+    "",
+    "\\Source",
+    "\\Source\\Private\\Core"
+  ],
+  "PreviewInSolutionExplorer": false
 }

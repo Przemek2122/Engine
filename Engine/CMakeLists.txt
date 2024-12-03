@@ -6,18 +6,22 @@ set(TOOL_MASM_PATH "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/T
 
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
+option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable" ON)
 
 # Create project
 project(Engine LANGUAGES CXX)
 
 # Add directories with code
-include_directories(${CMAKE_SOURCE_DIR}/Source/Public)
-include_directories(${CMAKE_SOURCE_DIR}/Source/Private)
-include_directories(${CMAKE_SOURCE_DIR}/Source/ThirdParty)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Public)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Source/Private)
 
 # Add your main executable
-add_executable(Engine Source/Private/Engine.cpp)
-
+if (ENGINE_BUILD_AS_LIBRARY)
+    add_library(Engine STATIC Source/Private/Engine.cpp)
+else()
+    add_executable(Engine Source/Private/Engine.cpp)
+endif()
+ 
 # Platform flags
 if(WIN32)
     message(STATUS "Configuring for Windows...")
@@ -112,8 +116,8 @@ endif()
 message(STATUS "Adding SDL...")
     
 if(ENGINE_VENDORED)
-    if (EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
-        set(SDL_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL")
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL")
+        set(SDL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL")
         set(SDL_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_build")
 
         # This assumes you have added SDL as a submodule in vendored/SDL
@@ -133,16 +137,16 @@ endif()
 message(STATUS "Adding SDL_ttf...")
     
 if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
         set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
 
-        set(SDL_TTF_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_ttf")
+        set(SDL_TTF_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
 
         add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
 
-        target_link_directories(Engine PRIVATE ${SDL_TTF_BUILD_PATH})
+        target_link_directories(Engine PUBLIC ${SDL_TTF_BUILD_PATH})
     else()
         message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
         message(FATAL_ERROR "Missing directory could mean missing git submodules.")
@@ -156,16 +160,16 @@ endif()
 message(STATUS "Adding SDL_mixer...")
     
 if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
         set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
 
-        set(SDL_MIXER_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+        set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
 
         add_subdirectory(${SDL_MIXER_PATH} ${SDL_MIXER_BUILD_PATH})
 
-        target_link_directories(Engine PRIVATE ${SDL_MIXER_BUILD_PATH})
+        target_link_directories(Engine PUBLIC ${SDL_MIXER_BUILD_PATH})
     else()
         message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
         message(FATAL_ERROR "Missing directory could mean missing git submodules.")
@@ -179,7 +183,7 @@ endif()
 message(STATUS "Adding SDL_image...")
 
 if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
         # Disable library which causes compilation issue on windows
         set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
         # Disable optional SDL_Image
@@ -190,12 +194,12 @@ if(ENGINE_VENDORED)
         option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
         set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
 
-        set(SDL_IMAGE_PATH "${CMAKE_SOURCE_DIR}/../ThirdParty/SDL_image")
+        set(SDL_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
         set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
 
         add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
 
-        target_link_directories(Engine PRIVATE ${SDL_IMAGE_BUILD_PATH})
+        target_link_directories(Engine PUBLIC ${SDL_IMAGE_BUILD_PATH})
     else()
         message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
         message(FATAL_ERROR "Missing directory could mean missing git submodules.")

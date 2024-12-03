@@ -1,12 +1,11 @@
 ﻿// Engine.cpp : Defines the entry point for the application.
-//
 
 #include "Engine.h"
 #include "SDL3/SDL.h"
 
 using namespace std;
 
-int main()
+int SDL_main()
 {
 	cout << "Hello CMake." << endl;
 
