@@ -10,7 +10,7 @@
 *.VC.db
 
 # Visual Studio 2015/2017 cache/options directory
-.vs/
+.vs/Engine/
 
 # Prerequisites
 *.d
