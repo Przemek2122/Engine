@@ -1,2 +1,0 @@
-C:/Repos/Engine/output/build/x64-debug/SDL_mixer_build/external/wavpack/CMakeFiles/CheckASM/CMakeFiles/edit_cache.dir
-C:/Repos/Engine/output/build/x64-debug/SDL_mixer_build/external/wavpack/CMakeFiles/CheckASM/CMakeFiles/rebuild_cache.dir
