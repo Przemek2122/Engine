@@ -1,21 +1,20 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 
+# Create project
+project(Engine LANGUAGES CXX)
+
 # Config
-set(TOOL_NASM_PATH "C:/Tools/nasm/nasm.exe")
-set(TOOL_MASM_PATH "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/ml64.exe")
+project(Engine VERSION 0.0.1)
 
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
 option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable" ON)
 
-# Create project
-project(Engine LANGUAGES CXX)
-
 # Add your main executable
 if (ENGINE_BUILD_AS_LIBRARY)
     add_library(Engine STATIC Source/Private/Engine.cpp)
 else()
-    add_executable(Engine Source/Public)
+    add_executable(Engine Source/Private/Engine.cpp)
 endif()
 
 # Add directories with code
@@ -32,52 +31,51 @@ if(WIN32)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(CMAKE_ASM_NASM_FLAGS "win64")
+        set(CMAKE_ASM_COMPILER  "ml64")
     else()
         set(CMAKE_ASM_NASM_FLAGS "win32")
+        set(CMAKE_ASM_COMPILER  "ml")
     endif()
+
+    set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_COMPILER} /c /Fo<OBJECT> <SOURCE>")
 elseif(APPLE)
     message(STATUS "Configuring for macOS...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_MAC)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "macho64")
+        set(CMAKE_PLATFORM_FLAGS "macho64")
     else()
-        set(CMAKE_ASM_NASM_FLAGS "macho32")
+        set(CMAKE_PLATFORM_FLAGS "macho32")
     endif()
+
+    set(CMAKE_ASM_COMPILER  "nasm") # Could also be YASM or other probably
+
+    # NASM config
+    set(CMAKE_NASM_COMPILER ${CMAKE_ASSEMBLY_COMPILER})
+    set(CMAKE_ASM_NASM_COMPILE_OBJECT "${CMAKE_NASM_COMPILER} -f ${CMAKE_PLATFORM_FLAGS} -o <OBJECT> <SOURCE>")
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
 
     target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "elf64")
+        set(CMAKE_PLATFORM_FLAGS "elf64")
     else()
-        set(CMAKE_ASM_NASM_FLAGS "elf32")
+        set(CMAKE_PLATFORM_FLAGS "elf32")
     endif()
+
+    set(CMAKE_ASM_COMPILER  "nasm") # Could also be YASM or other probably
+
+    # NASM config
+    set(CMAKE_NASM_COMPILER ${CMAKE_ASSEMBLY_COMPILER})
+    set(CMAKE_ASM_NASM_COMPILE_OBJECT "${CMAKE_NASM_COMPILER} -f ${CMAKE_PLATFORM_FLAGS} -o <OBJECT> <SOURCE>")
 else()
     # Add CMAKE_ASM_NASM_FLAGS from link below
     # See https://www.nasm.us/doc/nasmdoc2.html
-    #set(CMAKE_ASM_NASM_FLAGS "win32")
+    set(CMAKE_PLATFORM_FLAGS "PLATFORM_NOT_SET_CHECK_CONFIG")
 
     message(FATAL_ERROR "Unsupported platform!")
-endif()
-
-# Force CMake to Use NASM
-set(CMAKE_NASM_COMPILER ${TOOL_NASM_PATH})
-set(CMAKE_NASM_COMPILER_ENV_VAR "nasm")
-set(CMAKE_ASM_NASM_COMPILE_OBJECT "${TOOL_NASM_PATH} -f ${CMAKE_ASM_NASM_FLAGS} -o <OBJECT> <SOURCE>")
-set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_NASM_COMPILE_OBJECT}")
-set(CMAKE_MASM_COMPILER_ENV_VAR "ml64")
-set(CMAKE_MASM_COMPILER ${TOOL_MASM_PATH})
-
-#enable_language(ASM)
-#enable_language(NASM)
-#enable_language(MASM)
-
-if (TARGET SDL_mixer)
-    enable_language(ASM)
-    enable_language(MASM)
 endif()
 
 # Set debug method
