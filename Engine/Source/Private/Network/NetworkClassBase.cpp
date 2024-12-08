@@ -10,27 +10,15 @@
 static int64 ThreadNumber = 0;
 static const std::string NETWORK_THREAD_NAME = "NetworkThread";
 
-void alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
-{
-	buf->base = static_cast<char*>(malloc(suggested_size)); // Allocate memory for incoming data
-	buf->len = suggested_size;
-}
-
 FNetworkClassBase::FNetworkClassBase(FNetworkManager* InNetworkManager)
 	: NetworkManager(InNetworkManager)
 	, NetworkThreadData(nullptr)
 	, NetworkThread(nullptr)
 {
-	LoopForUV = new uv_loop_t();
-
-	uv_loop_init(LoopForUV);
 }
 
 FNetworkClassBase::~FNetworkClassBase()
 {
-	uv_loop_close(LoopForUV);
-
-	delete LoopForUV;
 }
 
 void FNetworkClassBase::Initialize()

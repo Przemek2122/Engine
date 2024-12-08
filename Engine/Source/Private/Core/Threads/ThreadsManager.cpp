@@ -1,7 +1,7 @@
 #include "CoreEngine.h"
 #include "Threads/ThreadsManager.h"
 
-#include "Mutex/MutexScopeLock.h"
+#include "Types/Mutex/MutexScopeLock.h"
 
 FThreadsManager::FThreadsManager()
 	: StartingNumberOfThreads(1)

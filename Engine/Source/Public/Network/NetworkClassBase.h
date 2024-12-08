@@ -5,11 +5,9 @@
 #include "CoreMinimal.h"
 
 #if ENGINE_NETWORK_LIB_ENABLED
-#include "libuv/uv.h"
+#include "uvw.hpp"
 
 class FNetworkThread;
-
-void alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 
 /** Structure added to libuv server to be able to identify instance */
 struct FCustomNetworkInstanceData
@@ -55,9 +53,6 @@ protected:
 
 	/** Network thread */
 	FNetworkThread* NetworkThread;
-
-	/** Library(libuv) loop */
-	uv_loop_t* LoopForUV;
 
 	/** Unique thread name */
 	std::string ThreadName;

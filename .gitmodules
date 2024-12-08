@@ -10,3 +10,9 @@
 [submodule "ThirdParty/SDL_ttf"]
 	path = ThirdParty/SDL_ttf
 	url = https://github.com/Przemek2122/SDL_ttf
+[submodule "ThirdParty/libuv"]
+	path = ThirdParty/libuv
+	url = https://github.com/Przemek2122/libuv
+[submodule "ThirdParty/uvw"]
+	path = ThirdParty/uvw
+	url = https://github.com/Przemek2122/uvw

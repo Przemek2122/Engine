@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 
-#define DEBUG ((defined _DEBUG) && _DEBUG)
+//#define DEBUG ((defined _DEBUG) && _DEBUG)
 #define WITH_WIDGET_DEBUGGER DEBUG
 
 #if DEBUG

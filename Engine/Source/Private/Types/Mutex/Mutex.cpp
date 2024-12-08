@@ -1,7 +1,7 @@
 // Created by Przemys³aw Wiewióra 2024
 
 #include "CoreEngine.h"
-#include "Mutex/Mutex.h"
+#include "Types/Mutex/Mutex.h"
 
 FMutex::FMutex()
 	: bIsLocked(false)

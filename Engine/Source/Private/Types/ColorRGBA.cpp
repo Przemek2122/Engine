@@ -1,8 +1,8 @@
 // Created by Przemys³aw Wiewióra 2020
 
 #include "CoreEngine.h"
-#include "ColorRGBA.h"
-#include "Vector2D.h"
+#include "Types/ColorRGBA.h"
+#include "Types/Vector2D.h"
 
 static Uint8 ColorRangeMinDefault = 0;
 static Uint8 ColorRangeMaxDefault = 255;

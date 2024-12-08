@@ -3,7 +3,7 @@
 #include "CoreEngine.h"
 #include "Renderer/Widgets/Samples/TextWidget.h"
 #include "SDL3/SDL.h"
-#include "SDL3/SDL_ttf.h"
+#include "SDL3_ttf/SDL_ttf.h"
 #include "Assets/TypesForAssets/Font.h"
 #include "Assets/Assets/FontAsset.h"
 

@@ -17,9 +17,7 @@ public:
 	void AsyncWork() override;
 
 protected:
-	uv_tcp_t* TCP_Socket;
-	uv_connect_t* Connection;
-	sockaddr_in* DestinationSocket;
+
 
 };
 
