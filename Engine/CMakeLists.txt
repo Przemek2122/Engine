@@ -336,6 +336,16 @@ else()
     find_package(uv REQUIRED)
 endif()
 
+# Add libuv
+message(STATUS "Adding libuv...")
+
+if(ENGINE_VENDORED)
+
+else()
+    # Not tested
+    find_package(libuv REQUIRED)
+endif()
+
 # Add uvw
 message(STATUS "Adding uvw...")
 

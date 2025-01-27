@@ -20,7 +20,7 @@ public:
 	void OnNewClientConnected(uv_stream_t* InUVServer);
 
 private:
-	uv_stream_t* UVServer;
+	std::shared_ptr<uvw::loop> LoopPtr;
 
 };
 

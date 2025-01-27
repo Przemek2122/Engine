@@ -8,7 +8,6 @@
 
 FNetworkTCPServer::FNetworkTCPServer(FNetworkManager* InNetworkManager)
 	: FNetworkServerBase(InNetworkManager)
-	, UVServer(nullptr)
 {
 }
 
@@ -18,7 +17,9 @@ void FNetworkTCPServer::Initialize()
 {
 	Super::Initialize();
 
-    std::shared_ptr<uvw::tcp_handle> tcp = loop.resource<uvw::tcp_handle>();
+    LoopPtr = uvw::loop::get_default();
+
+    std::shared_ptr<uvw::tcp_handle> tcp = LoopPtr->resource<uvw::tcp_handle>();
 
     tcp->on<uvw::listen_event>([](const uvw::listen_event&, uvw::tcp_handle& srv) {
         std::shared_ptr<uvw::tcp_handle> client = srv.parent().resource<uvw::tcp_handle>();
@@ -28,7 +29,7 @@ void FNetworkTCPServer::Initialize()
 
         srv.accept(*client);
         client->read();
-        });
+    });
 
     tcp->bind("127.0.0.1", 4242);
     tcp->listen();
