@@ -336,16 +336,6 @@ else()
     find_package(uv REQUIRED)
 endif()
 
-# Add libuv
-message(STATUS "Adding libuv...")
-
-if(ENGINE_VENDORED)
-
-else()
-    # Not tested
-    find_package(libuv REQUIRED)
-endif()
-
 # Add uvw
 message(STATUS "Adding uvw...")
 
@@ -385,6 +375,9 @@ target_link_libraries(Engine PUBLIC SDL3_mixer)
 
 # Link SDL3_image to target
 target_link_libraries(Engine PUBLIC SDL3_image)
+
+# Link uv to target
+target_link_libraries(Engine PUBLIC uv)
 
 # Link uvw to target
 target_link_libraries(Engine PUBLIC uvw)

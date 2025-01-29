@@ -454,6 +454,10 @@ bool FWidget::ReceiveOnMouseRightClick(FVector2D<int> InMousePosition, EInputSta
 	return bIsInputConsumed;
 }
 
+void FWidget::OnVisibilityChangedToHidden()
+{
+}
+
 #if WITH_WIDGET_DEBUGGER
 void FWidget::SetIsWidgetBeingDebugged(const bool bNewValue)
 {
