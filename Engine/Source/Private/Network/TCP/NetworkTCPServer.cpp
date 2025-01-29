@@ -19,7 +19,7 @@ void FNetworkTCPServer::Initialize()
 
     LoopPtr = uvw::loop::get_default();
 
-    std::shared_ptr<uvw::tcp_handle> tcp = LoopPtr->resource<uvw::tcp_handle>();
+    tcp = LoopPtr->resource<uvw::tcp_handle>();
 
     tcp->on<uvw::listen_event>([](const uvw::listen_event&, uvw::tcp_handle& srv) {
         std::shared_ptr<uvw::tcp_handle> client = srv.parent().resource<uvw::tcp_handle>();

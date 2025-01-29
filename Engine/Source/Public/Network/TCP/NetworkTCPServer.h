@@ -20,6 +20,7 @@ public:
 	void OnNewClientConnected(uv_stream_t* InUVServer);
 
 private:
+	std::shared_ptr<uvw::tcp_handle> tcp;
 	std::shared_ptr<uvw::loop> LoopPtr;
 
 };
