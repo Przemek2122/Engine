@@ -1,9 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.8)
 
-# Settings
-set(ENGINE_CONFIGURATION "Debug")
-set_property(GLOBAL PROPERTY ENGINE_CONFIGURATION ${ENGINE_CONFIGURATION})
-
 # Create project
 project(Engine LANGUAGES CXX)
 
@@ -140,19 +136,21 @@ else()
 endif()
 
 # Debug/Production flag
-if(ENGINE_CONFIGURATION STREQUAL Debug)
-    target_compile_definitions(Engine PUBLIC DEBUG)
-else()
-    target_compile_definitions(Engine PUBLIC PRODUCTION)
-endif()
+target_compile_definitions(Engine
+    PUBLIC
+    # If building Debug, define DEBUG; otherwise define PRODUCTION
+    $<$<CONFIG:Debug>:DEBUG>
+    $<$<CONFIG:RelWithDebInfo>:PRODUCTION>
+    $<$<CONFIG:Release>:PRODUCTION>
+    $<$<CONFIG:MinSizeRel>:PRODUCTION>
+)
 
 # SDL build options
 set(SDL_SHARED ON CACHE BOOL "shared libraries" FORCE)
 set(SDL_STATIC ON CACHE BOOL "static libraries" FORCE)
 set(SDL_TEST OFF CACHE BOOL "SDL test programs" FORCE)
 
-# Set directories
-set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin/${ENGINE_CONFIGURATION}")
+set(ENGINE_BIN_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/bin")
 
 set(EXECUTABLE_OUTPUT_PATH ${ENGINE_BIN_DIRECTORY_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ENGINE_BIN_DIRECTORY_PATH})
