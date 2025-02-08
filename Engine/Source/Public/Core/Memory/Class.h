@@ -96,7 +96,7 @@ public:
 	 * @Note: If class is not set, it will use default BaseClass
 	 * @Note: Will not be garbage collected any way so make sure to delete it after use!
 	 */
-	_NODISCARD TBaseClass* Allocate(TArgs... Args)
+	NO_DISCARD TBaseClass* Allocate(TArgs... Args)
 	{
 		if (StoredClass == nullptr)
 		{
@@ -107,13 +107,13 @@ public:
 	}
 
 	/** @returns true if any type is in storage */
-	_NODISCARD bool IsSet() const
+	NO_DISCARD bool IsSet() const
 	{
 		return StoredClass != nullptr;
 	}
 
 	template<typename TType>
-	_NODISCARD bool IsSame()
+	NO_DISCARD bool IsSame()
 	{
 		if (StoredClass == nullptr)
 		{

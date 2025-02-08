@@ -20,12 +20,12 @@ protected:
 	virtual void ReceiveTick();
 
 	/** Begin IWidgetManagementInterface */
-	_NODISCARD FVector2D<int> GetWidgetManagerOffset() const override;
-	_NODISCARD FVector2D<int> GetWidgetManagerSize() const override;
-	_NODISCARD bool HasParent() const override;
-	_NODISCARD int32 GetParentsNumber() const override;
-	_NODISCARD IWidgetManagementInterface* GetParent() const override;
-	_NODISCARD FWindow* GetOwnerWindow() const override;
+	NO_DISCARD FVector2D<int> GetWidgetManagerOffset() const override;
+	NO_DISCARD FVector2D<int> GetWidgetManagerSize() const override;
+	NO_DISCARD bool HasParent() const override;
+	NO_DISCARD int32 GetParentsNumber() const override;
+	NO_DISCARD IWidgetManagementInterface* GetParent() const override;
+	NO_DISCARD FWindow* GetOwnerWindow() const override;
 	void OnWindowChanged() override;
 	/** End IWidgetManagementInterface */
 

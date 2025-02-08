@@ -92,15 +92,15 @@ public:
 	virtual void OnComponentDestroy(const std::string& ComponentName, UBaseComponent* OldComponent);
 
 	/** @returns true if has owner and GetOwner() is safe to call. */
-	_NODISCARD bool HasOwner() const { return bDoesHaveComponentManagerInterfaceParent; }
+	NO_DISCARD bool HasOwner() const { return bDoesHaveComponentManagerInterfaceParent; }
 
 	/** @return cached owner. */
-	_NODISCARD IComponentManagerInterface* GetOwner() const;
+	NO_DISCARD IComponentManagerInterface* GetOwner() const;
 
 	/** Iterate all elements to the top returning top level owner, most likely EEntity. */
-	_NODISCARD IComponentManagerInterface* GetOwnerTop() const;
+	NO_DISCARD IComponentManagerInterface* GetOwnerTop() const;
 
-	_NODISCARD FWindow* GetOwnerWindow() const;
+	NO_DISCARD FWindow* GetOwnerWindow() const;
 
 	void TickComponents(const float DeltaTime);
 	void RenderComponents();

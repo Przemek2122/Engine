@@ -40,11 +40,11 @@ public:
 	 */
 	void SetText(const std::string& InText);
 
-	_NODISCARD std::string GetDesiredText() const;
-	_NODISCARD std::string GetRenderedText() const;
+	NO_DISCARD std::string GetDesiredText() const;
+	NO_DISCARD std::string GetRenderedText() const;
 
 	void SetTextRenderMode(ETextRenderMode NewTextRenderMode);
-	_NODISCARD ETextRenderMode GetTextRenderMode() const;
+	NO_DISCARD ETextRenderMode GetTextRenderMode() const;
 
 protected:
 	void RebuildWidget() override;

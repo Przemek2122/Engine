@@ -40,14 +40,14 @@ protected:
 
 	void ReceiveTick();
 
-	_NODISCARD virtual FWidgetManager* CreateWidgetManager();
+	NO_DISCARD virtual FWidgetManager* CreateWidgetManager();
 #if WITH_WIDGET_DEBUGGER
-	_NODISCARD virtual FWidgetDebugger* CreateWidgetDebugger();
+	NO_DISCARD virtual FWidgetDebugger* CreateWidgetDebugger();
 #endif
-	_NODISCARD virtual FWindowInputManager* CreateWindowInputManager();
-	_NODISCARD virtual FWidgetInputManager* CreateWidgetInputManager();
-	_NODISCARD virtual FMapManager* CreateMapManager();
-	_NODISCARD virtual FRenderer* CreateRenderer();
+	NO_DISCARD virtual FWindowInputManager* CreateWindowInputManager();
+	NO_DISCARD virtual FWidgetInputManager* CreateWidgetInputManager();
+	NO_DISCARD virtual FMapManager* CreateMapManager();
+	NO_DISCARD virtual FRenderer* CreateRenderer();
 
 public:
 	/** Render this window using renderer. */
@@ -65,14 +65,14 @@ public:
 
 	std::string GetWindowName() const;
 
-	_NODISCARD FRenderer* GetRenderer() const;
+	NO_DISCARD FRenderer* GetRenderer() const;
 
 	/** @returns Window size in px. */
-	_NODISCARD FVector2D<int> GetWindowSize() const;
+	NO_DISCARD FVector2D<int> GetWindowSize() const;
 	/** @returns Window percent at given location. Window { 100, 200 } with position { 50, 50 } will be { 0.5, 0.25 }. */
-	_NODISCARD FVector2D<float> GetWindowSizePercent(const FVector2D<int> Position) const;
+	NO_DISCARD FVector2D<float> GetWindowSizePercent(const FVector2D<int> Position) const;
 
-	_NODISCARD FVector2D<int> GetWindowLocation() const;
+	NO_DISCARD FVector2D<int> GetWindowLocation() const;
 
 	virtual void OnWindowMadeVisible();
 	virtual void OnWindowMadeInvisible();
@@ -82,12 +82,12 @@ public:
 	void SetWindowFocus(const bool bInNewFocus);
 	void SetWindowIsMouseInside(const bool bInIsWindowMouseInside);
 
-	_NODISCARD SDL_Window* GetSdlWindow() const { return Window; }
-	_NODISCARD Uint32 GetWindowId() const { return WindowId; }
-	_NODISCARD bool IsWindowFocused() const { return bIsWindowFocused && bIsWindowMouseInside; }
-	_NODISCARD bool IsWindowMouseInside() const { return bIsWindowMouseInside; }
+	NO_DISCARD SDL_Window* GetSdlWindow() const { return Window; }
+	NO_DISCARD Uint32 GetWindowId() const { return WindowId; }
+	NO_DISCARD bool IsWindowFocused() const { return bIsWindowFocused && bIsWindowMouseInside; }
+	NO_DISCARD bool IsWindowMouseInside() const { return bIsWindowMouseInside; }
 
-	_NODISCARD FMapManager* GetMapManager() const;
+	NO_DISCARD FMapManager* GetMapManager() const;
 
 	/** Use this if you changed to your own. Will return casted. */
 	template<typename TMapManagerClass>
@@ -96,17 +96,17 @@ public:
 		return static_cast<TMapManagerClass>(GetMapManager());
 	}
 
-	_NODISCARD FWidgetManager* GetWidgetManager() const;
-	_NODISCARD FWindowInputManager* GetWindowInputManager() const;
-	_NODISCARD FWidgetInputManager* GetWidgetInputManager() const;
+	NO_DISCARD FWidgetManager* GetWidgetManager() const;
+	NO_DISCARD FWindowInputManager* GetWindowInputManager() const;
+	NO_DISCARD FWidgetInputManager* GetWidgetInputManager() const;
 
 	template<class TWidgetTemplate>
-	_NODISCARD TWidgetTemplate* CreateWidget() const
+	NO_DISCARD TWidgetTemplate* CreateWidget() const
 	{
 		return GetWidgetManager()->CreateWidget<TWidgetTemplate>();
 	}
 	template<class TWidgetTemplate>
-	_NODISCARD TWidgetTemplate* CreateWidget(const std::string& WidgetName) const
+	NO_DISCARD TWidgetTemplate* CreateWidget(const std::string& WidgetName) const
 	{
 		return GetWidgetManager()->CreateWidget<TWidgetTemplate>(WidgetName);
 	}

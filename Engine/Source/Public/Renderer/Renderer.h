@@ -47,16 +47,16 @@ protected:
 
 public:
 	/** Raw SDL Renderer */
-	_NODISCARD INLINE_DEBUGABLE SDL_Renderer* GetSDLRenderer() const { return Renderer; }
+	NO_DISCARD INLINE_DEBUGABLE SDL_Renderer* GetSDLRenderer() const { return Renderer; }
 
 	/** Raw SDL Window */
-	_NODISCARD INLINE_DEBUGABLE SDL_Window* GetSdlWindow() const;
+	NO_DISCARD INLINE_DEBUGABLE SDL_Window* GetSdlWindow() const;
 
 	/** Raw SDL Window surface */
-	_NODISCARD INLINE_DEBUGABLE SDL_Surface* GetSdlWindowSurface() const;
+	NO_DISCARD INLINE_DEBUGABLE SDL_Surface* GetSdlWindowSurface() const;
 
 	/** @returns cached window size */
-	_NODISCARD INLINE_DEBUGABLE FVector2D<int> GetWindowSize() const;
+	NO_DISCARD INLINE_DEBUGABLE FVector2D<int> GetWindowSize() const;
 
 	void SetWindowSize(const int X, const int Y, const bool bUpdateSDL = true) const;
 

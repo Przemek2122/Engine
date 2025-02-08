@@ -32,7 +32,7 @@ public:
 	bool OnMouseRightClick(FVector2D<int> InMousePosition, EInputState InputState) override;
 	/** End FWidget */
 
-	static _NODISCARD FVector2D<int> GetMouseLocation();
+	static NO_DISCARD FVector2D<int> GetMouseLocation();
 
 	/** Called once when pressed in widget area. */
 	virtual void NativePressLeft();
@@ -57,7 +57,7 @@ public:
 	void CheckIfMouseIsInsideWidget();
 
 	void SetHoverState(EHoverState NewHoverState);
-	_NODISCARD EHoverState GetHoverState() const;
+	NO_DISCARD EHoverState GetHoverState() const;
 	EClickState GetClickStateLeftMouseButton() const;
 	EClickState GetClickStateRightMouseButton() const;
 

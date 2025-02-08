@@ -47,10 +47,10 @@ public:
 	virtual void PostSecondTick();
 
 	/** MainLoop() runs until this return false. */
-	_NODISCARD virtual bool CanContinueMainLoop() const;
+	NO_DISCARD virtual bool CanContinueMainLoop() const;
 
 	/** True if frame rate limit is enabled. */
-	_NODISCARD virtual bool IsFrameRateLimited() const;
+	NO_DISCARD virtual bool IsFrameRateLimited() const;
 
 	/** Call to stop main loop. (Exit engine) */
 	virtual void RequestExit();
@@ -65,31 +65,31 @@ public:
 	virtual void Clean();
 
 	/** @returns true if Init() has finished */
-	_NODISCARD bool IsEngineInitialized() const;
+	NO_DISCARD bool IsEngineInitialized() const;
 
 	virtual void UpdateFrameTimeStart();
 	virtual void UpdateFrameTimeEnd();
 
-	_NODISCARD uint32_t GetFrameTime() const;
-	_NODISCARD uint32_t GetFrameDelay() const;
+	NO_DISCARD uint32_t GetFrameTime() const;
+	NO_DISCARD uint32_t GetFrameDelay() const;
 
 	/* Use to set engine frame rate - ticks per second */
 	virtual void SetFrameRate(const uint32_t NewFrameRate);
 
-	_NODISCARD int GetFramesThisSecond() const;
+	NO_DISCARD int GetFramesThisSecond() const;
 
 	virtual double GetMaxDeltaTime() const;
 	virtual void SetDeltaTime(const double &InDeltaTime);
 
-	_NODISCARD float GetDeltaTime() const;
-	_NODISCARD double GetDeltaTimeDouble() const;
+	NO_DISCARD float GetDeltaTime() const;
+	NO_DISCARD double GetDeltaTimeDouble() const;
 
 	void UpdateFrameTime();
 
 	FRenderThread* GetRenderThread() const;
 
 	/** @Returns engine render class (used for managing windows) */
-	_NODISCARD FEngineRender* GetEngineRender() const;
+	NO_DISCARD FEngineRender* GetEngineRender() const;
 
 	/** Use this if you changed to your own. Will return casted. */
 	template<typename TRenderClass>
@@ -97,15 +97,15 @@ public:
 	{
 		return static_cast<TRenderClass>(GetEngineRender());
 	}
-	_NODISCARD const std::string& GetLaunchFullPath() const;
-	_NODISCARD const std::string& GetLaunchRelativePath() const;
+	NO_DISCARD const std::string& GetLaunchFullPath() const;
+	NO_DISCARD const std::string& GetLaunchRelativePath() const;
 
 	/** Call to add function to execute on next tick, FFunctorBase will be cleaned after executing. */
 	void AddLambdaToCallOnStartOfNextTick(const FFunctorLambda<void>& Function);
 
 	FDelegate<>& GetFunctionsToCallOnStartOfNextTick();
 
-	_NODISCARD FEventHandler* GetEventHandler() const;
+	NO_DISCARD FEventHandler* GetEventHandler() const;
 
 	/** Use this if you changed to your own. Will return casted. */
 	template<typename TEngineRenderClass>
@@ -114,7 +114,7 @@ public:
 		return static_cast<TEngineRenderClass>(GetEngineRender());
 	}
 
-	_NODISCARD FAssetsManager* GetAssetsManager() const;
+	NO_DISCARD FAssetsManager* GetAssetsManager() const;
 
 	/** Use this if you changed to your own. Will return casted. */
 	template<typename TAssetsManager>
@@ -123,25 +123,25 @@ public:
 		return static_cast<TAssetsManager>(GetAssetsManager());
 	}
 
-	_NODISCARD FEngineTickingManager* GetEngineTickingManager() const;
-	_NODISCARD FEngineRenderingManager* GetEngineRenderingManager() const;
-	_NODISCARD FThreadsManager* GetThreadsManager() const;
+	NO_DISCARD FEngineTickingManager* GetEngineTickingManager() const;
+	NO_DISCARD FEngineRenderingManager* GetEngineRenderingManager() const;
+	NO_DISCARD FThreadsManager* GetThreadsManager() const;
 #if ENGINE_NETWORK_LIB_ENABLED
-	_NODISCARD FNetworkManager* GetNetworkManager() const;
+	NO_DISCARD FNetworkManager* GetNetworkManager() const;
 #endif
 
 protected:
 	void UpdateFrameRateCounter();
 
-	_NODISCARD virtual FEngineRender* CreateEngineRenderer() const;
-	_NODISCARD virtual FEventHandler* CreateEventHandler() const;
-	_NODISCARD virtual FAssetsManager* CreateAssetsManager() const;
-	_NODISCARD virtual FEngineTickingManager* CreateEngineTickingManager() const;
-	_NODISCARD virtual FEngineRenderingManager* CreateEngineRenderingManager() const;
-	_NODISCARD virtual FThreadsManager* CreateThreadsManager() const;
+	NO_DISCARD virtual FEngineRender* CreateEngineRenderer() const;
+	NO_DISCARD virtual FEventHandler* CreateEventHandler() const;
+	NO_DISCARD virtual FAssetsManager* CreateAssetsManager() const;
+	NO_DISCARD virtual FEngineTickingManager* CreateEngineTickingManager() const;
+	NO_DISCARD virtual FEngineRenderingManager* CreateEngineRenderingManager() const;
+	NO_DISCARD virtual FThreadsManager* CreateThreadsManager() const;
 
 #if ENGINE_TESTS_ALLOW_ANY
-	_NODISCARD virtual class FTestManager* CreateTestManager() const;
+	NO_DISCARD virtual class FTestManager* CreateTestManager() const;
 #endif
 
 	static bool GetDisplaySettings(int DisplayIndex, SDL_DisplayMode& InDisplayMode);

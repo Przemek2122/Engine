@@ -75,10 +75,10 @@ public:
 	void SetShouldChangeSizeOnChildChange(const bool bInShouldChangeSizeOnChildChange);
 
 	/** Begin IWidgetManagementInterface */
-	_NODISCARD virtual FVector2D<int> GetWidgetManagerOffset() const override;
-	_NODISCARD virtual FVector2D<int> GetWidgetManagerSize() const override;
-	_NODISCARD virtual bool HasParent() const override;
-	_NODISCARD virtual FWindow* GetOwnerWindow() const override;
+	NO_DISCARD virtual FVector2D<int> GetWidgetManagerOffset() const override;
+	NO_DISCARD virtual FVector2D<int> GetWidgetManagerSize() const override;
+	NO_DISCARD virtual bool HasParent() const override;
+	NO_DISCARD virtual FWindow* GetOwnerWindow() const override;
 	virtual void OnWindowChanged() override;
 	/** End IWidgetManagementInterface */
 
@@ -89,27 +89,27 @@ public:
 	virtual bool ShouldConsumeInput() const;
 	
 	/** Decides if Render() should be called, affects all children */
-	_NODISCARD virtual bool ShouldBeRendered() const;
+	NO_DISCARD virtual bool ShouldBeRendered() const;
 
 	/** Name of this widget. Can be displayed or widget can be get using this variable. */
-	_NODISCARD std::string GetName() const override;
+	NO_DISCARD std::string GetName() const override;
 	
-	_NODISCARD FWindow* GetWindow() const;
-	_NODISCARD FRenderer* GetRenderer() const;
-	static _NODISCARD FEventHandler* GetEventHandler();
-	_NODISCARD EWidgetVisibility GetWidgetVisibility() const;
-	_NODISCARD std::string GetWidgetVisibilityAsString() const;
-	_NODISCARD EWidgetInteraction GetWidgetInteraction() const;
-	_NODISCARD std::string GetWidgetInteractionAsString() const;
-	_NODISCARD int32 GetWidgetOrder() const;
+	NO_DISCARD FWindow* GetWindow() const;
+	NO_DISCARD FRenderer* GetRenderer() const;
+	static NO_DISCARD FEventHandler* GetEventHandler();
+	NO_DISCARD EWidgetVisibility GetWidgetVisibility() const;
+	NO_DISCARD std::string GetWidgetVisibilityAsString() const;
+	NO_DISCARD EWidgetInteraction GetWidgetInteraction() const;
+	NO_DISCARD std::string GetWidgetInteractionAsString() const;
+	NO_DISCARD int32 GetWidgetOrder() const;
 
 	int32 GetParentsNumber() const override;
 
 	/** @returns parent IWidgetManagementInterface pointer */
-	_NODISCARD IWidgetManagementInterface* GetParent() const override;
+	NO_DISCARD IWidgetManagementInterface* GetParent() const override;
 
 	/** @returns first parent (top of tree) */
-	_NODISCARD IWidgetManagementInterface* GetParentRoot() const;
+	NO_DISCARD IWidgetManagementInterface* GetParentRoot() const;
 
 	virtual void ReceiveOnMouseMove(FVector2D<int> InMousePosition, EInputState InputState);
 	virtual bool ReceiveOnMouseLeftClick(FVector2D<int> InMousePosition, EInputState InputState);

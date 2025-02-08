@@ -26,7 +26,7 @@ public:
 	void AlignWidgets();
 
 	void SetVerticalBoxAlignMethod(const EVerticalBoxAlignMethod InVerticalBoxAlignMethod, const bool bUpdateAfterSet = true);
-	_NODISCARD EVerticalBoxAlignMethod GetVerticalBoxAlignMethod() const;
+	NO_DISCARD EVerticalBoxAlignMethod GetVerticalBoxAlignMethod() const;
 		 
 protected:
 	void AlignToLeft();

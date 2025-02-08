@@ -28,12 +28,12 @@ public:
 		return (*FunctionPointer)(Params...); // Params ...
     }
 	
-	_NODISCARD virtual bool IsValid() const override
+	NO_DISCARD virtual bool IsValid() const override
 	{
 		return FunctionPointer != nullptr;
 	}
 
-	_NODISCARD virtual EFunctorType GetFunctorType() const override
+	NO_DISCARD virtual EFunctorType GetFunctorType() const override
 	{
 		return EFunctorType::FT_STATIC;
 	}

@@ -66,7 +66,7 @@ protected:
 	/** Write data from this class into asset into MapAsset memory */
 	virtual void WriteAsset();
 
-	_NODISCARD virtual FEntityManager* CreateEntityManager();
+	NO_DISCARD virtual FEntityManager* CreateEntityManager();
 
 	void UpdateMapOffsetOnRenderer() const;
 

@@ -10,9 +10,9 @@ public:
 	virtual ~FObject();
 
 	/** Will return string like class <FClassName> like class FObject */
-	_NODISCARD std::string GetCppClassName() const;
+	NO_DISCARD std::string GetCppClassName() const;
 
 	/** Will return <FClassName> like FObject */
-	_NODISCARD std::string GetCppClassNameWithoutClass() const;
+	NO_DISCARD std::string GetCppClassNameWithoutClass() const;
 	
 };

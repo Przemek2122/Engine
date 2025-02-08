@@ -17,6 +17,8 @@
 #define INLINE_DEBUGABLE inline
 #endif
 
+#define NO_DISCARD SDL_NODISCARD
+
 typedef Uint8 uint8;
 typedef Uint32 uint32;
 typedef Uint64 uint64;
@@ -31,7 +33,7 @@ inline bool Inline_ENSURE_VALID_Lambda(auto Condition)
 	}
 	else
 	{
-		__debugbreak();
+		SDL_TriggerBreakpoint();
 
 		return false;
 	}

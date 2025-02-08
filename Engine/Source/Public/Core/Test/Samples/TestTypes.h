@@ -12,7 +12,7 @@ class FTestTypes : public FSingleRunTest
 public:
 	void DoTest() override;
 
-	_NODISCARD char* GetTestName() const override;
+	NO_DISCARD char* GetTestName() const override;
 		
 };
 

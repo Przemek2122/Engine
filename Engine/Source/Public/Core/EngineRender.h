@@ -27,7 +27,7 @@ public:
 	void StartRenderTick();
 
 	/** @returns true when rendering for this frame is ended. */
-	_NODISCARD bool IsRenderTickFinished() const;
+	NO_DISCARD bool IsRenderTickFinished() const;
 
 protected:
 	bool bIsRenderTickFinished;
@@ -60,9 +60,9 @@ public:
 	void DestroyWindow(FWindow* InWindow);
 
 	/** @returns window pointer or nullptr if there is no focused window. */
-	_NODISCARD FWindow* GetFocusedWindow() const;
+	NO_DISCARD FWindow* GetFocusedWindow() const;
 
-	_NODISCARD FWindow* GetWindowById(Uint32 WindowId);
+	NO_DISCARD FWindow* GetWindowById(Uint32 WindowId);
 
 	void OnWindowExposed(Uint32 WindowId);
 	void OnWindowHidden(Uint32 WindowId);

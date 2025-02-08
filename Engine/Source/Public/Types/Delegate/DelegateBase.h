@@ -22,7 +22,7 @@ public:
 	}
 
 	/** @returns true if there is at least one function bound. */
-	_NODISCARD virtual bool IsBound() const
+	NO_DISCARD virtual bool IsBound() const
 	{
 		return (Functors.Size() > 0);
 	}

@@ -24,7 +24,7 @@ public:
 
 	bool IsLocationInsideWidget(const FVector2D<int32>& TestLocation) const;
 
-	_NODISCARD virtual FVector2D<int32> GetWidgetLocation(EWidgetOrientation WidgetOrientation = EWidgetOrientation::Absolute) const;
+	NO_DISCARD virtual FVector2D<int32> GetWidgetLocation(EWidgetOrientation WidgetOrientation = EWidgetOrientation::Absolute) const;
 
 	const CArray<FWidgetGeometry>& GetChildrenGeometry() const { return ChildrenGeometry; }
 	const FWidgetGeometry& GetDesiredWidgetGeometry() const { return DesiredWidgetGeometry; }
@@ -33,7 +33,7 @@ public:
 	virtual void SetWidgetLocation(const FVector2D<int32> InWidgetLocation, EWidgetOrientation WidgetOrientation = EWidgetOrientation::Absolute, const bool bSetNoneAnchor = true, const bool bWasSentFromRebuild = false);
 	
 	/** @returns size of this widget. */
-	_NODISCARD virtual const FVector2D<int32>& GetWidgetSize() const;
+	NO_DISCARD virtual const FVector2D<int32>& GetWidgetSize() const;
 
 	/** Set size of this widget in pixels. */
 	virtual void SetWidgetSize(const FVector2D<int32> InWidgetSize, const bool bWasSentFromRebuild = false);
@@ -54,15 +54,15 @@ public:
 
 	void SetDefaultAnchor(const EAnchor NewAnchor);
 	void SetAnchor(const EAnchor NewAnchor);
-	_NODISCARD EAnchor GetAnchor() const;
+	NO_DISCARD EAnchor GetAnchor() const;
 
 	void SetClippingMethod(const EClipping NewClippingMethod);
-	_NODISCARD EClipping GetClippingMethod() const;
+	NO_DISCARD EClipping GetClippingMethod() const;
 
 	void SetWidgetMargin(const FWidgetMargin& InWidgetMargin);
 	const FWidgetMargin& GetWidgetMargin() const { return WidgetMargin; }
 
-	_NODISCARD virtual std::string GetName() const;
+	NO_DISCARD virtual std::string GetName() const;
 
 	FDelegateSafe<void> OnLocationChanged;
 	FDelegateSafe<void> OnSizeChanged;

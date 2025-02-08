@@ -31,9 +31,9 @@ public:
 	virtual TReturnType operator()(TInParams... Params) = 0;
 
 	/** True if any function was bound. */                                                                                                                                                
-	_NODISCARD virtual bool IsValid() const = 0;
+	NO_DISCARD virtual bool IsValid() const = 0;
 
 	/** Returns type of functor defined in EFunctorType */
-	_NODISCARD virtual EFunctorType GetFunctorType() const = 0;
+	NO_DISCARD virtual EFunctorType GetFunctorType() const = 0;
 
 };

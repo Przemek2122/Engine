@@ -30,8 +30,8 @@ public:
 
 	virtual EAssetType GetAssetType() const;
 
-	_NODISCARD virtual std::string GetAssetName() const;
-	_NODISCARD virtual std::string GetAssetPath() const;
+	NO_DISCARD virtual std::string GetAssetName() const;
+	NO_DISCARD virtual std::string GetAssetPath() const;
 
 	/** @returns number of  */
 	int GetNumberOfReferences() const;

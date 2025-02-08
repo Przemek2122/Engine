@@ -21,11 +21,11 @@ public:
 
 	void InitializeInputFromConfig();
 
-	_NODISCARD bool QuitInputDetected() const;
+	NO_DISCARD bool QuitInputDetected() const;
 
-	_NODISCARD bool HasMouseMoved() const;
-	_NODISCARD FVector2D<int> GetMouseLocationCurrent() const;
-	_NODISCARD FVector2D<int> GetMouseLocationLast() const;
+	NO_DISCARD bool HasMouseMoved() const;
+	NO_DISCARD FVector2D<int> GetMouseLocationCurrent() const;
+	NO_DISCARD FVector2D<int> GetMouseLocationLast() const;
 
 	std::shared_ptr<FIniObject> GetEngineInputIniObject() const;
 

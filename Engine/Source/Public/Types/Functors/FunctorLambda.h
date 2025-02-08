@@ -50,12 +50,12 @@ public:
 		return Function(Params ...);
 	}
 
-	_NODISCARD virtual bool IsValid() const override
+	NO_DISCARD virtual bool IsValid() const override
 	{
 		return false;
 	}
 
-	_NODISCARD EFunctorType GetFunctorType() const override
+	NO_DISCARD EFunctorType GetFunctorType() const override
 	{
 		return EFunctorType::FT_LAMBDA;
 	}

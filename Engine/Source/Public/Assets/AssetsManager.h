@@ -129,17 +129,17 @@ public:
 	void RemoveAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE);
 	
 	/** @returns Asset created using AddAsset(...) */
-	_NODISCARD std::shared_ptr<FAssetBase> GetAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE);
+	NO_DISCARD std::shared_ptr<FAssetBase> GetAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE);
 
 	/** @returns Asset created using AddAsset(...) */
 	template<typename TAssetSubClass>
-	_NODISCARD TAssetSubClass* GetAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE)
+	NO_DISCARD TAssetSubClass* GetAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE)
 	{
 		return dynamic_cast<TAssetSubClass*>(GetAsset(InAssetName, OptionalAssetType).get());
 	}
 
 	template<typename TAssetSubClass>
-	_NODISCARD bool HasAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE)
+	NO_DISCARD bool HasAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE)
 	{
 		if (OptionalAssetType == EAssetType::AT_NONE)
 		{

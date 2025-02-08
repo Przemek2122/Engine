@@ -20,15 +20,15 @@ public:
 	FTestBase();
 	virtual ~FTestBase();
 
-	_NODISCARD bool IsTestDone() const;
-	_NODISCARD bool ShouldAutoStartTest() const;
+	NO_DISCARD bool IsTestDone() const;
+	NO_DISCARD bool ShouldAutoStartTest() const;
 
 	/** Called once added into manager. */
 	virtual void StartTest();
 
 	void DestroyTest();
 	
-	_NODISCARD virtual char* GetTestName() const;
+	NO_DISCARD virtual char* GetTestName() const;
 
 protected:
 	void RegisterTest(FTestManager* InTestManager);

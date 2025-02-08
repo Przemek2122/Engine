@@ -15,7 +15,7 @@ public:
 
 	void DoTest() override;
 
-	_NODISCARD char* GetTestName() const override;
+	NO_DISCARD char* GetTestName() const override;
 
 protected:
 	Uint64 StartNS, EndNS;

@@ -21,19 +21,19 @@ public:
 	virtual ~IWidgetManagementInterface();
 
 	/** @returns size, this is used to move widgets by default to relative location. */
-	_NODISCARD virtual FVector2D<int> GetWidgetManagerOffset() const = 0;
+	NO_DISCARD virtual FVector2D<int> GetWidgetManagerOffset() const = 0;
 
 	/** @returns Size of this interface. */
-	_NODISCARD virtual FVector2D<int> GetWidgetManagerSize() const = 0;
+	NO_DISCARD virtual FVector2D<int> GetWidgetManagerSize() const = 0;
 
 	/** Get owner or nullptr if there is none */
-	_NODISCARD virtual IWidgetManagementInterface* GetParent() const = 0;
+	NO_DISCARD virtual IWidgetManagementInterface* GetParent() const = 0;
 
 	/** Calculate numer of parents. */
-	_NODISCARD virtual int32 GetParentsNumber() const = 0;
+	NO_DISCARD virtual int32 GetParentsNumber() const = 0;
 
 	/** True if has owner */
-	_NODISCARD virtual bool HasParent() const = 0;
+	NO_DISCARD virtual bool HasParent() const = 0;
 
 	virtual bool NeedsWidgetRebuild() { return bIsWidgetRequestingRebuild; }
 
@@ -117,10 +117,10 @@ public:
 	ContainerInt GetChildrenCount() const;
 
 	/** @returns widget by name SLOW */
-	_NODISCARD FWidget* GetWidgetByName(const std::string& InWidgetName);
+	NO_DISCARD FWidget* GetWidgetByName(const std::string& InWidgetName);
 	/** @returns widget by name SLOW - This implementation does auto deduction of type. */
 	template<typename FWidgetAuto>
-	_NODISCARD FWidgetAuto GetWidgetByName(const std::string& InWidgetName)
+	NO_DISCARD FWidgetAuto GetWidgetByName(const std::string& InWidgetName)
 	{
 		return dynamic_cast<FWidgetAuto>(GetWidgetByName(InWidgetName));
 	}
@@ -137,12 +137,12 @@ public:
 	virtual void UnRegisterWidget(FWidget* Widget);
 	
 	/** @returns Window which created this manager */
-	_NODISCARD virtual FWindow* GetOwnerWindow() const = 0;
+	NO_DISCARD virtual FWindow* GetOwnerWindow() const = 0;
 
 	/** Called when window */
 	virtual void OnWindowChanged() = 0;
 
-	_NODISCARD const CArray<FWidget*>& GetManagedWidgets() const { return ManagedWidgets; }
+	NO_DISCARD const CArray<FWidget*>& GetManagedWidgets() const { return ManagedWidgets; }
 
 	template<class TWidgetTemplate>
 	std::string GetUniqueNameFor()

@@ -18,11 +18,11 @@ class CArray : public CContainerBase<TType, TSizeType>
 {
 public:
 	/** Begin CContainerBase interface */
-	_NODISCARD SDL_FORCE_INLINE TSizeType Size() const override
+	NO_DISCARD SDL_FORCE_INLINE TSizeType Size() const override
 	{
 		return static_cast<TSizeType>(Vector.size());
 	}
-	_NODISCARD SDL_FORCE_INLINE bool IsEmpty() const override
+	NO_DISCARD SDL_FORCE_INLINE bool IsEmpty() const override
 	{
 		return Vector.empty();
 	}
@@ -255,7 +255,7 @@ public:
 
 	/** @return Index or -1 if not found */
 	template<typename TTypeAuto>
-	_NODISCARD SDL_FORCE_INLINE TSizeType FindIndexOf(TTypeAuto Value)
+	NO_DISCARD SDL_FORCE_INLINE TSizeType FindIndexOf(TTypeAuto Value)
 	{
 		const TSizeType VectorSize = static_cast<TSizeType>(Vector.size());
 		
@@ -328,71 +328,71 @@ public:
 	}
 
 	/** Begin of bucket functions */
-	_NODISCARD SDL_FORCE_INLINE auto begin() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto begin() noexcept -> auto
 	{
 		return Vector.begin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto cbegin() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto cbegin() noexcept -> auto
 	{
 		return Vector.cbegin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto rbegin() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto rbegin() noexcept -> auto
 	{
 		return Vector.rbegin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto crbegin() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto crbegin() noexcept -> auto
 	{
 		return Vector.crbegin();
 	}
 	
-	_NODISCARD SDL_FORCE_INLINE auto end() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto end() noexcept -> auto
 	{
 		return Vector.end();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto cend() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto cend() noexcept -> auto
 	{
 		return Vector.cend();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto rend() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto rend() noexcept -> auto
 	{
 		return Vector.rend();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto crend() noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto crend() noexcept -> auto
 	{
 		return Vector.crend();
 	}
 
 
-	_NODISCARD SDL_FORCE_INLINE auto begin() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto begin() const noexcept -> auto
 	{
 		return Vector.begin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto cbegin() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto cbegin() const noexcept -> auto
 	{
 		return Vector.cbegin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto rbegin() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto rbegin() const noexcept -> auto
 	{
 		return Vector.rbegin();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto crbegin() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto crbegin() const noexcept -> auto
 	{
 		return Vector.crbegin();
 	}
 	
-	_NODISCARD SDL_FORCE_INLINE auto end() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto end() const noexcept -> auto
 	{
 		return Vector.end();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto cend() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto cend() const noexcept -> auto
 	{
 		return Vector.cend();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto rend() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto rend() const noexcept -> auto
 	{
 		return Vector.rend();
 	}
-	_NODISCARD SDL_FORCE_INLINE auto crend() const noexcept -> auto
+	NO_DISCARD SDL_FORCE_INLINE auto crend() const noexcept -> auto
 	{
 		return Vector.crend();
 	}

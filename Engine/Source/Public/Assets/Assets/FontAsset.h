@@ -16,7 +16,7 @@ public:
 
 	EAssetType GetAssetType() const override;
 	
-	_NODISCARD FFont* GetFont(const int Size);
+	NO_DISCARD FFont* GetFont(const int Size);
 	
 protected:
 	void MakeFont(const int Size);

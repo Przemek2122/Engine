@@ -13,12 +13,12 @@ public:
 	FFont(FFontAsset* InFontAsset, const int InFontSize);
 	virtual ~FFont();
 
-	_NODISCARD TTF_Font* GetFont() const;
-	_NODISCARD int GetFontSize() const;
+	NO_DISCARD TTF_Font* GetFont() const;
+	NO_DISCARD int GetFontSize() const;
 
 	void Reinitialize();
 
-	_NODISCARD std::string GetFontAssetName() const;
+	NO_DISCARD std::string GetFontAssetName() const;
 	
 protected:
 	virtual void InitializeFont();
