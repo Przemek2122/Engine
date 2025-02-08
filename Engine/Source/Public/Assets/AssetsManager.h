@@ -6,6 +6,7 @@
 #include "Assets/AssetBase.h"
 #include "Containers/Map.h"
 #include "Misc/Filesystem.h"
+#include <sstream>
 
 class FIniManager;
 enum class EAssetType : Uint8;

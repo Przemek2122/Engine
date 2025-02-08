@@ -96,7 +96,7 @@ public:
 	
 	NO_DISCARD FWindow* GetWindow() const;
 	NO_DISCARD FRenderer* GetRenderer() const;
-	static NO_DISCARD FEventHandler* GetEventHandler();
+	static FEventHandler* GetEventHandler();
 	NO_DISCARD EWidgetVisibility GetWidgetVisibility() const;
 	NO_DISCARD std::string GetWidgetVisibilityAsString() const;
 	NO_DISCARD EWidgetInteraction GetWidgetInteraction() const;

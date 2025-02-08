@@ -1,6 +1,7 @@
 // Created by Przemys³aw Wiewióra 2020
 
 #include "CoreEngine.h"
+#include "ECS/BaseComponent.h"
 #include "ECS/ComponentManagerInterface.h"
 
 IComponentManagerInterface::IComponentManagerInterface(IComponentManagerInterface* InComponentManagerInterfaceParent, FWindow* InOwnerWindow)

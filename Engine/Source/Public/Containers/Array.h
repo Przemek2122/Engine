@@ -18,11 +18,11 @@ class CArray : public CContainerBase<TType, TSizeType>
 {
 public:
 	/** Begin CContainerBase interface */
-	NO_DISCARD SDL_FORCE_INLINE TSizeType Size() const override
+	NO_DISCARD TSizeType Size() const override
 	{
 		return static_cast<TSizeType>(Vector.size());
 	}
-	NO_DISCARD SDL_FORCE_INLINE bool IsEmpty() const override
+	NO_DISCARD bool IsEmpty() const override
 	{
 		return Vector.empty();
 	}
@@ -76,19 +76,19 @@ public:
 		return Vector != Other.Vector;
 	}
 
-	SDL_FORCE_INLINE void Push(TType Value)
+	void Push(TType Value)
 	{
 		Vector.push_back(Value);
 	}
-	SDL_FORCE_INLINE void Push(TType Value) const
+	void Push(TType Value) const
 	{
 		Vector.push_back(Value);
 	}
-	SDL_FORCE_INLINE void Push(TType* Value)
+	void Push(TType* Value)
 	{
 		Vector.push_back(Value);
 	}
-	SDL_FORCE_INLINE void Push(TType* Value) const
+	void Push(TType* Value) const
 	{
 		Vector.push_back(Value);
 	}
@@ -125,12 +125,12 @@ public:
 	}
 	
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE void InsertAt(TSizeType Index, TTypeAuto Value)
+	void InsertAt(TSizeType Index, TTypeAuto Value)
 	{
 		Vector.insert(Vector.begin() + Index, Value); 
 	}
 	
-	SDL_FORCE_INLINE bool RemoveAt(const TSizeType Index)
+	bool RemoveAt(const TSizeType Index)
 	{
 		if (Index >= 0 && Index < Size())
 		{
@@ -144,7 +144,7 @@ public:
 	
 	/** Remove first match. */
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE bool Remove(TTypeAuto Value)
+	bool Remove(TTypeAuto Value)
 	{
 		auto DeleteIndex = FindIndexOf(Value);
 
@@ -158,7 +158,7 @@ public:
 	
 	/** Remove all matches. */
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE bool RemoveAll(TTypeAuto Value)
+	bool RemoveAll(TTypeAuto Value)
 	{
 		TSizeType RemovedElements = 0;
 
@@ -184,7 +184,7 @@ public:
 		Vector.erase(unique(Vector.begin(), Vector.end()), Vector.end());
 	}
 	
-	SDL_FORCE_INLINE TType& operator[](TSizeType Index)
+	TType& operator[](TSizeType Index)
 	{
 		if (IsValidIndex(Index))
 		{
@@ -198,7 +198,7 @@ public:
 			return DefaultType;
 		}
 	}
-	SDL_FORCE_INLINE const TType& operator[](TSizeType Index) const
+	const TType& operator[](TSizeType Index) const
 	{
 		if (IsValidIndex(Index))
 		{
@@ -214,7 +214,7 @@ public:
 	}
 	
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE constexpr TType& At(TTypeAuto Index)
+	constexpr TType& At(TTypeAuto Index)
 	{
 		return Vector.at(Index);
 	}
@@ -235,7 +235,7 @@ public:
 		return OutIndex;
 	}
 
-	SDL_FORCE_INLINE TType GetRandomValue() const
+	TType GetRandomValue() const
 	{
 		const TSizeType RandomIndex = GetRandomIndex();
 
@@ -255,7 +255,7 @@ public:
 
 	/** @return Index or -1 if not found */
 	template<typename TTypeAuto>
-	NO_DISCARD SDL_FORCE_INLINE TSizeType FindIndexOf(TTypeAuto Value)
+	NO_DISCARD TSizeType FindIndexOf(TTypeAuto Value)
 	{
 		const TSizeType VectorSize = static_cast<TSizeType>(Vector.size());
 		
@@ -305,94 +305,94 @@ public:
 	}
 
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE void Fill(TTypeAuto Value)
+	void Fill(TTypeAuto Value)
 	{
 		Vector._Ufill(Value);
 	}
 	
-	SDL_FORCE_INLINE constexpr void Swap(std::vector<TType>& Other)
+	constexpr void Swap(std::vector<TType>& Other)
 	{
 		Vector.swap(Other);
 	}
 	
 	template<typename TTypeAuto>
-	SDL_FORCE_INLINE void SetNum(TTypeAuto NewSize)
+	void SetNum(TTypeAuto NewSize)
 	{
 		Vector.resize(NewSize);
 	}
 	
 	/** Removes all elements from the container (which are destroyed), leaving the container with a size of 0. */
-	SDL_FORCE_INLINE void Clear()
+	void Clear()
 	{
 		Vector.clear();
 	}
 
 	/** Begin of bucket functions */
-	NO_DISCARD SDL_FORCE_INLINE auto begin() noexcept -> auto
+	NO_DISCARD auto begin() noexcept -> auto
 	{
 		return Vector.begin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cbegin() noexcept -> auto
+	NO_DISCARD auto cbegin() noexcept -> auto
 	{
 		return Vector.cbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rbegin() noexcept -> auto
+	NO_DISCARD auto rbegin() noexcept -> auto
 	{
 		return Vector.rbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crbegin() noexcept -> auto
+	NO_DISCARD auto crbegin() noexcept -> auto
 	{
 		return Vector.crbegin();
 	}
 	
-	NO_DISCARD SDL_FORCE_INLINE auto end() noexcept -> auto
+	NO_DISCARD auto end() noexcept -> auto
 	{
 		return Vector.end();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cend() noexcept -> auto
+	NO_DISCARD auto cend() noexcept -> auto
 	{
 		return Vector.cend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rend() noexcept -> auto
+	NO_DISCARD auto rend() noexcept -> auto
 	{
 		return Vector.rend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crend() noexcept -> auto
+	NO_DISCARD auto crend() noexcept -> auto
 	{
 		return Vector.crend();
 	}
 
 
-	NO_DISCARD SDL_FORCE_INLINE auto begin() const noexcept -> auto
+	NO_DISCARD auto begin() const noexcept -> auto
 	{
 		return Vector.begin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cbegin() const noexcept -> auto
+	NO_DISCARD auto cbegin() const noexcept -> auto
 	{
 		return Vector.cbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rbegin() const noexcept -> auto
+	NO_DISCARD auto rbegin() const noexcept -> auto
 	{
 		return Vector.rbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crbegin() const noexcept -> auto
+	NO_DISCARD auto crbegin() const noexcept -> auto
 	{
 		return Vector.crbegin();
 	}
 	
-	NO_DISCARD SDL_FORCE_INLINE auto end() const noexcept -> auto
+	NO_DISCARD auto end() const noexcept -> auto
 	{
 		return Vector.end();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cend() const noexcept -> auto
+	NO_DISCARD auto cend() const noexcept -> auto
 	{
 		return Vector.cend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rend() const noexcept -> auto
+	NO_DISCARD auto rend() const noexcept -> auto
 	{
 		return Vector.rend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crend() const noexcept -> auto
+	NO_DISCARD auto crend() const noexcept -> auto
 	{
 		return Vector.crend();
 	}

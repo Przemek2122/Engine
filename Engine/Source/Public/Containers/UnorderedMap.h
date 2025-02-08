@@ -4,6 +4,7 @@
 
 #include "ContainerBase.h"
 
+#include <unordered_map>
 #include <map>
 
 /*
@@ -15,18 +16,18 @@ class CUnorderedMap : public CContainerBase<TValue, TSizeType>
 {
 public:
 	/** Begin CContainerBase interface */
-	NO_DISCARD SDL_FORCE_INLINE TSizeType Size() const override
+	NO_DISCARD TSizeType Size() const override
 	{
 		return static_cast<TSizeType>(Map.size());
 	}
-	NO_DISCARD SDL_FORCE_INLINE bool IsEmpty() const override
+	NO_DISCARD bool IsEmpty() const override
 	{
 		return Map.empty();
 	}
 	/** End CContainerBase interface */
 
 	/** Removes all elements from the container (which are destroyed), leaving the container with a size of 0. */
-	NO_DISCARD SDL_FORCE_INLINE void Clear()
+	NO_DISCARD void Clear()
 	{
 		Map.clear();
 	}
@@ -38,52 +39,52 @@ public:
 	}
 
 	template<typename TAutoType>
-	SDL_FORCE_INLINE TValue& operator[](TAutoType Index)
+	TValue& operator[](TAutoType Index)
 	{
 		return Map[Index];
 	}
 	template<typename TAutoType>
-	SDL_FORCE_INLINE TValue& operator[](TAutoType Index) const
+	TValue& operator[](TAutoType Index) const
 	{
 		return Map[Index];
 	}
 	
 	template<typename TAutoType>
-	SDL_FORCE_INLINE TValue At(TAutoType Index)
+	TValue At(TAutoType Index)
 	{
 		return Map.at(Index);
 	}
 	template<typename TAutoType>
-	SDL_FORCE_INLINE TValue At(TAutoType Index) const
+	TValue At(TAutoType Index) const
 	{
 		return Map.at(Index);
 	}
 	
 	template<typename TKeyAuto, typename TValueAuto>
-	NO_DISCARD SDL_FORCE_INLINE void Emplace(TKeyAuto Key, TValueAuto Value)
+	NO_DISCARD void Emplace(TKeyAuto Key, TValueAuto Value)
 	{
 		Map.emplace(Key, Value);
 	}
 	template<typename TKeyAuto, typename TValueAuto>
-	NO_DISCARD SDL_FORCE_INLINE void Emplace(TKeyAuto Key, TValueAuto Value) const
+	NO_DISCARD void Emplace(TKeyAuto Key, TValueAuto Value) const
 	{
 		Map.emplace(Key, Value);
 	}
 
 	template<typename TKeyAuto, typename TValueAuto>
-	NO_DISCARD SDL_FORCE_INLINE void InsertOrAssign(TKeyAuto Key, TValueAuto Value)
+	NO_DISCARD void InsertOrAssign(TKeyAuto Key, TValueAuto Value)
 	{
 		Map.insert_or_assign(Key, Value);
 	}
 	
 	template<typename TAutoType>
-	SDL_FORCE_INLINE bool Remove(TAutoType Key)
+	bool Remove(TAutoType Key)
 	{
 		return Map.erase(Key);
 	}
 	
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE bool ContainsKey(TAutoType Key)
+	NO_DISCARD bool ContainsKey(TAutoType Key)
 	{
 		for (auto& Pair : Map)
 		{
@@ -96,7 +97,7 @@ public:
 		return false;
 	}
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE bool ContainsKey(TAutoType Key) const
+	NO_DISCARD bool ContainsKey(TAutoType Key) const
 	{
 		for (auto& Pair : Map)
 		{
@@ -109,7 +110,7 @@ public:
 		return false;
 	}
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE bool ContainsValue(TAutoType Value)
+	NO_DISCARD bool ContainsValue(TAutoType Value)
 	{
 		for (auto& Pair : Map)
 		{
@@ -122,7 +123,7 @@ public:
 		return false;
 	}
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE bool ContainsValue(TAutoType Value) const
+	NO_DISCARD bool ContainsValue(TAutoType Value) const
 	{
 		for (auto& Pair : Map)
 		{
@@ -136,18 +137,18 @@ public:
 	}
 	
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE TValue FindValueByKey(TAutoType Key)
+	NO_DISCARD TValue FindValueByKey(TAutoType Key)
 	{
 		return Map.find(Key)->second;
 	}
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE TValue FindKeyByValue(TAutoType Value)
+	NO_DISCARD TValue FindKeyByValue(TAutoType Value)
 	{
 		return Map.find(Value);
 	}
 	
 	template<typename TAutoType>
-	NO_DISCARD SDL_FORCE_INLINE void SetAll(TAutoType Value)
+	NO_DISCARD void SetAll(TAutoType Value)
 	{
 		typename std::map<TKey, TValue>::iterator Iterator;
 		
@@ -157,7 +158,7 @@ public:
 		}
 	}
 
-	NO_DISCARD SDL_FORCE_INLINE void MapIterator(FFunctorLambda<void, TKey, TValue> Delegate)
+	NO_DISCARD void MapIterator(FFunctorLambda<void, TKey, TValue> Delegate)
 	{
 		for (auto it = Map.begin(); it != Map.end(); ++it)
 		{
@@ -165,7 +166,7 @@ public:
 		}
 	}
 
-	NO_DISCARD SDL_FORCE_INLINE void MapIteratorByIndexOnly(FFunctorLambda<void, TKey> Delegate)
+	NO_DISCARD void MapIteratorByIndexOnly(FFunctorLambda<void, TKey> Delegate)
 	{
 		for (auto it = Map.begin(); it != Map.end(); ++it)
 		{
@@ -173,7 +174,7 @@ public:
 		}
 	}
 
-	NO_DISCARD SDL_FORCE_INLINE void MapIteratorByValueOnly(FFunctorLambda<void, TValue> Delegate)
+	NO_DISCARD void MapIteratorByValueOnly(FFunctorLambda<void, TValue> Delegate)
 	{
 		for (auto it = Map.begin(); it != Map.end(); ++it)
 		{
@@ -182,71 +183,71 @@ public:
 	}
 
 	/** Begin of bucket functions */
-	NO_DISCARD SDL_FORCE_INLINE auto begin() noexcept -> auto
+	NO_DISCARD auto begin() noexcept -> auto
 	{
 		return Map.begin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cbegin() noexcept -> auto
+	NO_DISCARD auto cbegin() noexcept -> auto
 	{
 		return Map.cbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rbegin() noexcept -> auto
+	NO_DISCARD auto rbegin() noexcept -> auto
 	{
 		return Map.rbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crbegin() noexcept -> auto
+	NO_DISCARD auto crbegin() noexcept -> auto
 	{
 		return Map.crbegin();
 	}
 	
-	NO_DISCARD SDL_FORCE_INLINE auto end() noexcept -> auto
+	NO_DISCARD auto end() noexcept -> auto
 	{
 		return Map.end();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cend() noexcept -> auto
+	NO_DISCARD auto cend() noexcept -> auto
 	{
 		return Map.cend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rend() noexcept -> auto
+	NO_DISCARD auto rend() noexcept -> auto
 	{
 		return Map.rend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crend() noexcept -> auto
+	NO_DISCARD auto crend() noexcept -> auto
 	{
 		return Map.crend();
 	}
 
 
-	NO_DISCARD SDL_FORCE_INLINE auto begin() const noexcept -> auto
+	NO_DISCARD auto begin() const noexcept -> auto
 	{
 		return Map.begin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cbegin() const noexcept -> auto
+	NO_DISCARD auto cbegin() const noexcept -> auto
 	{
 		return Map.cbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rbegin() const noexcept -> auto
+	NO_DISCARD auto rbegin() const noexcept -> auto
 	{
 		return Map.rbegin();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crbegin() const noexcept -> auto
+	NO_DISCARD auto crbegin() const noexcept -> auto
 	{
 		return Map.crbegin();
 	}
 	
-	NO_DISCARD SDL_FORCE_INLINE auto end() const noexcept -> auto
+	NO_DISCARD auto end() const noexcept -> auto
 	{
 		return Map.end();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto cend() const noexcept -> auto
+	NO_DISCARD auto cend() const noexcept -> auto
 	{
 		return Map.cend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto rend() const noexcept -> auto
+	NO_DISCARD auto rend() const noexcept -> auto
 	{
 		return Map.rend();
 	}
-	NO_DISCARD SDL_FORCE_INLINE auto crend() const noexcept -> auto
+	NO_DISCARD auto crend() const noexcept -> auto
 	{
 		return Map.crend();
 	}

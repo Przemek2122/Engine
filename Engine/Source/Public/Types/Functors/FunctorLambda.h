@@ -41,7 +41,7 @@ public:
 
 	bool IsEqual(TSelfType* Other)
 	{
-		return (Function.target_type() == Other.Function.target_type() && GetFunctionAddress() == Other.GetFunctionAddress());
+		return (Function.target_type() == Other->Function.target_type() && GetFunctionAddress() == Other->GetFunctionAddress());
 	}
 
 	/** Begin FFunctorBase interface */
