@@ -60,13 +60,6 @@ target_include_directories(Engine
     PUBLIC ${ENGINE_SOURCE_PUBLIC_DIR}/Core
 )
 
-# Expose for parent CMAKE
-#target_sources(Engine
-#    INTERFACE ${ENGINE_SOURCE_PUBLIC_DIR}
-#    INTERFACE ${ENGINE_SOURCE_PRIVATE_DIR}
-#    INTERFACE ${ENGINE_SOURCE_THIRD_PARTY_DIR}
-#)
- 
 # Platform flags
 if(WIN32)
     message(STATUS "Configuring for Windows...")
@@ -74,11 +67,13 @@ if(WIN32)
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_ASM_NASM_FLAGS "win64")
-        set(CMAKE_ASM_COMPILER  "ml64")
+        set(CMAKE_ASM_MASM_FLAGS "/nologo /Dx64")
+        set(CMAKE_ASM_MASM_COMPILER "ml64")
+        enable_language(ASM_MASM)
     else()
-        set(CMAKE_ASM_NASM_FLAGS "win32")
-        set(CMAKE_ASM_COMPILER  "ml")
+        set(CMAKE_ASM_MASM_FLAGS "/nologo")
+        set(CMAKE_ASM_MASM_COMPILER "ml")
+        enable_language(ASM_MASM)
     endif()
 
     set(CMAKE_ASM_COMPILE_OBJECT "${CMAKE_ASM_COMPILER} /c /Fo<OBJECT> <SOURCE>")
@@ -242,6 +237,8 @@ if(ENGINE_VENDORED)
 
         set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
+
+        set(WAVPACK_ENABLE_ASM OFF CACHE BOOL "Disable assembly optimizations" FORCE)
 
         add_subdirectory(${SDL_MIXER_PATH} ${SDL_MIXER_BUILD_PATH})
 
