@@ -3,46 +3,24 @@
 #include "CoreEngine.h"
 #include "EngineMain.h"
 
-FEngineManager::FEngineManager()
+void FEngineManager::Start(const int InArgc, char* InArgv[])
 {
-}
+	std::cout << "Game engine initializing ..." << std::endl;
 
-FEngineManager::~FEngineManager()
-{
-}
+	GEngine = EngineClass.Allocate();
+		
+	Init(InArgc, InArgv);
 
-FEngine* FEngineManager::Get()
-{
-	return GEngine;
-}
+	MainLoop();
 
-void FEngineManager::Init(const int Argc, char* Argv[])
-{
-	GEngine->PreInit();
-
-	GEngine->EngineInit(Argc, Argv);
-
-	GEngine->Init();
-
-	GEngine->PostInit();
+	Exit();
 }
 
 void FEngineManager::MainLoop()
 {
 	while (GEngine->CanContinueMainLoop())
 	{
-		GEngine->UpdateFrameTimeStart();
-
-		// Calculate DeltaTime
-		{
-			GEngine->CounterCurrentFrame = SDL_GetPerformanceCounter();
-			auto DeltaTime = static_cast<double>(GEngine->CounterCurrentFrame - GEngine->CounterLastFrame) / static_cast<double>(SDL_GetPerformanceFrequency());
-			GEngine->SetDeltaTime(DeltaTime);
-		}
-		
-		GEngine->EngineTick();
-
-		GEngine->UpdateFrameTimeEnd();
+		LoopIterate();
 
 		// Delay if required.
 		if (GEngine->IsFrameRateLimited())
@@ -60,6 +38,33 @@ void FEngineManager::MainLoop()
 	}
 }
 
+void FEngineManager::Init(const int Argc, char* Argv[])
+{
+	GEngine->PreInit();
+
+	GEngine->EngineInit(Argc, Argv);
+
+	GEngine->Init();
+
+	GEngine->PostInit();
+}
+
+void FEngineManager::LoopIterate()
+{
+	GEngine->UpdateFrameTimeStart();
+
+	// Calculate DeltaTime
+	{
+		GEngine->CounterCurrentFrame = SDL_GetPerformanceCounter();
+		auto DeltaTime = static_cast<double>(GEngine->CounterCurrentFrame - GEngine->CounterLastFrame) / static_cast<double>(SDL_GetPerformanceFrequency());
+		GEngine->SetDeltaTime(DeltaTime);
+	}
+		
+	GEngine->EngineTick();
+
+	GEngine->UpdateFrameTimeEnd();
+}
+
 void FEngineManager::Exit()
 {
 	GEngine->PreExit();
@@ -69,4 +74,9 @@ void FEngineManager::Exit()
 	delete GEngine;
 
 	std::cout << "Game engine end." << std::endl;
+}
+
+FEngine* FEngineManager::Get()
+{
+	return GEngine;
 }

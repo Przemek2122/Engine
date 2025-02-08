@@ -16,7 +16,7 @@ class FEngine
 {
 friend FEngineManager;
 	
-protected:
+public:
 	FEngine();
 	virtual ~FEngine();
 
