@@ -21,7 +21,7 @@ void IWidgetPositionInterface::GenerateWidgetGeometry(FWidgetGeometry& InWidgetG
 	const FWidgetMargin& CurrentPadding = GetWidgetMargin();
 	InWidgetGeometry.Size = GetWidgetSize() + CurrentPadding.Get();
 
-	Super::GenerateWidgetGeometry(InWidgetGeometry);
+	IWidgetManagementInterface::GenerateWidgetGeometry(InWidgetGeometry);
 }
 
 void IWidgetPositionInterface::GenerateDesiredWidgetGeometry()
@@ -47,7 +47,7 @@ void IWidgetPositionInterface::RebuildWidget()
 
 	GenerateChildWidgetGeometry();
 
-	Super::RebuildWidget();
+	IWidgetManagementInterface::RebuildWidget();
 }
 
 bool IWidgetPositionInterface::IsLocationInsideWidget(const FVector2D<int32>& TestLocation) const

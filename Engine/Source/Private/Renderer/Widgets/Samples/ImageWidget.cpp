@@ -19,14 +19,14 @@ FImageWidget::FImageWidget(IWidgetManagementInterface* InWidgetManagementInterfa
 
 void FImageWidget::Init()
 {
-	Super::Init();
+	FWidget::Init();
 
 	SetWidgetSize({ 40, 40 });
 }
 
 void FImageWidget::PreDeInit()
 {
-	Super::PreDeInit();
+	FWidget::PreDeInit();
 
 	if (TextureAsset != nullptr)
 	{
@@ -42,7 +42,7 @@ void FImageWidget::Render()
 		GetRenderer()->DrawTexture(TextureAsset, GetWidgetLocation(), GetWidgetSize(), false);
 	}
 
-	Super::Render();
+	FWidget::Render();
 }
 
 void FImageWidget::SetImage(const std::string& InImageName, const std::string& OptionalPath)

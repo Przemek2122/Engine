@@ -67,14 +67,14 @@ FAudioPlayer::FAudioPlayer(FEntityManager* InEntityManager)
 
 void FAudioPlayer::BeginPlay()
 {
-	Super::BeginPlay();
+	EEntity::BeginPlay();
 
 	ReadIniFiles();
 }
 
 void FAudioPlayer::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	EEntity::Tick(DeltaTime);
 
 	if (bPlayAudioAutomatically && BackgroundMusicToPlayArray.Size() > 0)
 	{

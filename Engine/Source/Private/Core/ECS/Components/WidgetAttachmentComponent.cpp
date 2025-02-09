@@ -25,7 +25,7 @@ bool UWidgetAttachmentComponent::IsWidgetVisible() const
 
 void UWidgetAttachmentComponent::OnLocationChanged()
 {
-	Super::OnLocationChanged();
+	UComponent::OnLocationChanged();
 
 	if (Widget != nullptr)
 	{
@@ -35,7 +35,7 @@ void UWidgetAttachmentComponent::OnLocationChanged()
 
 void UWidgetAttachmentComponent::OnSizeChanged()
 {
-	Super::OnSizeChanged();
+	UComponent::OnSizeChanged();
 
 	if (Widget != nullptr)
 	{

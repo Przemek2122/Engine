@@ -19,7 +19,7 @@ UArrowComponent::UArrowComponent(IComponentManagerInterface* InComponentManagerI
 
 void UArrowComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UComponent::BeginPlay();
 
 	UParentComponent* RootComponentOfEntity = GetRootComponentOfEntity();
 	if (RootComponentOfEntity != nullptr)
@@ -47,12 +47,12 @@ void UArrowComponent::EndPlay()
 		ArrowTextureAsset = nullptr;
 	}
 
-	Super::EndPlay();
+	UComponent::EndPlay();
 }
 
 void UArrowComponent::Render()
 {
-	Super::Render();
+	UComponent::Render();
 
 	bool bShouldRenderArrow = false;
 

@@ -9,6 +9,47 @@
 //#define DEBUG ((defined _DEBUG) && _DEBUG)
 #define WITH_WIDGET_DEBUGGER DEBUG
 
+// define platform defaults
+/* ANDROID */
+#if defined(__ANDROID__) && (__ANDROID__ == 1)
+#define PLATFORM_ANDROID 1
+#else
+#define PLATFORM_ANDROID 0
+#endif
+
+/* LINUX */
+#if defined(__linux__) && !PLATFORM_ANDROID
+#define PLATFORM_LINUX 1
+#else
+#define PLATFORM_LINUX 0
+#endif
+
+/* WINDOWS */
+#if defined(_WIN32) || defined(_WIN64) /* SDL also defines WIN32 on Windows */
+#define PLATFORM_WINDOWS 1
+#else
+#define PLATFORM_WINDOWS 0
+#endif
+
+/* APPLE / macOS / iOS */
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#define PLATFORM_APPLE 1
+#if TARGET_OS_IPHONE
+    /* This covers both iOS devices and simulator. */
+#define PLATFORM_IOS 1
+#define PLATFORM_MAC 0
+#else
+    /* Assume macOS if not iOS. */
+#define PLATFORM_IOS 0
+#define PLATFORM_MAC 1
+#endif
+#else
+#define PLATFORM_APPLE 0
+#define PLATFORM_IOS   0
+#define PLATFORM_MAC   0
+#endif
+
 #if DEBUG
 // Not inline in debug to be able to see callstack.
 #define INLINE_DEBUGABLE
@@ -64,9 +105,6 @@ inline bool Inline_ENSURE_VALID_Lambda(auto Condition)
 /** Most basic text implementation, just changes to char* */
 #define TEXT_CHAR(Text) (const_cast<char*>(Text))
 #define STRING(Text) std::string(Text)
-
-/** Macro allowing calls to parent class. @note Constructor Super call in init list is not allowed! */
-#define Super __super
 
 /** Macro to check if CurrentClass inherits from BaseClass at compile time. FailMessage will be shown in log in case of missing class */
 #define ASSERT_IS_BASE_OF(BaseClass, CurrentClass, FailMessage) static_assert(std::is_base_of_v<BaseClass, CurrentClass>, FailMessage);

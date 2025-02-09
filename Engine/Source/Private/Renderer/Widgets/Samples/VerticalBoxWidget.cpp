@@ -15,7 +15,7 @@ FVerticalBoxWidget::FVerticalBoxWidget(IWidgetManagementInterface* InWidgetManag
 
 void FVerticalBoxWidget::RebuildWidget()
 {
-	Super::RebuildWidget();
+	FWidget::RebuildWidget();
 
 	AlignWidgets();
 }

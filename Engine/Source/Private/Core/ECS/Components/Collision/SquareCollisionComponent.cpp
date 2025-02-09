@@ -20,7 +20,7 @@ USquareCollisionComponent::~USquareCollisionComponent()
 
 void USquareCollisionComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UCollisionComponent::BeginPlay();
 
 	if (SquareCollision != nullptr)
 	{
@@ -34,7 +34,7 @@ void USquareCollisionComponent::BeginPlay()
 
 void USquareCollisionComponent::Render()
 {
-	Super::Render();
+	UCollisionComponent::Render();
 
 #if _DEBUG
 	// Draw collision
@@ -51,7 +51,7 @@ void USquareCollisionComponent::Render()
 
 void USquareCollisionComponent::OnLocationChanged()
 {
-	Super::OnLocationChanged();
+	UCollisionComponent::OnLocationChanged();
 
 	if (SquareCollision != nullptr)
 	{
@@ -63,14 +63,14 @@ void USquareCollisionComponent::OnLocationChanged()
 
 void USquareCollisionComponent::OnRotationChanged()
 {
-	Super::OnRotationChanged();
+	UCollisionComponent::OnRotationChanged();
 
 	// @TODO Rotation of square collision
 }
 
 void USquareCollisionComponent::OnSizeChanged()
 {
-	Super::OnSizeChanged();
+	UCollisionComponent::OnSizeChanged();
 
 	if (SquareCollision != nullptr)
 	{

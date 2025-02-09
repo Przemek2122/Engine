@@ -15,7 +15,7 @@ FNetworkTCPServer::~FNetworkTCPServer() = default;
 
 void FNetworkTCPServer::Initialize()
 {
-	Super::Initialize();
+    FNetworkServerBase::Initialize();
 
     LoopPtr = uvw::loop::get_default();
 
@@ -37,7 +37,7 @@ void FNetworkTCPServer::Initialize()
 
 void FNetworkTCPServer::DeInitialize()
 {
-	Super::DeInitialize();
+    FNetworkServerBase::DeInitialize();
 
 
 }

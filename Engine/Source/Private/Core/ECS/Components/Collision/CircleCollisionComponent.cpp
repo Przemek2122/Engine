@@ -19,7 +19,7 @@ UCircleCollisionComponent::~UCircleCollisionComponent()
 
 void UCircleCollisionComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UCollisionComponent::BeginPlay();
 
 	CircleCollision = new FCircleCollision(this, GetLocationForCollision(), GetCircleRadius());
 
@@ -28,7 +28,7 @@ void UCircleCollisionComponent::BeginPlay()
 
 void UCircleCollisionComponent::Render()
 {
-	Super::Render();
+	UCollisionComponent::Render();
 
 #if _DEBUG
 	// Draw collision
@@ -44,7 +44,7 @@ void UCircleCollisionComponent::Render()
 
 void UCircleCollisionComponent::OnLocationChanged()
 {
-	Super::OnLocationChanged();
+	UCollisionComponent::OnLocationChanged();
 
 	if (CircleCollision != nullptr)
 	{

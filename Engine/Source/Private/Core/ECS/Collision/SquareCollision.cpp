@@ -37,7 +37,7 @@ void FRectangle::UpdatePositionBottomRight()
 
 void FRectangleWithDiagonal::SetSize(const FVector2D<int>& InSize)
 {
-	Super::SetSize(InSize);
+	FRectangle::SetSize(InSize);
 
 	UpdateDiagonalSize();
 }

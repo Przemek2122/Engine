@@ -11,7 +11,7 @@ FBorderWidget::FBorderWidget(IWidgetManagementInterface* InWidgetManagementInter
 
 void FBorderWidget::Render()
 {
-	Super::Render();
+	FWidget::Render();
 
 	FRenderer* Renderer = GetRenderer();
 

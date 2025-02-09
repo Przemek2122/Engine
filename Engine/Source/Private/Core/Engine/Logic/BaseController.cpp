@@ -33,6 +33,7 @@ FPlayerController* EHUDBase::GetPlayerController() const
 FBaseController::FBaseController(FEntityManager* InEntityManager, const FUserId& InUserId)
 	: EEntity(InEntityManager)
 	, UserId(InUserId)
+	, UserTeamId(0)
 	, State(nullptr)
 {
 }
@@ -44,7 +45,7 @@ void FBaseController::BeginPlay()
 	State = CreateState(EntityManager);
 	State->BaseController = this;
 
-	Super::BeginPlay();
+	EEntity::BeginPlay();
 }
 
 FUserId FBaseController::GetUserId() const
@@ -85,7 +86,7 @@ FPlayerController::FPlayerController(FEntityManager* InEntityManager, const FUse
 
 void FPlayerController::BeginPlay()
 {
-	Super::BeginPlay();
+	FBaseController::BeginPlay();
 
 	FEntityManager* EntityManager = GetEntityManagerOwner();
 

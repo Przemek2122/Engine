@@ -18,12 +18,12 @@ void FButtonWidget::Render()
 {
 	GetRenderer()->DrawRectangle(GetWidgetLocation(EWidgetOrientation::Absolute), GetWidgetSize(), ButtonRenderColor, false);
 
-	Super::Render();
+	FInteractionBaseWidget::Render();
 }
 
 void FButtonWidget::RebuildWidget()
 {
-	Super::RebuildWidget();
+	FInteractionBaseWidget::RebuildWidget();
 
 	if (HorizontalAlignMethod == EHorizontalAlignMethod::AlignToFit)
 	{
@@ -47,54 +47,54 @@ void FButtonWidget::RebuildWidget()
 
 void FButtonWidget::NativeHoverInsideTick()
 {
-	Super::NativeHoverInsideTick();
+	FInteractionBaseWidget::NativeHoverInsideTick();
 }
 
 void FButtonWidget::NativeHoverOutsideTick()
 {
-	Super::NativeHoverOutsideTick();
+	FInteractionBaseWidget::NativeHoverOutsideTick();
 
 	ButtonRenderColor = ButtonNormalColor;
 }
 
 void FButtonWidget::NativePressLeft()
 {
-	Super::NativePressLeft();
+	FInteractionBaseWidget::NativePressLeft();
 	
 	ButtonRenderColor = ButtonClickColor;
 }
 
 void FButtonWidget::NativeReleaseLeft()
 {
-	Super::NativeReleaseLeft();
+	FInteractionBaseWidget::NativeReleaseLeft();
 	
 	ButtonRenderColor = ButtonNormalColor;
 }
 
 void FButtonWidget::NativePressRight()
 {
-	Super::NativePressRight();
+	FInteractionBaseWidget::NativePressRight();
 
 	ButtonRenderColor = ButtonClickColor;
 }
 
 void FButtonWidget::NativeReleaseRight()
 {
-	Super::NativeReleaseRight();
+	FInteractionBaseWidget::NativeReleaseRight();
 
 	ButtonRenderColor = ButtonNormalColor;
 }
 
 void FButtonWidget::NativeMouseEnterWidget()
 {
-	Super::NativeMouseEnterWidget();
+	FInteractionBaseWidget::NativeMouseEnterWidget();
 	
 	ButtonRenderColor = ButtonHoverColor;
 }
 
 void FButtonWidget::NativeMouseExitWidget()
 {
-	Super::NativeMouseExitWidget();
+	FInteractionBaseWidget::NativeMouseExitWidget();
 	
 	ButtonRenderColor = ButtonNormalColor;
 }

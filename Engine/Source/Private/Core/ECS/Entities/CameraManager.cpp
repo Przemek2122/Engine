@@ -35,7 +35,7 @@ void ECameraManager::EndPlay()
 
 void ECameraManager::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	EEntity::Tick(DeltaTime);
 }
 
 void ECameraManager::RegisterInput()

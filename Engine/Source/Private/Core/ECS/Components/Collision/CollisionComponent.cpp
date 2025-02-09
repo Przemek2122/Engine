@@ -17,7 +17,7 @@ UCollisionComponent::UCollisionComponent(IComponentManagerInterface* InComponent
 
 void UCollisionComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UComponent::BeginPlay();
 
 	CollisionManagerCached = GetCollisionManager();
 
@@ -59,7 +59,7 @@ void UCollisionComponent::RemoveCollision(FCollisionBase* CollisionObject)
 
 void UCollisionComponent::OnLocationChanged()
 {
-	Super::OnLocationChanged();
+	UComponent::OnLocationChanged();
 
 	if (CollisionManagerCached != nullptr)
 	{

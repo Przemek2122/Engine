@@ -17,7 +17,7 @@ FProgressBarWidget::FProgressBarWidget(IWidgetManagementInterface* InWidgetManag
 
 void FProgressBarWidget::Render()
 {
-	Super::Render();
+	FWidget::Render();
 
 	// Draw
 	FRenderer* Renderer = GetRenderer();
@@ -33,7 +33,7 @@ void FProgressBarWidget::Render()
 
 void FProgressBarWidget::RebuildWidget()
 {
-	Super::RebuildWidget();
+	FWidget::RebuildWidget();
 
 	DefaultLocation = GetWidgetLocation();
 	DefaultSize = GetWidgetSize();

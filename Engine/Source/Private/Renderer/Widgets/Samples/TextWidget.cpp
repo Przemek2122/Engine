@@ -45,12 +45,12 @@ void FTextWidget::Render()
 {
 	SDL_RenderTexture(GetRenderer()->GetSDLRenderer(), TextTexture, nullptr, SDLRect);
 
-	Super::Render();
+	FWidget::Render();
 }
 
 void FTextWidget::OnClippingMethodChanged(const EClipping NewClipping)
 {
-	Super::OnClippingMethodChanged(NewClipping);
+	FWidget::OnClippingMethodChanged(NewClipping);
 
 	// We need to redraw because it might need to cut part of text
 	OnTextChanged();
@@ -58,7 +58,7 @@ void FTextWidget::OnClippingMethodChanged(const EClipping NewClipping)
 
 void FTextWidget::UpdateWidgetLocation()
 {
-	Super::UpdateWidgetLocation();
+	FWidget::UpdateWidgetLocation();
 
 	const FVector2D<int>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
 
@@ -68,7 +68,7 @@ void FTextWidget::UpdateWidgetLocation()
 
 void FTextWidget::UpdateWidgetSize(const bool bWasSentFromRebuild)
 {
-	Super::UpdateWidgetSize(bWasSentFromRebuild);
+	FWidget::UpdateWidgetSize(bWasSentFromRebuild);
 
 	const FVector2D<int>& SizeCache = GetWidgetSize();
 
@@ -78,7 +78,7 @@ void FTextWidget::UpdateWidgetSize(const bool bWasSentFromRebuild)
 
 void FTextWidget::UpdateAnchor(const bool bIsFromRebuild)
 {
-	Super::UpdateAnchor(bIsFromRebuild);
+	FWidget::UpdateAnchor(bIsFromRebuild);
 
 	const FVector2D<int>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
 	const FVector2D<int>& SizeCache = GetWidgetSize();
@@ -108,7 +108,7 @@ std::string FTextWidget::GetRenderedText() const
 
 void FTextWidget::RebuildWidget()
 {
-	Super::RebuildWidget();
+	FWidget::RebuildWidget();
 
 	if (FontAsset != nullptr)
 	{

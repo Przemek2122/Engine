@@ -15,7 +15,7 @@ void EScreenSelectionEntity::EndPlay()
 {
 	OnEndPlay.Execute();
 
-	Super::EndPlay();
+	EEntity::EndPlay();
 }
 
 void EScreenSelectionEntity::RegisterScreenSelectable(IScreenSelectionInterface* InScreenSelectable)

@@ -52,7 +52,7 @@ void FHorizontalBoxWidget::SetScaleToContent(const bool bInScaleToContent)
 
 void FHorizontalBoxWidget::RebuildWidget()
 {
-	Super::RebuildWidget();
+	FWidget::RebuildWidget();
 
 	AlignWidgets();
 }

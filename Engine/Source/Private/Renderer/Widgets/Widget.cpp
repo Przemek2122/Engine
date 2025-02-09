@@ -126,7 +126,7 @@ void FWidget::OnWidgetVisibilityChanged()
 
 void FWidget::OnChildSizeChanged()
 {
-	Super::OnChildSizeChanged();
+	IWidgetPositionInterface::OnChildSizeChanged();
 
 	UpdateSizeToFitChildren();
 }

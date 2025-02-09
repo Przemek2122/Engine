@@ -27,7 +27,7 @@ UMoveComponent::UMoveComponent(IComponentManagerInterface* InComponentManagerInt
 
 void UMoveComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UComponent::BeginPlay();
 
 	EEntity* EntityOwner = GetEntity();
 	if (EntityOwner != nullptr)
@@ -44,7 +44,7 @@ void UMoveComponent::BeginPlay()
 
 void UMoveComponent::Tick(const float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	UComponent::Tick(DeltaTime);
 
 	if (IsMoving())
 	{

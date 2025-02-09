@@ -13,7 +13,7 @@ FAIActionMove::FAIActionMove(FAITree* InAiTree)
 
 void FAIActionMove::Initialize()
 {
-	Super::Initialize();
+	FAIActionBase::Initialize();
 
 	// Get entity. Should always be valid.
 	EEntity* Entity = GetTree()->GetOwnerEntity();
@@ -33,7 +33,7 @@ bool FAIActionMove::ShouldFinishAction() const
 
 void FAIActionMove::EndAction()
 {
-	Super::EndAction();
+	FAIActionBase::EndAction();
 
 	// Disable if moving due to action running
 	if (CurrentMoveComponent != nullptr && (IsActionRunning() && CurrentMoveComponent->IsMoving()))
@@ -45,7 +45,7 @@ void FAIActionMove::EndAction()
 
 void FAIActionMove::StartAction()
 {
-	Super::StartAction();
+	FAIActionBase::StartAction();
 
 	if (CurrentMoveComponent != nullptr)
 	{

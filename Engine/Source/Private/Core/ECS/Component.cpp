@@ -1,7 +1,6 @@
 // Created by Przemys³aw Wiewióra 2020
 
 #include "CoreEngine.h"
-#include "ECS/Component.h"
 
 UComponent::UComponent(IComponentManagerInterface* InComponentManagerInterface)
 	: UBaseComponent(InComponentManagerInterface)
@@ -10,7 +9,7 @@ UComponent::UComponent(IComponentManagerInterface* InComponentManagerInterface)
 
 void UComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UBaseComponent::BeginPlay();
 
 	for (const auto& ComponentPair : ComponentsMap)
 	{
@@ -20,7 +19,7 @@ void UComponent::BeginPlay()
 
 void UComponent::OnComponentCreated(const std::string& ComponentName, UBaseComponent* NewComponent)
 {
-	Super::OnComponentCreated(ComponentName, NewComponent);
+	UBaseComponent::OnComponentCreated(ComponentName, NewComponent);
 
 	FTransform2DInterface* Transform2DInterface = dynamic_cast<FTransform2DInterface*>(NewComponent);
 	if (Transform2DInterface != nullptr)
@@ -37,7 +36,7 @@ void UComponent::OnComponentCreated(const std::string& ComponentName, UBaseCompo
 
 void UComponent::OnComponentDestroy(const std::string& ComponentName, UBaseComponent* OldComponent)
 {
-	Super::OnComponentDestroy(ComponentName, OldComponent);
+	UBaseComponent::OnComponentDestroy(ComponentName, OldComponent);
 
 	FTransform2DInterface* Transform2DInterface = dynamic_cast<FTransform2DInterface*>(OldComponent);
 	if (Transform2DInterface != nullptr)

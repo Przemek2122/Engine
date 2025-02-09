@@ -12,7 +12,7 @@ UParentComponent::UParentComponent(IComponentManagerInterface* InComponentManage
 
 void UParentComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UBaseComponent::BeginPlay();
 
 	for (auto ComponentPair : ComponentsMap)
 	{
@@ -22,7 +22,7 @@ void UParentComponent::BeginPlay()
 
 void UParentComponent::OnComponentCreated(const std::string& ComponentName, UBaseComponent* NewComponent)
 {
-	Super::OnComponentCreated(ComponentName, NewComponent);
+	UBaseComponent::OnComponentCreated(ComponentName, NewComponent);
 
 	FTransform2DInterface* TransformComponent = dynamic_cast<FTransform2DInterface*>(NewComponent);
 	if (TransformComponent != nullptr)
@@ -39,7 +39,7 @@ void UParentComponent::OnComponentCreated(const std::string& ComponentName, UBas
 
 void UParentComponent::OnComponentDestroy(const std::string& ComponentName, UBaseComponent* OldComponent)
 {
-	Super::OnComponentDestroy(ComponentName, OldComponent);
+	UBaseComponent::OnComponentDestroy(ComponentName, OldComponent);
 
 	FTransform2DInterface* TransformComponent = dynamic_cast<FTransform2DInterface*>(OldComponent);
 	if (TransformComponent != nullptr)

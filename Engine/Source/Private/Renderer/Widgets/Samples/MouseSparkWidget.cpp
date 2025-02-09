@@ -36,7 +36,7 @@ void FMouseSparkWidget::Init()
 
 void FMouseSparkWidget::Tick()
 {
-	Super::Tick();
+	FWidget::Tick();
 
 	// Add sparks is focused
 	if (GetParent()->GetOwnerWindow()->IsWindowFocused())
@@ -83,7 +83,7 @@ void FMouseSparkWidget::Tick()
 
 void FMouseSparkWidget::Render()
 {
-	Super::Render();
+	FWidget::Render();
 	
 	if (const FRenderer* Renderer = GetRenderer())
 	{

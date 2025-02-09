@@ -33,7 +33,7 @@ FCollisionManager::~FCollisionManager()
 
 void FCollisionManager::InitializeSubSystem()
 {
-	Super::InitializeSubSystem();
+	ISubSystemInstanceInterface::InitializeSubSystem();
 
 	const std::string CollisionSettingsIniName = "CollisionSettings";
 	FIniManager* IniManager = GEngine->GetAssetsManager()->GetIniManager();
@@ -63,7 +63,7 @@ void FCollisionManager::InitializeSubSystem()
 
 void FCollisionManager::TickSubSystem()
 {
-	Super::TickSubSystem();
+	ISubSystemInstanceInterface::TickSubSystem();
 
 	if (bIsCollisionReady)
 	{

@@ -28,6 +28,9 @@
 #include "Core/Memory/AutoUIMenu.h"
 
 #include "Core/ECS/EntityManager.h"
+#include "Core/ECS/Component.h"
+
+#include "Misc/VectorMath.h"
 
 #include "Renderer/Window.h"
 #include "Renderer/Renderer.h"

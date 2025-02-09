@@ -225,20 +225,24 @@ namespace FUtil
 
 	struct tm GetTimeInfo()
 	{
-		time_t rawtime;
-		time(&rawtime);
-		struct tm timeinfo;
-		localtime_s(&timeinfo, &rawtime);
+		time_t InTime;
+		time(&InTime);
+		struct tm OutTime;
 
-		return timeinfo;
+#if PLATFORM_WINDOWS
+		localtime_s(&OutTime, &InTime);
+#elif PLATFORM_ANDROID
+		localtime_r(&InTime, &OutTime);
+#else
+		OutTime = *localtime(&InTime);
+#endif
+
+		return OutTime;
 	}
 
 	std::string GetCurrentTimeNoSpecial()
 	{
-		time_t RawTime64;
-		time(&RawTime64);
-		tm TimeInfo;
-		localtime_s(&TimeInfo, &RawTime64);
+		const tm TimeInfo = GetTimeInfo();
 
 		std::string ctm = std::to_string(TimeInfo.tm_mday) + "_" + MonthTable[TimeInfo.tm_mon] + "_" + std::to_string(TimeInfo.tm_year + 1900) + "_"
 			+ std::to_string(TimeInfo.tm_hour) + "_" + std::to_string(TimeInfo.tm_min) + "_" + std::to_string(TimeInfo.tm_sec);
@@ -248,10 +252,7 @@ namespace FUtil
 
 	std::string GetCurrentTime()
 	{
-		time_t RawTime64;
-		time(&RawTime64);
-		tm TimeInfo;
-		localtime_s(&TimeInfo, &RawTime64);
+		const tm TimeInfo = GetTimeInfo();
 
 		std::string ctm = std::to_string(TimeInfo.tm_mday) + "-" + MonthTable[TimeInfo.tm_mon] + "-" + std::to_string(TimeInfo.tm_year + 1900) + " "
 			+ std::to_string(TimeInfo.tm_hour) + ":" + std::to_string(TimeInfo.tm_min) + ":" + std::to_string(TimeInfo.tm_sec);

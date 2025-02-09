@@ -17,7 +17,7 @@ URenderComponent::URenderComponent(IComponentManagerInterface* InComponentManage
 
 void URenderComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	UComponent::BeginPlay();
 
 	// Set default size
 	SetImageSize(GetSize());
@@ -25,7 +25,7 @@ void URenderComponent::BeginPlay()
 
 void URenderComponent::EndPlay()
 {
-	Super::EndPlay();
+	UComponent::EndPlay();
 
 	if (TextureAsset != nullptr)
 	{
@@ -36,7 +36,7 @@ void URenderComponent::EndPlay()
 
 void URenderComponent::Render()
 {
-	Super::Render();
+	UComponent::Render();
 
 	if (TextureAsset != nullptr)
 	{
