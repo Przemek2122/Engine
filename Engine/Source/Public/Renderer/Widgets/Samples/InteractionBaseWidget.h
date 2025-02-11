@@ -32,7 +32,7 @@ public:
 	bool OnMouseRightClick(FVector2D<int> InMousePosition, EInputState InputState) override;
 	/** End FWidget */
 
-	static NO_DISCARD FVector2D<int> GetMouseLocation();
+	static FVector2D<int> GetMouseLocation();
 
 	/** Called once when pressed in widget area. */
 	virtual void NativePressLeft();
