@@ -35,7 +35,7 @@ file(GLOB_RECURSE ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL "${ENGINE_SOURCE_THIRD
 set_property(GLOBAL PROPERTY ENGINE_SOURCE_FILES_THIRDPARTY ${ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL})
 
 if (ENGINE_BUILD_AS_LIBRARY)
-    add_library(Engine STATIC 
+    add_library(Engine SHARED 
         ${ENGINE_SOURCE_FILES_PRIVATE_INTERNAL}
         ${ENGINE_SOURCE_FILES_PUBLIC_INTERNAL}
         ${ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL}
@@ -95,7 +95,7 @@ elseif(APPLE)
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
 
-    target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
+    #target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(CMAKE_PLATFORM_FLAGS "elf64")
@@ -112,6 +112,8 @@ else()
     # Add CMAKE_ASM_NASM_FLAGS from link below
     # See https://www.nasm.us/doc/nasmdoc2.html
     set(CMAKE_PLATFORM_FLAGS "PLATFORM_NOT_SET_CHECK_CONFIG")
+
+    set(CMAKE_ASM_COMPILER  "nasm")
 
     message(FATAL_ERROR "Unsupported platform!")
 endif()
@@ -204,6 +206,7 @@ if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
         set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
+		set(SDLTTF_SHARED ON CACHE BOOL "Build SDL3_ttf as a shared library" FORCE)
 
         set(SDL_TTF_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
@@ -233,6 +236,7 @@ if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
         set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
+		set(SDLMIXER_SHARED ON CACHE BOOL "Build SDL3_mixer as a shared library" FORCE)
 
         set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
@@ -268,6 +272,7 @@ if(ENGINE_VENDORED)
         set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
         set(SDLIMAGE_TESTS_INSTALL OFF CACHE BOOL "" FORCE)
         set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+		set(SDLIMAGE_SHARED ON CACHE BOOL "Build SDL3_image as a shared library" FORCE)
 
         option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
         set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
@@ -353,13 +358,13 @@ endif()
 target_link_libraries(Engine PUBLIC SDL3::SDL3)
 
 # Link SDL_ttf to target
-target_link_libraries(Engine PUBLIC SDL3_ttf)
+target_link_libraries(Engine PUBLIC SDL3_ttf-shared)
 
 # Link SDL_mixer to target
-target_link_libraries(Engine PUBLIC SDL3_mixer)
+target_link_libraries(Engine PUBLIC SDL3_mixer-shared)
 
 # Link SDL3_image to target
-target_link_libraries(Engine PUBLIC SDL3_image)
+target_link_libraries(Engine PUBLIC SDL3_image-shared)
 
 # Link uv to target
 target_link_libraries(Engine PUBLIC uv)
