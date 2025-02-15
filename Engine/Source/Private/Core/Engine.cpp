@@ -92,11 +92,16 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 		LOG_DEBUG("Param name: " << LaunchParameter.Name << ", value: " << LaunchParameter.Value);
 	}
 
+#if PLATFORM_ANDROID
+	// Android have files of app in root dir
+	LaunchRelativePath = FFileSystem::GetPlatformSlash();
+#else
 	// We always need correct directory.
 	if (ENSURE_VALID(!LaunchFullPath.empty()))
 	{
 		LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\'));
 	}
+#endif
 
 	// Initialize SDL
 	const bool SdlInitialized = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
