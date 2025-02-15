@@ -56,7 +56,7 @@ public:
 	virtual bool IsInProgress() const { return bIsInProgress; }
 
 	FGameModeManager* GetGameModeManager() const;
-	FWindowAdvanced* GetWindowAdvanced() const;
+	FWindow* GetWindow() const;
 
 	/** Called when start is called. Make sure to check if gameplay is not already in progress using IsInProgress() */
 	FDelegate<void> OnGameplayStart;

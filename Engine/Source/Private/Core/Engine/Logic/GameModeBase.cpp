@@ -13,7 +13,7 @@ FGameModeBase::FGameModeBase(FGameModeManager* InGameModeManager)
 	, CurrentUserIndex(-1)
 	, LocalUserController(nullptr)
 {
-	CurrentMap = OwnerGameModeManager->GetOwnerWindowAdvanced()->GetMapManager()->GetCurrentMap();
+	CurrentMap = OwnerGameModeManager->GetOwnerWindow()->GetMapManager()->GetCurrentMap();
 }
 
 void FGameModeBase::Initialize()
@@ -199,7 +199,7 @@ FGameModeManager* FGameModeBase::GetGameModeManager() const
 	return OwnerGameModeManager;
 }
 
-FWindowAdvanced* FGameModeBase::GetWindowAdvanced() const
+FWindow* FGameModeBase::GetWindow() const
 {
-	return OwnerGameModeManager->GetOwnerWindowAdvanced();
+	return OwnerGameModeManager->GetOwnerWindow();
 }

@@ -13,7 +13,7 @@ class FGameModeBase;
 class FGameModeManager : public ISubSystemInstanceInterface
 {
 public:
-	FGameModeManager(FWindowAdvanced* InWindowAdvanced);
+	FGameModeManager(FWindow* InWindow);
 	~FGameModeManager() override;
 
 	/** Create object of type FGameModeBase. @Note previous game mode gets deleted */
@@ -46,7 +46,7 @@ public:
 		return dynamic_cast<TGameModeClass*>(CurrentGameMode);
 	}
 
-	FWindowAdvanced* GetOwnerWindowAdvanced() const;
+	FWindow* GetOwnerWindow() const;
 
 protected:
 	void CleanPreviousGameMode();
@@ -54,6 +54,6 @@ protected:
 private:
 	FGameModeBase* CurrentGameMode;
 
-	FWindowAdvanced* OwnerWindowAdvanced;
+	FWindow* OwnerWindow;
 
 };

@@ -4,9 +4,9 @@
 #include "Core/Engine/Logic/GameModeManager.h"
 #include "Engine/Logic/GameModeBase.h"
 
-FGameModeManager::FGameModeManager(FWindowAdvanced* InWindowAdvanced)
+FGameModeManager::FGameModeManager(FWindow* InWindow)
 	: CurrentGameMode(nullptr)
-	, OwnerWindowAdvanced(InWindowAdvanced)
+	, OwnerWindow(InWindow)
 {
 }
 
@@ -20,9 +20,9 @@ FGameModeBase* FGameModeManager::GetCurrentGameMode() const
 	return CurrentGameMode;
 }
 
-FWindowAdvanced* FGameModeManager::GetOwnerWindowAdvanced() const
+FWindow* FGameModeManager::GetOwnerWindow() const
 {
-	return OwnerWindowAdvanced;
+	return OwnerWindow;
 }
 
 void FGameModeManager::CleanPreviousGameMode()
