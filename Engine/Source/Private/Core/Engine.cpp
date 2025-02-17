@@ -241,6 +241,7 @@ void FEngine::EnginePostSecondTick()
 
 void FEngine::PreInit()
 {
+	GEngine = this;
 }
 
 void FEngine::Init()

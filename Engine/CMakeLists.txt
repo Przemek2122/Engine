@@ -45,6 +45,18 @@ else()
     add_executable(Engine "${ENGINE_SOURCE_PRIVATE_DIR}/Core/Engine.cpp")
 endif()
 
+# Get all runtime dependencies (DLLs/SO files) from Engine target
+if(WIN32)
+    set(RUNTIME_LIB_EXT ".dll")
+elseif(APPLE)
+    set(RUNTIME_LIB_EXT ".dylib")
+else()
+    set(RUNTIME_LIB_EXT ".so")
+endif()
+
+# Set global property
+set_property(GLOBAL PROPERTY RUNTIME_LIB_EXT ${RUNTIME_LIB_EXT})
+
 # Precompiled header
 target_precompile_headers(Engine PUBLIC "${ENGINE_SOURCE_PUBLIC_DIR}/Core/CoreEngine.h")
 

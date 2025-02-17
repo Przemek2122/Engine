@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Containers/QueueSafe.h"
 
-enum class ELogMessageType : Uint8
+enum class ENGINE_API ELogMessageType : Uint8
 {
 	Message_Info,
 	Message_Debug,
@@ -13,7 +13,7 @@ enum class ELogMessageType : Uint8
 	Message_Error,
 };
 
-struct FLogMessage
+struct ENGINE_API FLogMessage
 {
 	ELogMessageType Type;
 	std::string Text;
@@ -177,10 +177,10 @@ public:
 
 private:
 	/** Thread for console and log output */
-	static SDL_Thread* LogThread;
+	static inline SDL_Thread* LogThread = nullptr;
 
 	/** Queue for messages. */
-	static CQueueSafe<FLogMessage> MessagesQueue;
+	static inline CQueueSafe<FLogMessage> MessagesQueue;
 
 	/** constant for Milli second */
 	static constexpr double FullMilliSecond = 1e3;
