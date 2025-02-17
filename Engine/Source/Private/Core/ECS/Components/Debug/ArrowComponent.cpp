@@ -28,7 +28,7 @@ void UArrowComponent::BeginPlay()
 	}
 
 	const FAssetCollectionItem& ArrowCollectionItem = FEngineAssetsCollection::ArrowTransparent1;
-	FTextureAsset* NewTextureAsset = FAssetsManagerHelpers::GetOrCreateAsset<FTextureAsset>(GEngine->GetAssetsManager(), GetOwnerWindow(), ArrowCollectionItem.GetAssetName(), ArrowCollectionItem.GetAssetPath(), EAssetType::AT_TEXTURE);
+	FTextureAsset* NewTextureAsset = FAssetsManagerHelpers::GetOrCreateAsset<FTextureAsset>(FGlobalDefines::GEngine->GetAssetsManager(), GetOwnerWindow(), ArrowCollectionItem.GetAssetName(), ArrowCollectionItem.GetAssetPath(), EAssetType::AT_TEXTURE);
 	if (NewTextureAsset != nullptr)
 	{
 		SetArrow(NewTextureAsset);

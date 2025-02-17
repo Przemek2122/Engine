@@ -32,7 +32,7 @@ FRenderer::FRenderer(FWindow* InWindow)
 	{
 		LOG_ERROR("Can not create renderer: " << STRING(SDL_GetError()));
 
-		GEngine->ForceExit(EEngineErrorCode::CanNotCreateRenderer);
+		FGlobalDefines::GEngine->ForceExit(EEngineErrorCode::CanNotCreateRenderer);
 	}
 }
 

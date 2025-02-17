@@ -108,7 +108,7 @@ Uint32 FTimer::OnTimerFinished(void* InOptionalTimerParams, SDL_TimerID InTimerI
 	else
 	{
 		// @TODO May be critical if two timers happen in same time
-		GEngine->AddLambdaToCallOnStartOfNextTick([OptionalTimerParams]()
+		FGlobalDefines::GEngine->AddLambdaToCallOnStartOfNextTick([OptionalTimerParams]()
 		{
 			OptionalTimerParams->Timer->OnSynchronousTimerFinished();
 		});

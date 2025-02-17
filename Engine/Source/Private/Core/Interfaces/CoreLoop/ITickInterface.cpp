@@ -14,7 +14,7 @@ ITickInterface::~ITickInterface()
 {
 	if (bIsRegisteredTickInterface)
 	{
-		GEngine->GetEngineTickingManager()->UnRegisterInterface(TickFunctor, RegisteredPhase);
+		FGlobalDefines::GEngine->GetEngineTickingManager()->UnRegisterInterface(TickFunctor, RegisteredPhase);
 	}
 }
 
@@ -26,6 +26,6 @@ void ITickInterface::RegisterTickInterface()
 
 		RegisteredPhase = GetTickPhase();
 
-		GEngine->GetEngineTickingManager()->RegisterInterface(TickFunctor, RegisteredPhase);
+		FGlobalDefines::GEngine->GetEngineTickingManager()->RegisterInterface(TickFunctor, RegisteredPhase);
 	}
 }
