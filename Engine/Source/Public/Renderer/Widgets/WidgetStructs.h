@@ -3,14 +3,14 @@
 #include "CoreMinimal.h"
 
 /** Structure for generating parent widget using children */
-struct FWidgetGeometry
+struct ENGINE_API FWidgetGeometry
 {
 	/** Widget size */
 	FVector2D<int32> Size;
 };
 
 /** Base class for padding and margin */
-struct FBoxSpacing
+struct ENGINE_API FBoxSpacing
 {
 protected:
 	/** Will set given padding to all 4 sides */
@@ -67,7 +67,7 @@ protected:
 };
 
 /** Margin is for child widget to set size for parent */
-struct FWidgetMargin : FBoxSpacing
+struct ENGINE_API FWidgetMargin : FBoxSpacing
 {
 	FWidgetMargin(const int32 Margin = 0)
 		: FBoxSpacing(Margin)
@@ -81,7 +81,7 @@ struct FWidgetMargin : FBoxSpacing
 };
 
 /** Margin is for internal widget size */
-struct FWidgetPadding : FBoxSpacing
+struct ENGINE_API FWidgetPadding : FBoxSpacing
 {
 	FWidgetPadding(const int32 Margin = 0)
 		: FBoxSpacing(Margin)
@@ -95,7 +95,7 @@ struct FWidgetPadding : FBoxSpacing
 };
 
 /** Internal child widget padding - Calculated by margin of parent */
-struct FWidgetPaddingInternal : FBoxSpacing
+struct ENGINE_API FWidgetPaddingInternal : FBoxSpacing
 {
 	FWidgetPaddingInternal(const int32 Margin = 0)
 		: FBoxSpacing(Margin)

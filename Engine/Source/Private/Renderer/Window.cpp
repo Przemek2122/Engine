@@ -140,7 +140,7 @@ void FWindow::Render()
 	Renderer->PostRender();
 }
 
-#if DEBUG
+#if WITH_WIDGET_DEBUGGER
 void FWindow::StartWidgetDebugger()
 {
 	WidgetDebugger = CreateWidgetDebugger();

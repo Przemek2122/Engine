@@ -12,7 +12,7 @@ class FTestManager;
  * Base class for testing.
  * Do once test.
  */
-class FTestBase
+class ENGINE_API FTestBase
 {
 	friend FTestManager;
 	

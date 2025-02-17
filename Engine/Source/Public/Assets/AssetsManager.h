@@ -14,7 +14,7 @@ class FAssetBase;
 class FFontAsset;
 class FFont;
 
-struct FAssetsStructure
+struct ENGINE_API FAssetsStructure
 {
 	CMap<std::string, std::shared_ptr<FAssetBase>> AssetsMap;
 };
@@ -23,7 +23,7 @@ struct FAssetsStructure
  * Storage class. Registers assets which can be accessed anywhere.
  * Can also help with search for assets.
  */
-class FAssetsManager
+class ENGINE_API FAssetsManager
 {
 	friend FEngine;
 	

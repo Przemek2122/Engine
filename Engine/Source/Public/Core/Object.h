@@ -3,7 +3,7 @@
 #pragma once
 #include <string>
 
-class FObject
+class ENGINE_API FObject
 {
 public:
 	FObject();

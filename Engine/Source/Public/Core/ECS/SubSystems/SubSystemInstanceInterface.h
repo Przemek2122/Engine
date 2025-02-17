@@ -9,7 +9,7 @@ class ISubSystemManagerInterface;
 /**
  * Interface for any object which should be subsystem
  */
-class ISubSystemInstanceInterface
+class ENGINE_API ISubSystemInstanceInterface
 {
 public:
 	ISubSystemInstanceInterface();

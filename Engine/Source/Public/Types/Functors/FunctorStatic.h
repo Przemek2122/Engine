@@ -9,7 +9,7 @@
  * - Static function
  */
 template<typename TReturnType, typename... TInParams>
-class FFunctorStatic : public FFunctorBase<TReturnType, TInParams...>
+class ENGINE_API FFunctorStatic : public FFunctorBase<TReturnType, TInParams...>
 {
 public:	
 	/** For static functions */

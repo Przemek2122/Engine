@@ -9,14 +9,14 @@ typedef FVector2D<int32> FTransform2DLocation;
 typedef int32 FTransform2DRotation;
 typedef FVector2D<int32> FTransform2DSize;
 
-enum class ETransformFollowMethod
+enum class ENGINE_API ETransformFollowMethod
 {
 	Default,
 	RotateAroundParent
 };
 
 /** Structure with location and rotation in 2D */
-struct FTransform2D
+struct ENGINE_API FTransform2D
 {
 	FTransform2D();
 
@@ -31,7 +31,7 @@ struct FTransform2D
  * Location and rotation are absolute to world (0, 0) if not attached
  * and Location and rotation are relative to parent if attached
  */
-class FTransform2DInterface
+class ENGINE_API FTransform2DInterface
 {
 public:
 	FTransform2DInterface();

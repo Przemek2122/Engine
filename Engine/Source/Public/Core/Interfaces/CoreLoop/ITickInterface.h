@@ -5,7 +5,7 @@
 /**
  * Enum for tick phases (defines order of ticking, first tick first)
  */
-enum class ETickPhase : Uint8
+enum class ENGINE_API ETickPhase : Uint8
 {
 	None = 0,					// Not used
 	PostEngine,					// Called right after engine tick
@@ -21,7 +21,7 @@ enum class ETickPhase : Uint8
  * Class for objects that need to be ticked
  * Self registers and unregisters
  */
-class ITickInterface
+class ENGINE_API ITickInterface
 {
 public:
 	ITickInterface();

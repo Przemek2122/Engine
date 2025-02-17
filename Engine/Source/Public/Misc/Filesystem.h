@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 
-class FFileSystem
+class ENGINE_API FFileSystem
 {
 public:
 	/** All directory related functions */
-	class Directory
+	class ENGINE_API Directory
 	{
 	public:
 		static bool Exists(const std::string& InPath);
@@ -17,7 +17,7 @@ public:
 	};
 
 	/** All file related functions */
-	class File
+	class ENGINE_API File
 	{
 	public:
 		static bool Exists(const std::string& InPath);

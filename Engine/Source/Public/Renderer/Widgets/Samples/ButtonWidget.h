@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "InteractionBaseWidget.h"
 
-enum class EHorizontalAlignMethod : Uint8
+enum class ENGINE_API EHorizontalAlignMethod : Uint8
 {
 	AlignToFit,
 	AlignOnlyIfNotFitting
@@ -15,7 +15,7 @@ enum class EHorizontalAlignMethod : Uint8
  * Button widget
  * Contains background with customizable colors and clicking ability
  */
-class FButtonWidget : public FInteractionBaseWidget
+class ENGINE_API FButtonWidget : public FInteractionBaseWidget
 {
 public:
 	FButtonWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

@@ -14,7 +14,7 @@ class FGameModeManager;
 /**
  * Base class for game modes.
  */
-class FGameModeBase
+class ENGINE_API FGameModeBase
 {
 public:
 	FGameModeBase(FGameModeManager* InGameModeManager);

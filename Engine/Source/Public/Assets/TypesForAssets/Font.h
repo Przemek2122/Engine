@@ -7,7 +7,7 @@
 /**
  * For loading storing and using font.
  */
-class FFont
+class ENGINE_API FFont
 {
 public:
 	FFont(FFontAsset* InFontAsset, const int InFontSize);

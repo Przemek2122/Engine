@@ -7,7 +7,7 @@
 /**
  * Asset collections are simple classes for asset path and name structures
  */
-class FBaseAssetsCollection
+class ENGINE_API FBaseAssetsCollection
 {
 	// Sample below:
 	// inline static FAssetCollectionItem FactoryBase = { "FactoryBase", R"(Assets\Textures\Factories\FactoryBase.png)" };

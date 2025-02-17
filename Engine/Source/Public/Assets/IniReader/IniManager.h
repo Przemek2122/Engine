@@ -11,7 +11,7 @@ class FIniObject;
  * Class for managing ini files.
  * Each ini file gets its own object for management.
  */
-class FIniManager
+class ENGINE_API FIniManager
 {
 public:
 	FIniManager(FAssetsManager* InAssetsManager);

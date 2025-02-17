@@ -9,7 +9,7 @@ class FIniObject;
  * This class is used to handle mouse events.
  * If delegate returns true it means input is consumed and should not be sent anymore
  */
-class FMouseInputDelegateWrapper
+class ENGINE_API FMouseInputDelegateWrapper
 {
 public:
 	FMouseInputDelegateWrapper(FEventHandler* InEventHandler)

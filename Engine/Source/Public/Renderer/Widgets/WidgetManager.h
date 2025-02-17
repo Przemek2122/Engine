@@ -8,7 +8,7 @@
 /**
  * Interactive UI rendering.
  */
-class FWidgetManager : public IWidgetManagementInterface
+class ENGINE_API FWidgetManager : public IWidgetManagementInterface
 {
 	friend FWindow;
 	

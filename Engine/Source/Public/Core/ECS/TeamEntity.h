@@ -14,7 +14,7 @@ class FEntityManager;
 /**
  * Entity with team component
  */
-class ETeamEntity : public EEntity
+class ENGINE_API ETeamEntity : public EEntity
 {
 public:
 	ETeamEntity(FEntityManager* InEntityManager, const FUserId& InOwnerUserId, const int InTeam);

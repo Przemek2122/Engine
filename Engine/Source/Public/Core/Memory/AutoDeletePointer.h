@@ -10,7 +10,7 @@ class FUIMenu;
  * @Note if you declare this class twice with the same pointer, it will crash.
  */
 template<typename TTypeToStore>
-class FAutoDeletePointer
+class ENGINE_API FAutoDeletePointer
 {
 public:
 	FAutoDeletePointer()
@@ -21,21 +21,21 @@ public:
 
 	/** Normal constructor - Create object to store */
 	template<typename ...TInParams>
-	explicit FAutoDeletePointer(TInParams... Params)
+	FAutoDeletePointer(TInParams... Params)
 		: StoredObject(new TTypeToStore(Params...))
 		, bHasAnyObject(true)
 	{
 	}
 
 	/** Normal constructor - Pass in object to store */
-	explicit FAutoDeletePointer(TTypeToStore* Params)
+	FAutoDeletePointer(TTypeToStore* Params)
 		: StoredObject(Params)
 		, bHasAnyObject(true)
 	{
 	}
 
 	/** Copy constructor - Makes previous FAutoDeletePointer not usable anymore. */
-	explicit FAutoDeletePointer(FAutoDeletePointer& OtherAutoDeletePointer) noexcept 
+	FAutoDeletePointer(FAutoDeletePointer& OtherAutoDeletePointer) noexcept 
 		: StoredObject(OtherAutoDeletePointer.StoredObject)
 		, bHasAnyObject(true)
 	{

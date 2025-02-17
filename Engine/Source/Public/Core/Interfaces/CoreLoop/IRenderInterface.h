@@ -5,7 +5,7 @@
 /**
  * Enum for render phases (defines order of rendering, first render first)
  */
-enum class ERenderPhase : Uint8
+enum class ENGINE_API ERenderPhase : Uint8
 {
 	None = 0,				// This should not be ever used.
 	Background,				// Special case for background rendering (map)
@@ -20,7 +20,7 @@ enum class ERenderPhase : Uint8
  * Class for objects that need to be ticked
  * Self registers and unregisters
  */
-class IRenderInterface
+class ENGINE_API IRenderInterface
 {
 public:
 	IRenderInterface();
@@ -41,5 +41,5 @@ public:
 private:
 	bool bIsRegistered;
 	ERenderPhase RegisteredPhase;
-	FFunctorObject<IRenderInterface, void> RenderFunctor;
+	//FFunctorObject<IRenderInterface, void> RenderFunctor;
 };

@@ -12,7 +12,7 @@
  * Class responsible for managing widgets. \n
  * It will be on WidgetManager class as well as on each widget as we can add widget to each of those.
  */
-class IWidgetManagementInterface
+class ENGINE_API IWidgetManagementInterface
 {
 	friend FWidget;
 	

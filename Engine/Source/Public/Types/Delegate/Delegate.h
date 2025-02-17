@@ -14,7 +14,7 @@
  * @Note: All functions passed in are deleted at end of this object life.
  */
 template<typename TReturnType = void, typename... TInParams>
-class FDelegate : public FDelegateBase<TReturnType, FFunctorBase<TReturnType, TInParams...>*, TInParams...>
+class ENGINE_API FDelegate : public FDelegateBase<TReturnType, FFunctorBase<TReturnType, TInParams...>*, TInParams...>
 {
 public:
 	using DelegateBase = FDelegateBase<TReturnType, FFunctorBase<TReturnType, TInParams...>*, TInParams...>;

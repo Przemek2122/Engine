@@ -14,7 +14,7 @@
  * Dynamic array template for any type.
  */
 template<typename TType, typename TSizeType = ContainerInt>
-class CArray : public CContainerBase<TType, TSizeType>
+class ENGINE_API CArray : public CContainerBase<TType, TSizeType>
 {
 public:
 	/** Begin CContainerBase interface */

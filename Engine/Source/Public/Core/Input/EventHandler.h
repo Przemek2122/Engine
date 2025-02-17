@@ -9,7 +9,7 @@
 
 static const std::string DefaultInputName = "Default";
 
-class FEventHandler
+class ENGINE_API FEventHandler
 {
 public:
 	FEventHandler(const SDL_Event& InEvent);

@@ -10,7 +10,7 @@ class FWidget;
  * Class for managing window input.
  * (Only on focused window)
  */
-class IWidgetInteraction
+class ENGINE_API IWidgetInteraction
 {
 public:
 	IWidgetInteraction();

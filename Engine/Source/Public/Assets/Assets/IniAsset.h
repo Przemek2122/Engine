@@ -8,7 +8,7 @@
 /**
  * For loading storing and using font.
  */
-class FIniAsset : public FAssetBase
+class ENGINE_API FIniAsset : public FAssetBase
 {
 public:
 	FIniAsset(const std::string& InAssetName, const std::string& InAssetPath);

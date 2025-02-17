@@ -20,7 +20,7 @@ enum class EAssetType : uint8_t
 /**
  * Base class for any asset type files.
  */
-class FAssetBase
+class ENGINE_API FAssetBase
 {
 	friend FEngine;
 	

@@ -11,7 +11,7 @@
  * Not thread safe
  */
 template<typename TKey, typename TValue, typename TSizeType = ContainerInt>
-class CMap : public CContainerBase<TValue, TSizeType>
+class ENGINE_API CMap : public CContainerBase<TValue, TSizeType>
 {
 public:
 	CMap()

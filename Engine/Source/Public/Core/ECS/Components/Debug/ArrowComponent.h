@@ -9,7 +9,7 @@ class UParentComponent;
 /**
  * Component for displaying simple arrow
  */
-class UArrowComponent : public UComponent
+class ENGINE_API UArrowComponent : public UComponent
 {
 public:
 	UArrowComponent(IComponentManagerInterface* InComponentManagerInterface);

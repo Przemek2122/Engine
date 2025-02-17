@@ -13,7 +13,7 @@ class FAITree;
  * It is not set as not to run automatically, you should use TryStartAction
  * If you wish to start automatically, change HasAutomaticStart to return true.
  */
-class FAIActionMove : public FAIActionBase
+class ENGINE_API FAIActionMove : public FAIActionBase
 {
 public:
 	FAIActionMove(FAITree* InAiTree);

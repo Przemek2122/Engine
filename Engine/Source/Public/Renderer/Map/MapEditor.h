@@ -9,7 +9,7 @@ class FMap;
  * It should have references to the map
  * Map should not have references to it
  */
-class FMapEditor
+class ENGINE_API FMapEditor
 {
 public:
 	FMapEditor(FMap* InMap);

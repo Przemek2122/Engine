@@ -12,7 +12,7 @@ class FEngineRenderingManager;
 class FEngineTickingManager;
 class ITickInterface;
 
-class FEngine
+class ENGINE_API FEngine
 {
 friend FEngineManager;
 	

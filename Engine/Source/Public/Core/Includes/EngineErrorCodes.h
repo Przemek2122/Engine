@@ -2,7 +2,7 @@
 
 #pragma once
 
-enum class EEngineErrorCode
+enum class ENGINE_API EEngineErrorCode
 {
 	/** Successful output */
 	Success = 0,

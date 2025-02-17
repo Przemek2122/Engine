@@ -8,7 +8,7 @@
  * AI Memory set is used to store memory for whole AI.
  * It can be shared between AI Trees
  */
-class FAIMemorySet
+class ENGINE_API FAIMemorySet
 {
 protected:
 	/** Virtual method for casting */

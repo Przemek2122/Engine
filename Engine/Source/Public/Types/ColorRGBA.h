@@ -8,7 +8,7 @@
 /**
  * Color type
  */
-class FColorRGBA
+class ENGINE_API FColorRGBA
 {
 public:
 	FColorRGBA();

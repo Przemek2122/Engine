@@ -6,14 +6,14 @@ struct FCollisionTile;
 class UCollisionComponent;
 class FCollisionManager;
 
-enum class ECollisionType
+enum class ENGINE_API ECollisionType
 {
 	Circle,
 	Square,
 	Other
 };
 
-class FCollisionBase
+class ENGINE_API FCollisionBase
 {
 	friend FCollisionManager;
 

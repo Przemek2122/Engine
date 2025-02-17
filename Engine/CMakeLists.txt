@@ -40,6 +40,7 @@ if (ENGINE_BUILD_AS_LIBRARY)
         ${ENGINE_SOURCE_FILES_PUBLIC_INTERNAL}
         ${ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL}
     )
+    target_compile_definitions(Engine PRIVATE ENGINE_BUILD_AS_LIBRARY)
 else()
     add_executable(Engine "${ENGINE_SOURCE_PRIVATE_DIR}/Core/Engine.cpp")
 endif()

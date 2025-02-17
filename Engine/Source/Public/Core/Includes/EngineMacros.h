@@ -60,6 +60,22 @@
 
 #define NO_DISCARD SDL_NODISCARD
 
+#ifdef ENGINE_BUILD_AS_LIBRARY
+	#ifdef PLATFORM_WINDOWS
+		#define EXPORT_API __declspec(dllexport)
+	#else
+		#define EXPORT_API __attribute__((visibility("default")))
+	#endif
+#else
+	#ifdef PLATFORM_WINDOWS
+		#define EXPORT_API __declspec(dllimport)
+	#else
+		#define EXPORT_API
+	#endif
+#endif
+
+#define ENGINE_API EXPORT_API
+
 typedef Uint8 uint8;
 typedef Uint32 uint32;
 typedef Uint64 uint64;
@@ -89,6 +105,13 @@ inline bool Inline_ENSURE_VALID_Lambda(auto Condition)
 #define ENSURE_VALID(Condition) Condition
 //#define ENSURE_VALID_MESSAGE(Condition, Message)
 #endif
+
+/** Set bit on bitmask */
+#define BITMASK_SET(Variable, Mask) ((Variable) |= (Mask));
+#define BITMASK_UNSET(Variable, Mask) ((Variable) &= ~(Mask));
+#define BITMASK_TOGGLE(Variable, Mask) ((Variable) ^= (Mask));
+/** Use this to check wheater bit on bitmask is set */
+#define BITMASK_IS_SET(Variable, Mask) (((Variable) & (Mask)) == (Mask))
 
 /**
  * Advanced text, returns std::string, can be used anywhere

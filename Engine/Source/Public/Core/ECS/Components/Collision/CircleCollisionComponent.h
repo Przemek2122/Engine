@@ -12,7 +12,7 @@ class FCollisionBase;
 /**
  * Component for collision management
  */
-class UCircleCollisionComponent : public UCollisionComponent
+class ENGINE_API UCircleCollisionComponent : public UCollisionComponent
 {
 public:
 	UCircleCollisionComponent(IComponentManagerInterface* InComponentManagerInterface);

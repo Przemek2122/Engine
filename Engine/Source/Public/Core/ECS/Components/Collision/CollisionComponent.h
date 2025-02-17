@@ -11,7 +11,7 @@ class FCollisionBase;
 /**
  * Component for collision management
  */
-class UCollisionComponent : public UComponent
+class ENGINE_API UCollisionComponent : public UComponent
 {
 public:
 	UCollisionComponent(IComponentManagerInterface* InComponentManagerInterface);

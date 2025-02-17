@@ -4,7 +4,7 @@
 
 #include "BaseCollision.h"
 
-struct FCircle
+struct ENGINE_API FCircle
 {
 public:
 	FCircle(const FVector2D<int>& InLocation, const int InCircleRadius)
@@ -28,7 +28,7 @@ protected:
 /**
  * Basic BoundingCircles collision
  */
-class FCircleCollision : public FCollisionBase
+class ENGINE_API FCircleCollision : public FCollisionBase
 {
 public:
 	FCircleCollision(UCollisionComponent* InCollisionComponent, const FVector2D<int> InLocation, const int InCircleRadius);

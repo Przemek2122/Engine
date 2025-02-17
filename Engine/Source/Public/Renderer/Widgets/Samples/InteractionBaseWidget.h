@@ -7,21 +7,21 @@
 
 enum class EInputState;
 
-enum class EHoverState : Uint8
+enum class ENGINE_API EHoverState : Uint8
 {
 	None,
 	Entered,
 	Exited
 };
 
-enum class EClickState : Uint8
+enum class ENGINE_API EClickState : Uint8
 {
 	NotClicked,
 	Pressed,
 	Released
 };
 
-class FInteractionBaseWidget : public FWidget
+class ENGINE_API FInteractionBaseWidget : public FWidget
 {
 public:
 	FInteractionBaseWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

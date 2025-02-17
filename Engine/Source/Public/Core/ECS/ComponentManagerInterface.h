@@ -4,7 +4,7 @@
 
 class UBaseComponent;
 
-class IComponentManagerInterface
+class ENGINE_API IComponentManagerInterface
 {
 protected:
 	IComponentManagerInterface(IComponentManagerInterface* InComponentManagerInterfaceParent, FWindow* InOwnerWindow);

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-struct FWindowCreationData
+struct ENGINE_API FWindowCreationData
 {
 	FWindowCreationData(const bool bInIsThisWindowDebugger);
 
@@ -12,7 +12,7 @@ struct FWindowCreationData
 };
 
 /** Call for managing rendering (windows). */
-class FEngineRender
+class ENGINE_API FEngineRender
 {
 	friend FEngine;
 

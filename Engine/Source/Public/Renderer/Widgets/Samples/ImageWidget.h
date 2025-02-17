@@ -10,7 +10,7 @@ class FTextureAsset;
  * Widget for displaying image
  * Renders before child widgets and before any class which inherits from it.
  */
-class FImageWidget : public FWidget
+class ENGINE_API FImageWidget : public FWidget
 {
 public:
 	FImageWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

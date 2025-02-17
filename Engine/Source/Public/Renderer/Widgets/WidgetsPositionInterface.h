@@ -8,7 +8,7 @@
 /**
  * Class responsible for managing widget location and size.
  */
-class IWidgetPositionInterface : public IWidgetManagementInterface
+class ENGINE_API IWidgetPositionInterface : public IWidgetManagementInterface
 {
 	friend FWidget;
 	

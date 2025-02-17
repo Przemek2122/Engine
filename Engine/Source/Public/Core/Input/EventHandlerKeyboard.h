@@ -7,7 +7,7 @@
  * This class is used to handle keyboard events. It exists to allow rebinding.
  * If delegate returns true it means input is consumed and should not be sent anymore
  */
-class FInputDelegateWrapper
+class ENGINE_API FInputDelegateWrapper
 {
 public:
 	FInputDelegateWrapper(FEventHandler* InEventHandler)

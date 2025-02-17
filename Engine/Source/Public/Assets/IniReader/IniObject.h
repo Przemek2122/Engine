@@ -11,7 +11,7 @@ class FIniManager;
  * Struct contains field from ini file.
  * It also can be converted to most common types - int and bool
  */
-struct FIniField
+struct ENGINE_API FIniField
 {
 public:
 	FIniField(std::string InName = std::string(), std::string InValue = std::string());
@@ -35,7 +35,7 @@ protected:
 	std::string Value;
 };
 
-class FIniObject
+class ENGINE_API FIniObject
 {
 public:
 	FIniObject(FIniManager* InIniManager, std::string InIniPath, std::string InIniName);

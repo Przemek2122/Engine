@@ -7,7 +7,7 @@
  * Engine launch parameter available on Engine class inside of LaunchParameters array
  * There is raw 'AsString' as well as 'AsBool' and 'AsInt' functions
  */
-struct FEngineLaunchParameter
+struct ENGINE_API FEngineLaunchParameter
 {
 	std::string Name;
 	std::string Value;

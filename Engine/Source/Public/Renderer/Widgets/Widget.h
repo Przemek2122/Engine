@@ -20,7 +20,7 @@ class FInteractionBaseWidget;
  *
  * Widgets are build one frame after requesting rebuild to avoid loops when creating widgets
  */
-class FWidget : public FObject, public IWidgetPositionInterface
+class ENGINE_API FWidget : public FObject, public IWidgetPositionInterface
 {
 	friend IWidgetManagementInterface;
 

@@ -9,7 +9,7 @@
  * Not thread safe
  */
 template<typename TType, typename TSizeType = int>
-class CDeque : public CContainerBase<TType, TSizeType>
+class ENGINE_API CDeque : public CContainerBase<TType, TSizeType>
 {
 public:
 	/** Begin CContainerBase interface */

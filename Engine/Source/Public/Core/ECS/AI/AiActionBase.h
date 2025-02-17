@@ -9,7 +9,7 @@ class FAITree;
 /**
  * AI actions base class
  */
-class FAIActionBase
+class ENGINE_API FAIActionBase
 {
 public:
 	FAIActionBase(FAITree* InAiTree);

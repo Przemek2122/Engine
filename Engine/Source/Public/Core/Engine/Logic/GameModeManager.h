@@ -10,7 +10,7 @@ class FGameModeBase;
 /**
  * Manages game modes used in FGameModeManager.
  */
-class FGameModeManager : public ISubSystemInstanceInterface
+class ENGINE_API FGameModeManager : public ISubSystemInstanceInterface
 {
 public:
 	FGameModeManager(FWindow* InWindow);

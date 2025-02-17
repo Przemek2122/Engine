@@ -7,7 +7,7 @@
 /**
  * Singleton manager for engine class.
  */
-class FEngineManager
+class ENGINE_API FEngineManager
 {
 public:
 	/**

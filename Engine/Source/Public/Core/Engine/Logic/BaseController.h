@@ -21,7 +21,7 @@ enum EStateType
  * User Id for disallowing to provide raw Id.
  * It should always come from object.
  */
-struct FUserId
+struct ENGINE_API FUserId
 {
 	friend FGameModeBase;
 

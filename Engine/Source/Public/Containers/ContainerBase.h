@@ -12,7 +12,7 @@ typedef int64 ContainerBigInt;
  * Base class for containers.
  */
 template<typename TType, typename TSizeType = ContainerInt>
-class CContainerBase
+class ENGINE_API CContainerBase
 {
 public:
 	virtual ~CContainerBase() = default;

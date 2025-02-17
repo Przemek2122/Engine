@@ -15,7 +15,7 @@ class FEntityManager;
 /**
  * Generic entity class
  */
-class EEntity : public FObject, public IComponentManagerInterface
+class ENGINE_API EEntity : public FObject, public IComponentManagerInterface
 {
 public:
 	EEntity(FEntityManager* InEntityManager);

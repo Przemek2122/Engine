@@ -10,7 +10,7 @@
  * Window input manager.
  * Separated from EventHandler because it does not know which window is used
  */
-class FWindowInputManager
+class ENGINE_API FWindowInputManager
 {
 public:
 	FWindowInputManager(FWindow* InWindow);

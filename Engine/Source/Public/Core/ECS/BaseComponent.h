@@ -10,7 +10,7 @@ class EEntity;
  * Base component class.
  * This is base of components without any transform
  */
-class UBaseComponent : public IComponentManagerInterface
+class ENGINE_API UBaseComponent : public IComponentManagerInterface
 {
 public:
 	UBaseComponent(IComponentManagerInterface* InComponentManagerInterface);

@@ -19,7 +19,7 @@ class FMapAsset;
  * 4. Use SetActiveGameMap or SetActiveEditorMap
  * 5. OPTIONAL - Map can be deactivated using DeactivateCurrentGameMap or DeactivateCurrentEditorMap
  */
-class FMapManager
+class ENGINE_API FMapManager
 {
 public:
 	FMapManager(FWindow* InWindow);

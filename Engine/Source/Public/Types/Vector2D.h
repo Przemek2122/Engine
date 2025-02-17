@@ -7,7 +7,7 @@
 
 /* Two dimensional vector. */
 template<class TType>
-class FVector2D
+class ENGINE_API FVector2D
 {
 public:
 	FVector2D() : X(TType(0)), Y(TType(0)) {}

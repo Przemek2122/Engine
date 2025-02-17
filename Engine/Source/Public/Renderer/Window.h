@@ -23,7 +23,7 @@ class FWidgetDebugger;
  * Window class. Has SDL_Window and FRender.
  * This class have ISubSystemManagerInterface for implementing subsystems
  */
-class FWindow : public ISubSystemManagerInterface
+class ENGINE_API FWindow : public ISubSystemManagerInterface
 {
 	friend FEngineRender;
 

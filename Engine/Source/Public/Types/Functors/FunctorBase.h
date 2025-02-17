@@ -21,7 +21,7 @@ enum class EFunctorType
  * operator() - Use to call stored function.
  */
 template<typename TReturnType, typename... TInParams>
-class FFunctorBase
+class ENGINE_API FFunctorBase
 {
 public:
 	FFunctorBase() = default;

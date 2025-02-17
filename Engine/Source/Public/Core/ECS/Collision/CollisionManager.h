@@ -13,7 +13,7 @@ class FSquareCollision;
 class FCircleCollision;
 
 /** Single tile of specified size in specified location */
-struct FCollisionTile
+struct ENGINE_API FCollisionTile
 {
 	FVector2D<int> TileLocation;
 	FVector2D<int> TileSize;
@@ -23,7 +23,7 @@ struct FCollisionTile
 };
 
 /** Row of tiles */
-struct FCollisionMeshRow
+struct ENGINE_API FCollisionMeshRow
 {
 	/** Array of collision in single horizontal row. */
 	CArray<FCollisionTile*> CollisionTiles;
@@ -33,7 +33,7 @@ struct FCollisionMeshRow
  * Collision manager
  * Collision is managed using tiles for collision detection of collidable objects in same tile.
  */
-class FCollisionManager : public ISubSystemInstanceInterface
+class ENGINE_API FCollisionManager : public ISubSystemInstanceInterface
 {
 public:
 	FCollisionManager();

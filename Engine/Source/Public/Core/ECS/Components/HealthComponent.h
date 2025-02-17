@@ -10,7 +10,7 @@ class URenderComponent;
  * Component for managing health
  * + Damage, healing, death with delegate
  */
-class UHealthComponent : public UBaseComponent
+class ENGINE_API UHealthComponent : public UBaseComponent
 {
 public:
 	UHealthComponent(IComponentManagerInterface* InComponentManagerInterface);

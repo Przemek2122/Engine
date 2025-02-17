@@ -8,7 +8,7 @@
 /**
  * Class for helping use of AssetsManager.
  */
-class FAssetsManagerHelpers
+class ENGINE_API FAssetsManagerHelpers
 {
 public:
 	/**

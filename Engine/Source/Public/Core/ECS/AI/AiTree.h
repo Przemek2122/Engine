@@ -14,7 +14,7 @@ class FAIActionBase;
  * One tree for movement. One action for direct approach. One for approach from left etc...
  * Another example would be AI with multiple weapons.
  */
-class FAITree
+class ENGINE_API FAITree
 {
 public:
 	FAITree(EEntity* InOwnerEntity);

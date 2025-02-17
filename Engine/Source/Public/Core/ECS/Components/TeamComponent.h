@@ -7,7 +7,7 @@
  * Team Component
  * defines team and user which is owning a unit
  */
-class UTeamComponent : public UBaseComponent
+class ENGINE_API UTeamComponent : public UBaseComponent
 {
 public:
 	UTeamComponent(IComponentManagerInterface* InComponentManagerInterface);

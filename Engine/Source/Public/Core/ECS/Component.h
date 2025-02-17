@@ -10,7 +10,7 @@ class EEntity;
 /**
  * It's UBaseComponent but with transform
  */
-class UComponent : public UBaseComponent, public FTransform2DInterface
+class ENGINE_API UComponent : public UBaseComponent, public FTransform2DInterface
 {
 public:
 	UComponent(IComponentManagerInterface* InComponentManagerInterface);

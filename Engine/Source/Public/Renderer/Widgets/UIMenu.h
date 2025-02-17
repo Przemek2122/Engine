@@ -6,7 +6,7 @@
  * Class for UI widgets
  * Like MainMenu, PauseMenu, etc.
  */
-class FUIMenu
+class ENGINE_API FUIMenu
 {
 public:
 	/** Window is very important for widgets as it stores widget that we can later add more widgets to. */

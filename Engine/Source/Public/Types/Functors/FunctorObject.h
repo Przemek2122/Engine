@@ -9,7 +9,7 @@
  * Function on objects
  */
 template<class TClass, typename TReturnType, typename... TInParams>
-class FFunctorObject : public FFunctorBase<TReturnType, TInParams...>
+class ENGINE_API FFunctorObject : public FFunctorBase<TReturnType, TInParams...>
 {
 public:
 	typedef FFunctorObject<TClass, TReturnType, TInParams...> TSelfType;
@@ -44,7 +44,7 @@ public:
 		FunctionPointer = InFunctor.FunctionPointer;
 		ClassObject = InFunctor.ClassObject;
 		
-		return this;
+		return *this;
     }
 
 	bool IsEqual(TSelfType& OtherFunctor)

@@ -6,7 +6,7 @@
 IRenderInterface::IRenderInterface()
 	: bIsRegistered(false)
 	, RegisteredPhase(ERenderPhase::None)
-	, RenderFunctor(FFunctorObject(this, &IRenderInterface::Render))
+	//, RenderFunctor(FFunctorObject(this, &IRenderInterface::Render))
 {
 	Register();
 }
@@ -15,7 +15,7 @@ IRenderInterface::~IRenderInterface()
 {
 	if (bIsRegistered)
 	{
-		GEngine->GetEngineRenderingManager()->UnRegisterInterface(RenderFunctor, RegisteredPhase);
+		//GEngine->GetEngineRenderingManager()->UnRegisterInterface(RenderFunctor, RegisteredPhase);
 	}
 }
 
@@ -27,6 +27,6 @@ void IRenderInterface::Register()
 
 		RegisteredPhase = GetRenderPhase();
 
-		GEngine->GetEngineRenderingManager()->RegisterInterface(RenderFunctor, RegisteredPhase);
+		//GEngine->GetEngineRenderingManager()->RegisterInterface(RenderFunctor, RegisteredPhase);
 	}
 }

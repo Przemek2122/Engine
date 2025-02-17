@@ -8,7 +8,7 @@
 /**
  * Interface for SubSystem manager
  */
-class ISubSystemManagerInterface
+class ENGINE_API ISubSystemManagerInterface
 {
 public:
 	ISubSystemManagerInterface() = default;

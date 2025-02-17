@@ -2,7 +2,7 @@
 
 #pragma once
 
-enum class EBorderDisplayMethod
+enum class ENGINE_API EBorderDisplayMethod
 {
 	/** Only draws a line starting at widget location and being draw as widget size */
 	BorderOutline,
@@ -11,7 +11,7 @@ enum class EBorderDisplayMethod
 	BorderWithFill,
 };
 
-class FBorderWidget : public FWidget
+class ENGINE_API FBorderWidget : public FWidget
 {
 public:
 	FBorderWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

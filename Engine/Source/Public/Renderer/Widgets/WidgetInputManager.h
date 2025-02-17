@@ -9,7 +9,7 @@ enum class EInputState;
 /**
  * Class responsible for giving input to the FWidget class
  */
-class FWidgetInputManager
+class ENGINE_API FWidgetInputManager
 {
 public:
 	FWidgetInputManager(FWindow* InOwnerWindow);

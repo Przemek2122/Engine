@@ -10,7 +10,7 @@ enum class EHorizontalBoxAlignMethod
 	FromTheLeft,
 };
 
-class FHorizontalBoxWidget : public FWidget
+class ENGINE_API FHorizontalBoxWidget : public FWidget
 {
 public:
 	FHorizontalBoxWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

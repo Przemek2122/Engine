@@ -4,7 +4,7 @@
 
 #include "../Widget.h"
 
-class FInputTextWidget : public FWidget
+class ENGINE_API FInputTextWidget : public FWidget
 {
 public:
 	FInputTextWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName);

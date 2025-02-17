@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "../Widget.h"
 
-class FCheckBoxWidget : public FWidget
+class ENGINE_API FCheckBoxWidget : public FWidget
 {
 
 

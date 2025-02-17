@@ -7,7 +7,7 @@
 
 enum class EInputState;
 
-class ECameraManager : public EEntity
+class ENGINE_API ECameraManager : public EEntity
 {
 public:
 	ECameraManager(FEntityManager* InEntityManager);

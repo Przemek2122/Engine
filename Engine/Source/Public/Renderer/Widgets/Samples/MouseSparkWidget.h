@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-struct FSpark
+struct ENGINE_API FSpark
 {
 	FSpark();
 	FSpark(const FVector2D<int>& InLocation, const float InSpeed, const int InRotationDegree);
@@ -17,7 +17,7 @@ struct FSpark
 /**
  * Widget that creates sparks under mouse cursor
  */
-class FMouseSparkWidget : public FWidget
+class ENGINE_API FMouseSparkWidget : public FWidget
 {
 public:
 	FMouseSparkWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

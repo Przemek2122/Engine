@@ -4,7 +4,7 @@
 
 class FIniObject;
 
-struct FMusicToPlay
+struct ENGINE_API FMusicToPlay
 {
 	FMusicToPlay(std::string InMusicPath = "", const bool bLoadNow = false);
 	virtual ~FMusicToPlay();
@@ -25,7 +25,7 @@ private:
 /**
  * Audio player entity
  */
-class FAudioPlayer : public EEntity
+class ENGINE_API FAudioPlayer : public EEntity
 {
 public:
 	FAudioPlayer(FEntityManager* InEntityManager);

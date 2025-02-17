@@ -7,7 +7,7 @@
 
 class FMap;
 
-class FEntityManager
+class ENGINE_API FEntityManager
 {
 	friend FMap;
 

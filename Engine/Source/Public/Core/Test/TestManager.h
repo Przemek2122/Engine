@@ -11,7 +11,7 @@
  * GEngine class used to check if things work properly.
  * Also can be used to see sample code.
  */
-class FTestManager
+class ENGINE_API FTestManager
 {
 public:
 	FTestManager();

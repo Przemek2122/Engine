@@ -5,7 +5,7 @@
 /**
  * Base class for all asset collection items - Will keep AssetName and AssetPath.
  */
-struct FAssetCollectionItem
+struct ENGINE_API FAssetCollectionItem
 {
 protected:
 	std::string AssetName;

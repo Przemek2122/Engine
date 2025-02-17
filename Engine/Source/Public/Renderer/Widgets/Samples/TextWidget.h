@@ -13,7 +13,7 @@ enum class ETextRenderMode : Uint8
 	Blended,					// Render
 };
 
-class FTextWidget : public FWidget
+class ENGINE_API FTextWidget : public FWidget
 {
 public:
 	FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder = WIDGET_DEFINES_DEFAULT_ORDER);

@@ -161,12 +161,12 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	RenderThread = dynamic_cast<FRenderThread*>(RenderThreadData->GetThread());
 
 #if ENGINE_NETWORK_LIB_ENABLED
-	const FEngineLaunchParameter& IsEngineLaunchParameter = GetLaunchParameter(FEngineLaunchParameterCollection::IsServer);
+	const FEngineLaunchParameter& IsServerEngineLaunchParameter = GetLaunchParameter(FEngineLaunchParameterCollection::IsServer);
 
 	bool bIsServer = true;
-	if (IsEngineLaunchParameter.IsValid())
+	if (IsServerEngineLaunchParameter.IsValid())
 	{
-		bIsServer = IsEngineLaunchParameter.AsBool();
+		bIsServer = IsServerEngineLaunchParameter.AsBool();
 	}
 
 	NetworkManager = new FNetworkManager(this, bIsServer);
@@ -223,8 +223,6 @@ void FEngine::EngineTick()
 	EngineRender->Tick();
 
 	ThreadsManager->TickThreadCallbacks();
-
-	EngineRenderingManager->EngineRender();
 
 	// Wait for Render thread.
 	// We need to do this to avoid changing data when render is not finished
@@ -284,7 +282,8 @@ void FEngine::ForceExit(const EEngineErrorCode OptionalErrorCode)
 
 	LOG_WARN("Waiting for log to be printed.");
 
-	while (!FUtil::MessagesQueue.IsEmpty())
+	// Wait for messages to be printed
+	while (!FUtil::HasEmptyMessagesQueue())
 	{
 		THREAD_WAIT_SHORT_TIME;
 	}
