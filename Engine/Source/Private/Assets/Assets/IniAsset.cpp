@@ -22,7 +22,7 @@ EAssetType FIniAsset::GetAssetType() const
 
 std::string FIniAsset::GetAbsolutePath() const
 {
-	return GEngine->GetAssetsManager()->ConvertRelativeToFullPath(AssetPath);
+	return FGlobalDefines::GEngine->GetAssetsManager()->ConvertRelativeToFullPath(AssetPath);
 }
 
 bool FIniAsset::DoesFileExist() const

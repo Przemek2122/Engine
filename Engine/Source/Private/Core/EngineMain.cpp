@@ -7,7 +7,7 @@ void FEngineManager::Start(const int InArgc, char* InArgv[])
 {
 	std::cout << "Game engine initializing ..." << std::endl;
 
-	GEngine = EngineClass.Allocate();
+	FGlobalDefines::GEngine = EngineClass.Allocate();
 		
 	Init(InArgc, InArgv);
 
@@ -18,15 +18,15 @@ void FEngineManager::Start(const int InArgc, char* InArgv[])
 
 void FEngineManager::MainLoop()
 {
-	while (GEngine->CanContinueMainLoop())
+	while (FGlobalDefines::GEngine->CanContinueMainLoop())
 	{
 		LoopIterate();
 
 		// Delay if required.
-		if (GEngine->IsFrameRateLimited())
+		if (FGlobalDefines::GEngine->IsFrameRateLimited())
 		{
-			const auto EngineFrameTime = GEngine->GetFrameTime();
-			const auto EngineFrameDelay = GEngine->GetFrameDelay();
+			const auto EngineFrameTime = FGlobalDefines::GEngine->GetFrameTime();
+			const auto EngineFrameDelay = FGlobalDefines::GEngine->GetFrameDelay();
 
 			if (EngineFrameDelay > EngineFrameTime)
 			{
@@ -34,49 +34,49 @@ void FEngineManager::MainLoop()
 			}
 		}
 
-		GEngine->CounterLastFrame = GEngine->CounterCurrentFrame;
+		FGlobalDefines::GEngine->CounterLastFrame = FGlobalDefines::GEngine->CounterCurrentFrame;
 	}
 }
 
 void FEngineManager::Init(const int Argc, char* Argv[])
 {
-	GEngine->PreInit();
+	FGlobalDefines::GEngine->PreInit();
 
-	GEngine->EngineInit(Argc, Argv);
+	FGlobalDefines::GEngine->EngineInit(Argc, Argv);
 
-	GEngine->Init();
+	FGlobalDefines::GEngine->Init();
 
-	GEngine->PostInit();
+	FGlobalDefines::GEngine->PostInit();
 }
 
 void FEngineManager::LoopIterate()
 {
-	GEngine->UpdateFrameTimeStart();
+	FGlobalDefines::GEngine->UpdateFrameTimeStart();
 
 	// Calculate DeltaTime
 	{
-		GEngine->CounterCurrentFrame = SDL_GetPerformanceCounter();
-		auto DeltaTime = static_cast<double>(GEngine->CounterCurrentFrame - GEngine->CounterLastFrame) / static_cast<double>(SDL_GetPerformanceFrequency());
-		GEngine->SetDeltaTime(DeltaTime);
+		FGlobalDefines::GEngine->CounterCurrentFrame = SDL_GetPerformanceCounter();
+		auto DeltaTime = static_cast<double>(FGlobalDefines::GEngine->CounterCurrentFrame - FGlobalDefines::GEngine->CounterLastFrame) / static_cast<double>(SDL_GetPerformanceFrequency());
+		FGlobalDefines::GEngine->SetDeltaTime(DeltaTime);
 	}
-		
-	GEngine->EngineTick();
 
-	GEngine->UpdateFrameTimeEnd();
+	FGlobalDefines::GEngine->EngineTick();
+
+	FGlobalDefines::GEngine->UpdateFrameTimeEnd();
 }
 
 void FEngineManager::Exit()
 {
-	GEngine->PreExit();
+	FGlobalDefines::GEngine->PreExit();
 
-	GEngine->Clean();
+	FGlobalDefines::GEngine->Clean();
 
-	delete GEngine;
+	delete FGlobalDefines::GEngine;
 
 	std::cout << "Game engine end." << std::endl;
 }
 
 FEngine* FEngineManager::Get()
 {
-	return GEngine;
+	return FGlobalDefines::GEngine;
 }

@@ -101,7 +101,7 @@ void FNetworkManager::DeInitialize()
 
 void FNetworkManager::LoadConfig()
 {
-	FIniManager* IniManager = GEngine->GetAssetsManager()->GetIniManager();
+	FIniManager* IniManager = FGlobalDefines::GEngine->GetAssetsManager()->GetIniManager();
 	if (IniManager != nullptr)
 	{
 		std::shared_ptr<FIniObject> IniObject = IniManager->GetIniObject(NETWORK_CONFIG_INI_NAME);

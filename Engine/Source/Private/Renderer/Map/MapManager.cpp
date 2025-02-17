@@ -39,7 +39,7 @@ void FMapManager::DrawMap()
 
 FMapAsset* FMapManager::GetMapByName(const std::string& Name)
 {
-	FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+	FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 	if (AssetsManager != nullptr)
 	{
 		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name);
@@ -140,7 +140,7 @@ void FMapManager::DeactivateCurrentEditorMap()
 
 void FMapManager::CacheAvailableMaps()
 {
-	FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+	FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 	if (AssetsManager != nullptr)
 	{
 		AvailableMaps.Clear();
@@ -182,7 +182,7 @@ CArray<std::string> FMapManager::GetAvailableMaps() const
 
 FMapAsset* FMapManager::LoadMap(const std::string& Name)
 {
-	FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+	FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 	if (AssetsManager != nullptr)
 	{
 		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name);

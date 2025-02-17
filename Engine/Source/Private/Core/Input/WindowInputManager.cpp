@@ -8,7 +8,7 @@
 FWindowInputManager::FWindowInputManager(FWindow* InWindow)
 	: Window(InWindow)
 {
-	EventHandler = GEngine->GetEventHandler();
+	EventHandler = FGlobalDefines::GEngine->GetEventHandler();
 
 	if (EventHandler != nullptr)
 	{

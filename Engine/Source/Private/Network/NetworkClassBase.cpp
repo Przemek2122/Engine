@@ -23,7 +23,7 @@ FNetworkClassBase::~FNetworkClassBase()
 
 void FNetworkClassBase::Initialize()
 {
-	FThreadsManager* ThreadManager = GEngine->GetThreadsManager();
+	FThreadsManager* ThreadManager = FGlobalDefines::GEngine->GetThreadsManager();
 	if (ThreadManager != nullptr)
 	{
 		ThreadName = std::string(NETWORK_THREAD_NAME) + std::to_string(ThreadNumber);
@@ -45,7 +45,7 @@ void FNetworkClassBase::Initialize()
 
 void FNetworkClassBase::DeInitialize()
 {
-	FThreadsManager* ThreadManager = GEngine->GetThreadsManager();
+	FThreadsManager* ThreadManager = FGlobalDefines::GEngine->GetThreadsManager();
 	if (ThreadManager != nullptr && NetworkThreadData != nullptr)
 	{
 		ThreadManager->TryStopThread(NetworkThreadData);

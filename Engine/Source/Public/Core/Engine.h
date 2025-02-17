@@ -34,7 +34,7 @@ public:
 	/** First init ever called. */
 	virtual void PreInit();
 
-	/** Init (SDL, GEngine stuff). */
+	/** Init (SDL, FGlobalDefines::GEngine stuff). */
 	virtual void Init();
 
 	/** Third init function. */

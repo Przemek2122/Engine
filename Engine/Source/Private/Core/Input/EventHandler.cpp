@@ -53,7 +53,7 @@ void FEventHandler::ResetAll()
 void FEventHandler::InitializeInputFromConfig()
 {
 	const std::string EngineInputSettingsIniName = "EngineInput";
-	FIniManager* IniManager = GEngine->GetAssetsManager()->GetIniManager();
+	FIniManager* IniManager = FGlobalDefines::GEngine->GetAssetsManager()->GetIniManager();
 	EngineInputIniObject = IniManager->GetIniObject(EngineInputSettingsIniName);
 	if (EngineInputIniObject->DoesIniExist())
 	{
@@ -593,44 +593,44 @@ void FEventHandler::InputWindowEvent()
 		case SDL_EVENT_WINDOW_HIDDEN:
 		{
 			LOG_DEBUG("Window " << Event.window.windowID << " hidden");
-			GEngine->GetEngineRender()->OnWindowHidden(Event.window.windowID);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowHidden(Event.window.windowID);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_EXPOSED:
 		{
 			LOG_DEBUG("Window " << Event.window.windowID << " exposed");
-			GEngine->GetEngineRender()->OnWindowExposed(Event.window.windowID);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowExposed(Event.window.windowID);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_MOVED:
 		{
-			GEngine->GetEngineRender()->OnWindowMoved(Event.window.windowID, Event.window.data1, Event.window.data2);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowMoved(Event.window.windowID, Event.window.data1, Event.window.data2);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			GEngine->GetEngineRender()->OnWindowResized(Event.window.windowID, Event.window.data1, Event.window.data2);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowResized(Event.window.windowID, Event.window.data1, Event.window.data2);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 		{
-			GEngine->GetEngineRender()->OnWindowSizeChanged(Event.window.windowID, Event.window.data1, Event.window.data2);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowSizeChanged(Event.window.windowID, Event.window.data1, Event.window.data2);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_MINIMIZED:
 		{
-			GEngine->GetEngineRender()->OnWindowMinimized(Event.window.windowID);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowMinimized(Event.window.windowID);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_MAXIMIZED:
 		{
-			GEngine->GetEngineRender()->OnWindowMaximized(Event.window.windowID);
+			FGlobalDefines::GEngine->GetEngineRender()->OnWindowMaximized(Event.window.windowID);
 			break;
 		}
 
@@ -642,25 +642,25 @@ void FEventHandler::InputWindowEvent()
 
 		case SDL_EVENT_WINDOW_MOUSE_ENTER:
 		{
-			GEngine->GetEngineRender()->SetWindowIsMouseInside(Event.window.windowID, true);
+			FGlobalDefines::GEngine->GetEngineRender()->SetWindowIsMouseInside(Event.window.windowID, true);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
 		{
-			GEngine->GetEngineRender()->SetWindowIsMouseInside(Event.window.windowID, false);
+			FGlobalDefines::GEngine->GetEngineRender()->SetWindowIsMouseInside(Event.window.windowID, false);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
 		{
-			GEngine->GetEngineRender()->SetWindowFocus(Event.window.windowID, true);
+			FGlobalDefines::GEngine->GetEngineRender()->SetWindowFocus(Event.window.windowID, true);
 			break;
 		}
 
 		case SDL_EVENT_WINDOW_FOCUS_LOST:
 		{
-			GEngine->GetEngineRender()->SetWindowFocus(Event.window.windowID, false);
+			FGlobalDefines::GEngine->GetEngineRender()->SetWindowFocus(Event.window.windowID, false);
 			break;
 		}
 
@@ -679,5 +679,5 @@ void FEventHandler::InputWindowEvent()
 
 FWindow* FEventHandler::GetCurrentlyFocusedWindow() const
 {
-	return GEngine->GetEngineRender()->GetFocusedWindow();
+	return FGlobalDefines::GEngine->GetEngineRender()->GetFocusedWindow();
 }

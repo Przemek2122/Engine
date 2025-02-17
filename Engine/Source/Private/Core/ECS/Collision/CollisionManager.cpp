@@ -36,7 +36,7 @@ void FCollisionManager::InitializeSubSystem()
 	ISubSystemInstanceInterface::InitializeSubSystem();
 
 	const std::string CollisionSettingsIniName = "CollisionSettings";
-	FIniManager* IniManager = GEngine->GetAssetsManager()->GetIniManager();
+	FIniManager* IniManager = FGlobalDefines::GEngine->GetAssetsManager()->GetIniManager();
 	EngineCollisionSettingsIniObject = IniManager->GetIniObject(CollisionSettingsIniName);
 	if (EngineCollisionSettingsIniObject && EngineCollisionSettingsIniObject->DoesIniExist())
 	{
@@ -170,7 +170,7 @@ void FCollisionManager::BuildCollision()
 		FDelegateSafe<> MainThreadCallback;
 		MainThreadCallback.BindObject(this, &FCollisionManager::OnCollisionCreated);
 
-		GEngine->GetThreadsManager()->AddAsyncDelegate(AsyncWork, MainThreadCallback);
+		FGlobalDefines::GEngine->GetThreadsManager()->AddAsyncDelegate(AsyncWork, MainThreadCallback);
 	}
 }
 

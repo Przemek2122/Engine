@@ -2,7 +2,7 @@
 
 #pragma once
 
-// GEngine base classes forward declarations
+// FGlobalDefines::GEngine base classes forward declarations
 
 class FEngineMain;
 class FEngine;

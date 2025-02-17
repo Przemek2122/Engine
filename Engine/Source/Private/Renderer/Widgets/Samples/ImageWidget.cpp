@@ -47,7 +47,7 @@ void FImageWidget::Render()
 
 void FImageWidget::SetImage(const std::string& InImageName, const std::string& OptionalPath)
 {
-	FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+	FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 	if (AssetsManager != nullptr)
 	{
 		FTextureAsset* TemporaryTextureAsset = FAssetsManagerHelpers::GetOrCreateAsset<FTextureAsset>(AssetsManager, GetOwnerWindow(), InImageName, OptionalPath, EAssetType::AT_TEXTURE);

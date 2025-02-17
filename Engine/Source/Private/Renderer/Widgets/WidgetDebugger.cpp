@@ -28,7 +28,7 @@ void FWidgetDebugger::StartDebugger()
 		static const FVector2D<int> WindowLocation = Window->GetWindowLocation() + FVector2D<int>(Window->GetWindowSize().X, 0);
 		static const FVector2D<int> WindowDefaultSize = FVector2D<int>(400, 600);
 
-		DebuggerWindow = GEngine->GetEngineRender()->CreateWindow<FWindow>(WindowCreationData, WindowName, WindowLocation, WindowDefaultSize);
+		DebuggerWindow = FGlobalDefines::GEngine->GetEngineRender()->CreateWindow<FWindow>(WindowCreationData, WindowName, WindowLocation, WindowDefaultSize);
 		if (DebuggerWindow != nullptr)
 		{
 			// Refresh all widgets in debugger

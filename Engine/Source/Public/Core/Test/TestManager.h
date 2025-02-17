@@ -8,7 +8,7 @@
 #if ENGINE_TESTS_ALLOW_ANY
 
 /**
- * GEngine class used to check if things work properly.
+ * FGlobalDefines::GEngine class used to check if things work properly.
  * Also can be used to see sample code.
  */
 class ENGINE_API FTestManager

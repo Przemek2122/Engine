@@ -202,7 +202,7 @@ void FEngine::EngineTick()
 
 	if (EventHandler->QuitInputDetected())
 	{
-		GEngine->RequestExit();
+		FGlobalDefines::GEngine->RequestExit();
 	}
 
 	// Tick functions for next tick
@@ -241,7 +241,7 @@ void FEngine::EnginePostSecondTick()
 
 void FEngine::PreInit()
 {
-	GEngine = this;
+	FGlobalDefines::GEngine = this;
 }
 
 void FEngine::Init()

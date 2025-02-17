@@ -73,13 +73,13 @@ void FWidget::Init()
 
 	bWasInitCalled = true;
 
-	FEventHandler* EventHandler = GEngine->GetEventHandler();
+	FEventHandler* EventHandler = FGlobalDefines::GEngine->GetEventHandler();
 	SetupInput(EventHandler);
 }
 
 void FWidget::PreDeInit()
 {
-	FEventHandler* EventHandler = GEngine->GetEventHandler();
+	FEventHandler* EventHandler = FGlobalDefines::GEngine->GetEventHandler();
 	ClearInput(EventHandler);
 
 	// Unregister widget
@@ -204,7 +204,7 @@ void FWidget::DestroyWidget()
 
 		ClearChildren();
 
-		GEngine->GetFunctionsToCallOnStartOfNextTick().BindObject(this, &FWidget::FinalizeDestroyWidget);
+		FGlobalDefines::GEngine->GetFunctionsToCallOnStartOfNextTick().BindObject(this, &FWidget::FinalizeDestroyWidget);
 	}
 }
 
@@ -334,7 +334,7 @@ FRenderer* FWidget::GetRenderer() const
 
 FEventHandler* FWidget::GetEventHandler()
 {
-	return GEngine->GetEventHandler();
+	return FGlobalDefines::GEngine->GetEventHandler();
 }
 
 EWidgetVisibility FWidget::GetWidgetVisibility() const

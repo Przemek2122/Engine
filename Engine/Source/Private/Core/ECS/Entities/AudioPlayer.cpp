@@ -121,7 +121,7 @@ void FAudioPlayer::SetNumberOfSupportedAudioChannels(const int32 NewNumberOfChan
 
 void FAudioPlayer::ReadIniFiles()
 {
-	AssetManager = GEngine->GetAssetsManager();
+	AssetManager = FGlobalDefines::GEngine->GetAssetsManager();
 	FIniManager* IniManager = AssetManager->GetIniManager();
 	const std::shared_ptr<FIniObject> AudioSettingsConfigObject = IniManager->GetIniObject(DefaultAudioSettingsConfigFile);
 	if (AudioSettingsConfigObject->DoesIniExist())

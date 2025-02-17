@@ -1,5 +1,12 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemys³aw Wiewióra 2020-2025
 
 #pragma once
 
-static FEngine* GEngine = nullptr;
+class ENGINE_API FGlobalDefines
+{
+public:
+	static inline FEngine* GEngine;
+
+	// Add more global defines if needed
+};
+

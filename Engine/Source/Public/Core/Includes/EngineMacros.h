@@ -60,7 +60,7 @@
 
 #define NO_DISCARD SDL_NODISCARD
 
-#ifdef ENGINE_BUILD_AS_LIBRARY
+#if defined(ENGINE_BUILD_AS_LIBRARY) && ENGINE_BUILD_AS_LIBRARY
 	#ifdef PLATFORM_WINDOWS
 		#define EXPORT_API __declspec(dllexport)
 	#else

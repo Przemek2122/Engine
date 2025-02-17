@@ -62,5 +62,5 @@ void FAssetBase::OnNumberOfReferencesLowered()
 
 void FAssetBase::ReleaseAsset()
 {
-	GEngine->GetAssetsManager()->RemoveAsset(AssetName, GetAssetType());
+	FGlobalDefines::GEngine->GetAssetsManager()->RemoveAsset(AssetName, GetAssetType());
 }

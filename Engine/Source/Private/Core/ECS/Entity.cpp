@@ -227,14 +227,14 @@ FGameModeBase* EEntity::GetGameMode() const
 
 void EEntity::RegisterInputInternal()
 {
-	FEventHandler* InputHandler = GEngine->GetEventHandler();
+	FEventHandler* InputHandler = FGlobalDefines::GEngine->GetEventHandler();
 
 	RegisterInput(InputHandler);
 }
 
 void EEntity::UnRegisterInputInternal()
 {
-	FEventHandler* InputHandler = GEngine->GetEventHandler();
+	FEventHandler* InputHandler = FGlobalDefines::GEngine->GetEventHandler();
 
 	UnRegisterInput(InputHandler);
 }

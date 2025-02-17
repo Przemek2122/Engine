@@ -97,7 +97,7 @@ void URenderComponent::SetImage(const std::string& InImageName, const std::strin
 {
 	if (!InImageName.empty())
 	{
-		FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+		FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 		if (AssetsManager != nullptr)
 		{
 			FTextureAsset* TemporaryTexture = FAssetsManagerHelpers::GetOrCreateAsset<FTextureAsset>(AssetsManager, GetOwnerWindow(), InImageName, OptionalPath, EAssetType::AT_TEXTURE);

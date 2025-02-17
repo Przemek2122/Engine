@@ -68,7 +68,7 @@ void FMapAsset::LoadMap()
 
 			CArray<std::string> MapAssetFiles = FFileSystem::GetFilesFromDirectory(MapAssetsDirPath);
 
-			FAssetsManager* AssetsManager = GEngine->GetAssetsManager();
+			FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 			SDL_Renderer* WindowRenderer = MapManager->GetOwnerWindow()->GetRenderer()->GetSDLRenderer();
 
 			LoadMapAssets(Parser, AssetsManager, WindowRenderer);
@@ -163,7 +163,7 @@ FParser FMapAsset::CreateMapFilesParser()
 
 void FMapAsset::GenerateNamesForMapAssets()
 {
-	const std::string SharedBeginning = AssetPath + GEngine->GetAssetsManager()->GetPlatformSlash();
+	const std::string SharedBeginning = AssetPath + FGlobalDefines::GEngine->GetAssetsManager()->GetPlatformSlash();
 	const std::string SharedBeginningFiles = SharedBeginning + AssetName;
 
 	MapNameFilePath = SharedBeginningFiles + '.' + FMapGlobalSettings::Extensions::PrimaryMapFileExtension;

@@ -76,7 +76,7 @@ CArray<std::string> FAssetsManager::GetFilesFromDirectory(const std::string& Dir
 
 std::string FAssetsManager::GetProjectLocation() const
 {
-	return GEngine->GetLaunchRelativePath();
+	return FGlobalDefines::GEngine->GetLaunchRelativePath();
 }
 
 char FAssetsManager::GetPlatformSlash() const
@@ -114,5 +114,5 @@ std::string FAssetsManager::ConvertRelativeToFullPath(const std::string& InPathR
 {
 	const char Slash = FFileSystem::GetPlatformSlash();
 	
-	return GEngine->GetLaunchRelativePath() + Slash + InPathRelative;
+	return FGlobalDefines::GEngine->GetLaunchRelativePath() + Slash + InPathRelative;
 }

@@ -41,7 +41,7 @@ void FMouseSparkWidget::Tick()
 	// Add sparks is focused
 	if (GetParent()->GetOwnerWindow()->IsWindowFocused())
 	{
-		const FEventHandler* EventHandler = GEngine->GetEventHandler();
+		const FEventHandler* EventHandler = FGlobalDefines::GEngine->GetEventHandler();
 
 		const FVector2D<int> MouseLocation = EventHandler->GetMouseLocationCurrent();
 
