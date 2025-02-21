@@ -6,6 +6,9 @@
 
 class FGameModeManager;
 
+// @TODO: Window advanced should be entirely removed.
+// All of its functionality should be replaced by subsystems added to window
+
 /**
  * Advanced window
  */

@@ -4,7 +4,7 @@
 #include "Assets/Assets/MapAsset.h"
 #include "Renderer/Map/Map.h"
 #include "Renderer/Map/MapEditor.h"
-#include "Renderer/Map/Mapmanager.h"
+#include "Renderer/Map/MapManager.h"
 
 FMapManager::FMapManager(FWindow* InWindow)
 	: CurrentMap(nullptr)

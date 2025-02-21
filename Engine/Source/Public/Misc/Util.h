@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020-2025
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020-2025
 
 #pragma once
 
@@ -196,6 +196,8 @@ private:
 
 	/** Log directory. Default: "log". */
 	static inline const std::string LogDir = "log";
+
+    static inline std::string LogDirRuntime;
 
 	/** Log prefix. Default: "log_". eg: log_13_01_19... */
 	static inline const std::string LogPrefix = "log_";

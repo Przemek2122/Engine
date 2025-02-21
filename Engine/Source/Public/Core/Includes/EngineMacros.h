@@ -9,7 +9,7 @@
 //#define DEBUG ((defined _DEBUG) && _DEBUG)
 #define WITH_WIDGET_DEBUGGER DEBUG
 
-// define platform defaults
+/** define platform defaults */
 /* ANDROID */
 #if defined(__ANDROID__) && (__ANDROID__ == 1)
 #define PLATFORM_ANDROID 1
@@ -61,13 +61,13 @@
 #define NO_DISCARD SDL_NODISCARD
 
 #if defined(ENGINE_BUILD_AS_LIBRARY) && ENGINE_BUILD_AS_LIBRARY
-	#ifdef PLATFORM_WINDOWS
+	#if PLATFORM_WINDOWS
 		#define EXPORT_API __declspec(dllexport)
 	#else
 		#define EXPORT_API __attribute__((visibility("default")))
 	#endif
 #else
-	#ifdef PLATFORM_WINDOWS
+	#if PLATFORM_WINDOWS
 		#define EXPORT_API __declspec(dllimport)
 	#else
 		#define EXPORT_API

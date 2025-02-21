@@ -1,10 +1,7 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
-#include "Misc/Filesystem.h"
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/stat.h>
+#include "Misc/FileSystem.h"
 
 namespace fs = std::filesystem;
 
@@ -32,9 +29,7 @@ bool FFileSystem::Directory::Delete(const std::string& InPath, const bool bRecur
 
 bool FFileSystem::File::Exists(const std::string& InPath)
 {
-    struct stat buffer;
-
-    return (stat(InPath.c_str(), &buffer) == 0);
+    return (fs::exists(InPath));
 }
 
 bool FFileSystem::File::Create(const std::string& InPath)
@@ -163,6 +158,11 @@ char FFileSystem::GetPlatformEndLine()
 	static char* PlatformEndLine = TEXT_CHAR("\n");
 
 	return *PlatformEndLine;
+}
+
+std::string FFileSystem::GetBasePathCached()
+{
+    return FGlobalDefines::GEngine->GetLaunchFullPath();
 }
 
 void FFileSystem::GetFilesFromDirectoryRecursive(CArray<std::string>& Container, const std::filesystem::directory_entry& Entry, const bool bRecursive)

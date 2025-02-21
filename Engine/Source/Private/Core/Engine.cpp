@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020-2024 https://github.com/Przemek2122/GameEngine
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020-2024 https://github.com/Przemek2122/GameEngine
 
 #include "CoreEngine.h"
 #include "Input/EventHandler.h"
@@ -92,17 +92,6 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 		LOG_DEBUG("Param name: " << LaunchParameter.Name << ", value: " << LaunchParameter.Value);
 	}
 
-#if PLATFORM_ANDROID
-	// Android have files of app in root dir
-	LaunchRelativePath = FFileSystem::GetPlatformSlash();
-#else
-	// We always need correct directory.
-	if (ENSURE_VALID(!LaunchFullPath.empty()))
-	{
-		LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\'));
-	}
-#endif
-
 	// Initialize SDL
 	const bool SdlInitialized = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 	if (SdlInitialized)
@@ -144,6 +133,13 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 
 		ForceExit(EEngineErrorCode::Mixer_OpenAudioFailed);
 	}
+
+    // Get launch location
+#if PLATFORM_ANDROID
+	LaunchRelativePath = SDL_GetAndroidInternalStoragePath();
+#else
+	LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\')) + FFileSystem::GetPlatformSlash();
+#endif
 
 	EngineRender = CreateEngineRenderer();
 	EventHandler = CreateEventHandler();

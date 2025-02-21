@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020-2025
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020-2025
 
 #include "CoreEngine.h"
 #include "Misc/Util.h"
@@ -14,7 +14,18 @@ void FUtil::LogInit(bool EnableLogging)
 
 	if (EnableLogging)
 	{
-		FFileSystem::Directory::Create(LogDir);
+#if PLATFORM_ANDROID
+		// @TODO: This should be change to proper organization and app name
+		char* PathPtr = SDL_GetPrefPath("Org", "App");
+
+        LogDirRuntime = PathPtr + LogDir;
+
+		SDL_free(PathPtr);
+#else
+        LogDirRuntime = LogDir;
+#endif
+
+		FFileSystem::Directory::Create(LogDirRuntime);
 
 		bIsLoggingEnabled = true;
 

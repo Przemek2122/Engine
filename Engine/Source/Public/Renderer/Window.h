@@ -80,6 +80,7 @@ public:
 	virtual void OnWindowSizeChanged(Sint32 X, Sint32 Y);
 
 	void SetWindowFocus(const bool bInNewFocus);
+	void SetWindowForcedFocus(const bool bInNewFocus);
 	void SetWindowIsMouseInside(const bool bInIsWindowMouseInside);
 
 	NO_DISCARD SDL_Window* GetSdlWindow() const { return Window; }

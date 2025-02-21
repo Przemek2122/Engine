@@ -98,21 +98,15 @@ std::string FAssetsManager::GetConfigPathRelative() const
 
 std::string FAssetsManager::GetMapsPathRelative() const
 {
-	const char Slash = FFileSystem::GetPlatformSlash();
-
-	return GetAssetsPathRelative() + Slash + MapsDirName;
+	return GetAssetsPathRelative() + MapsDirName;
 }
 
 std::string FAssetsManager::GetFontsPathRelative() const
 {
-	const char Slash = FFileSystem::GetPlatformSlash();
-
-	return GetAssetsPathRelative() + Slash + FontsDirName;
+	return GetAssetsPathRelative() + FontsDirName;
 }
 
 std::string FAssetsManager::ConvertRelativeToFullPath(const std::string& InPathRelative) const
-{
-	const char Slash = FFileSystem::GetPlatformSlash();
-	
-	return FGlobalDefines::GEngine->GetLaunchRelativePath() + Slash + InPathRelative;
+{\
+	return FGlobalDefines::GEngine->GetLaunchRelativePath() + InPathRelative;
 }

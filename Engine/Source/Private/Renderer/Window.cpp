@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
 #include "Renderer/Window.h"
@@ -11,8 +11,8 @@
 #endif
 #include "Renderer/Widgets/WidgetInputManager.h"
 
-FWindow::FWindow(const std::string& InName, FVector2D<int32> InLocation, const FVector2D<int> InSize, const Uint32 InWindowFlags)
-	: Window(SDL_CreateWindow(InName.c_str(), InSize.X, InSize.Y, InWindowFlags))
+FWindow::FWindow(const std::string& InName, FVector2D<int32> InLocation, const FVector2D<int> InSize, Uint32 InWindowFlags)
+	: Window(nullptr)
 	, Renderer(nullptr)
 	, WindowName(InName)
 	, Size(InSize)
@@ -28,6 +28,16 @@ FWindow::FWindow(const std::string& InName, FVector2D<int32> InLocation, const F
 	, WidgetInputManager(nullptr)
 	, MapManager(nullptr)
 {
+#if PLATFORM_ANDROID
+	// Special flags for android (due to single window)
+	BITMASK_SET(InWindowFlags, SDL_WINDOW_MAXIMIZED);
+	BITMASK_SET(InWindowFlags, SDL_WINDOW_BORDERLESS);
+	BITMASK_SET(InWindowFlags, SDL_WINDOW_ALWAYS_ON_TOP);
+
+#endif
+
+	Window = SDL_CreateWindow(InName.c_str(), InSize.X, InSize.Y, InWindowFlags);
+
 	if (Window != nullptr)
 	{
 		LOG_INFO("Window created. (" << WindowName << ")");
@@ -71,6 +81,10 @@ void FWindow::Init()
 	WindowInputManager = CreateWindowInputManager();
 	WidgetInputManager = CreateWidgetInputManager();
 	MapManager = CreateMapManager();
+
+#if PLATFORM_ANDROID
+	SetWindowForcedFocus(true);
+#endif
 }
 
 void FWindow::DeInit()
@@ -181,7 +195,7 @@ FVector2D<int> FWindow::GetWindowSize() const
 {
 	FVector2D<int> Size;
 
-	SDL_GetWindowSize(Window, &Size.X, &Size.Y);
+	SDL_GetWindowSizeInPixels(Window, &Size.X, &Size.Y);
 	
 	return Size;
 }
@@ -222,6 +236,17 @@ void FWindow::SetWindowFocus(const bool bInNewFocus)
 	bIsWindowFocused = bInNewFocus;
 
 	// @TODO Could be forced to focus but unsure if that's needed
+}
+
+void FWindow::SetWindowForcedFocus(const bool bInNewFocus)
+{
+	SetWindowFocus(bInNewFocus);
+
+	if (bInNewFocus)
+	{
+		SDL_SetWindowFocusable(Window, true);
+		SDL_RaiseWindow(Window);
+	}
 }
 
 void FWindow::SetWindowIsMouseInside(const bool bInIsWindowMouseInside)

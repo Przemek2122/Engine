@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #pragma once
 
@@ -49,6 +49,8 @@ public:
 	static char GetPlatformSlash();
 
 	static char GetPlatformEndLine();
+
+	static std::string GetBasePathCached();
 
 private:
 	static void GetFilesFromDirectoryRecursive(CArray<std::string>& Container, const std::filesystem::directory_entry& Entry, const bool bRecursive);
