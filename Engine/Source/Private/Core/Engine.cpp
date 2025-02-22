@@ -183,7 +183,7 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	TestManager->SpawnTestCaseByClass<FTestPerformance>();
 #endif
 
-	const std::string OpenSansFullPath = AssetsManager->ConvertRelativeToFullPath(std::string("Fonts") + FFileSystem::GetPlatformSlash() + "OpenSans" + FFileSystem::GetPlatformSlash() + "OpenSans-Regular.ttf");
+	const std::string OpenSansFullPath = std::string("Fonts") + FFileSystem::GetPlatformSlash() + "OpenSans" + FFileSystem::GetPlatformSlash() + "OpenSans-Regular.ttf";
 	AssetsManager->AddAsset<FFontAsset>("OpenSans", OpenSansFullPath);
 
 	UpdateFrameTime();
