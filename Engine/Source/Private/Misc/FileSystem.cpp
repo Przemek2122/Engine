@@ -2,6 +2,7 @@
 
 #include "CoreEngine.h"
 #include "Misc/FileSystem.h"
+#include "Assets/AssetsGlobals.h"
 
 namespace fs = std::filesystem;
 
@@ -29,7 +30,21 @@ bool FFileSystem::Directory::Delete(const std::string& InPath, const bool bRecur
 
 bool FFileSystem::File::Exists(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    const std::string AssetReadType = "r";
+
+    SDL_IOStream *IOStream = SDL_IOFromFile(InPath.c_str(), AssetReadType.c_str());
+    if (IOStream != nullptr)
+    {
+        SDL_CloseIO(IOStream);
+
+        return true;
+    }
+
+    return false;
+#else
     return (fs::exists(InPath));
+#endif
 }
 
 bool FFileSystem::File::Create(const std::string& InPath)
