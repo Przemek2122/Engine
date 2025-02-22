@@ -123,6 +123,14 @@ std::string FAssetsManager::GetFontsPathRelative() const
 }
 
 std::string FAssetsManager::ConvertRelativeToFullPath(const std::string& InPathRelative) const
-{\
-	return FGlobalDefines::GEngine->GetLaunchRelativePath() + InPathRelative;
+{
+	std::string OutPath = FGlobalDefines::GEngine->GetLaunchRelativePath();
+
+#if !PLATFORM_ANDROID
+	OutPath += AssetDirName + FFileSystem::GetPlatformSlash();
+#endif
+
+	OutPath += InPathRelative;
+
+	return std::move(OutPath);
 }
