@@ -84,6 +84,15 @@ char FAssetsManager::GetPlatformSlash() const
 	return FFileSystem::GetPlatformSlash();
 }
 
+bool FAssetsManager::ExistsFileOrDirectory(const std::string& InAssetPath)
+{
+#if !PLATFORM_ANDROID
+	return true;
+#else
+	return (FFileSystem::File::Exists(InAssetPath) || FFileSystem::Directory::Exists(InAssetPath));
+#endif
+}
+
 std::string FAssetsManager::GetAssetsPathRelative() const
 {
 	return AssetDirName;
@@ -91,9 +100,16 @@ std::string FAssetsManager::GetAssetsPathRelative() const
 
 std::string FAssetsManager::GetConfigPathRelative() const
 {
-	const char Slash = FFileSystem::GetPlatformSlash();
+	std::string ConfigPath;
 
-	return AssetDirName + Slash + ConfigDirName;
+#if PLATFORM_ANDROID
+	ConfigPath = ConfigDirName;
+#else
+	const char Slash = FFileSystem::GetPlatformSlash();
+	ConfigPath = AssetDirName + Slash + ConfigDirName;
+#endif
+
+	return std::move(ConfigPath);
 }
 
 std::string FAssetsManager::GetMapsPathRelative() const

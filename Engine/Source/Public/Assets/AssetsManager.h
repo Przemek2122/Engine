@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #pragma once
 
@@ -38,7 +38,7 @@ public:
 	template<class TAssetType>
 	std::shared_ptr<TAssetType> CreateAssetFromAbsolutePath(const std::string& InAssetName, const std::string& InAssetPath)
 	{
-		if (FFileSystem::File::Exists(InAssetPath) || FFileSystem::Directory::Exists(InAssetPath))
+		if (ExistsFileOrDirectory(InAssetPath))
 		{
 			std::shared_ptr<TAssetType> Asset = std::make_shared<TAssetType>(InAssetName, InAssetPath);
 
@@ -58,7 +58,7 @@ public:
 	{
 		const std::string FullFilePath = ConvertRelativeToFullPath(InAssetPath);
 
-		if (FFileSystem::File::Exists(FullFilePath) || FFileSystem::Directory::Exists(FullFilePath))
+		if (ExistsFileOrDirectory(FullFilePath))
 		{
 			std::shared_ptr<TAssetType> Asset = std::make_shared<TAssetType>(InAssetName, FullFilePath);
 
@@ -77,8 +77,8 @@ public:
 	TAssetType* AddAsset(const std::string& InAssetName, const std::string& InAssetPath)
 	{
 		const std::string FullFilePath = ConvertRelativeToFullPath(InAssetPath);
-		
-		if (FFileSystem::File::Exists(FullFilePath) || FFileSystem::Directory::Exists(FullFilePath))
+
+		if (ExistsFileOrDirectory(FullFilePath))
 		{
 			std::shared_ptr<TAssetType> Asset = CreateAssetFromRelativePath<TAssetType>(InAssetName, InAssetPath);
 
@@ -112,7 +112,7 @@ public:
 	template<class TAssetType>
 	void AddAssetExternal(std::shared_ptr<TAssetType> AssetPtr)
 	{
-		if (FFileSystem::File::Exists(AssetPtr.get()->GetAssetPath()))
+		if (ExistsFileOrDirectory(AssetPtr.get()->GetAssetPath()))
 		{
 			EAssetType AssetTypeKey = AssetPtr.get()->GetAssetType();
 
@@ -127,10 +127,10 @@ public:
 	}
 	
 	/** Delete asset by name. */
-	void RemoveAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE);
+	void RemoveAsset(const std::string& InAssetName, EAssetType OptionalAssetType = EAssetType::AT_NONE);
 	
 	/** @returns Asset created using AddAsset(...) */
-	NO_DISCARD std::shared_ptr<FAssetBase> GetAsset(const std::string& InAssetName, const EAssetType OptionalAssetType = EAssetType::AT_NONE);
+	NO_DISCARD std::shared_ptr<FAssetBase> GetAsset(const std::string& InAssetName, EAssetType OptionalAssetType = EAssetType::AT_NONE);
 
 	/** @returns Asset created using AddAsset(...) */
 	template<typename TAssetSubClass>
@@ -171,6 +171,8 @@ public:
 	std::string GetProjectLocation() const;
 
 	char GetPlatformSlash() const;
+
+	static bool ExistsFileOrDirectory(const std::string& InAssetPath);
 
 	/** @returns 'Assets' directory */
 	std::string GetAssetsPathRelative() const;
