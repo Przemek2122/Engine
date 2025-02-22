@@ -2,7 +2,6 @@
 
 #include "CoreEngine.h"
 #include "Assets/TypesForAssets/Texture.h"
-#include "SDL3_image/SDL_image.h"
 
 FTexture::FTexture(const std::string& InTexturePath, SDL_Renderer* Renderer)
 {
