@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
 #include "Renderer/Widgets/Samples/TextWidget.h"
@@ -16,7 +16,7 @@ FTextWidget::FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface
 	, RenderedText(DefaultText)
 	, TextSize(16)
 	, AssetsManager(FGlobalDefines::GEngine->GetAssetsManager())
-	, FontAsset(AssetsManager->GetAsset<FFontAsset>(DefaultFont))
+	, FontAsset(nullptr)
 	, TextRenderColor(255)
 	, TextBackgroundRenderColor({ 255, 0, 0})
 	, SDLRect(new SDL_FRect)
@@ -26,6 +26,8 @@ FTextWidget::FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface
 	, DesiredTextRenderMode(ETextRenderMode::Blended)
 	, bAutoCutTextToFitInsideOfParent(false)
 {
+    FontAsset = AssetsManager->GetAsset<FFontAsset>(DefaultFont);
+
 #if _DEBUG
 	// Unable to find font asset.
 	ENSURE_VALID(FontAsset != nullptr);
