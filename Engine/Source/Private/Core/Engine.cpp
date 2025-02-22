@@ -9,6 +9,8 @@
 #include "Test/Samples/TestDelegate.h"
 #include "Test/Samples/TestTypes.h"
 #include "Test/Samples/TestClassType.h"
+#include "Test/Samples/TestPerformance.h"
+#include "Test/Samples/TestTimers.h"
 #endif
 
 #if ENGINE_NETWORK_LIB_ENABLED
@@ -19,9 +21,6 @@
 #include "Engine/EngineRenderingManager.h"
 #include "Engine/EngineTickingManager.h"
 #include "Includes/EngineLaunchParameterCollection.h"
-#include "Misc/StringHelpers.h"
-#include "Test/Samples/TestPerformance.h"
-#include "Test/Samples/TestTimers.h"
 #include "Threads/RenderThread.h"
 #include "Threads/ThreadsManager.h"
 #include "Threads/ThreadData.h"
@@ -136,7 +135,10 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 
     // Get launch location
 #if PLATFORM_ANDROID
-	LaunchRelativePath = SDL_GetAndroidInternalStoragePath();
+	//LaunchRelativePath = std::string(SDL_GetAndroidInternalStoragePath()) + FFileSystem::GetPlatformSlash();
+
+	// In Android, we use SDL to check paths, we do not specify them themselves
+	LaunchRelativePath = std::string("");
 #else
 	LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\')) + FFileSystem::GetPlatformSlash();
 #endif
@@ -181,7 +183,8 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	TestManager->SpawnTestCaseByClass<FTestPerformance>();
 #endif
 
-	AssetsManager->AddAsset<FFontAsset>("OpenSans", R"(Assets\Fonts\OpenSans\OpenSans-Regular.ttf)");
+	const std::string OpenSansFullPath = AssetsManager->ConvertRelativeToFullPath(std::string("Fonts") + FFileSystem::GetPlatformSlash() + "OpenSans" + FFileSystem::GetPlatformSlash() + "OpenSans-Regular.ttf");
+	AssetsManager->AddAsset<FFontAsset>("OpenSans", OpenSansFullPath);
 
 	UpdateFrameTime();
 
