@@ -7,6 +7,7 @@
 
 #include "Assets/Assets/AssetBase.h"
 #include "Assets/AssetsManager.h"
+#include "Assets/AssetsGlobals.h"
 
 #include "Containers/ContainerBase.h"
 #include "Containers/Array.h"
