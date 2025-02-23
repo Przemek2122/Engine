@@ -19,6 +19,11 @@ struct ENGINE_API FLogMessage
 	std::string Text;
 };
 
+/**
+ * Global utilities class, with:
+ * - log (Info, Debug, Warn, Error)
+ * - time conversions
+ */
 class ENGINE_API FUtil
 {
 public:
