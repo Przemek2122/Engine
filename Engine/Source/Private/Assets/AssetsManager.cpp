@@ -102,12 +102,7 @@ std::string FAssetsManager::GetConfigPathRelative() const
 {
 	std::string ConfigPath;
 
-#if PLATFORM_ANDROID
 	ConfigPath = ConfigDirName;
-#else
-	const char Slash = FFileSystem::GetPlatformSlash();
-	ConfigPath = AssetDirName + Slash + ConfigDirName;
-#endif
 
 	return std::move(ConfigPath);
 }
