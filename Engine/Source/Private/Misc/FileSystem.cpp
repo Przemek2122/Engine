@@ -111,7 +111,8 @@ void FFileSystem::File::GetFileContentLineByLine(FDelegateSafe<void, const std::
     std::string CurrentLine;
 
 #if PLATFORM_ANDROID
-    SDL_IOStream *IOStream = SDL_IOFromFile(InPath.c_str(), FAssetsGlobals::GetAssetReadType(EAssetReadMethod::OpenForReading).c_str());
+    std::string OpenForReading = FAssetsGlobals::GetAssetReadType(EAssetReadMethod::OpenForReading);
+    SDL_IOStream *IOStream = SDL_IOFromFile(InPath.c_str(), OpenForReading.c_str());
     if (!IOStream)
     {
         while (ReadLine(IOStream, CurrentLine))
