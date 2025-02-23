@@ -317,15 +317,19 @@ bool FUtil::HasEmptyMessagesQueue()
 
 void FUtil::PrintToConsole(std::string& Message, const int Color)
 {
-#if defined(_WIN32) || defined(_WIN64)
+#if PLATFORM_WINDOWS
 	// Change color to red
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); // text color
 	SetConsoleTextAttribute(hConsole, Color);
 #endif
 
+#if PLATFORM_ANDROID
+    SDL_Log("%s", Message.c_str());
+#else
 	std::cout << Message << std::endl;
+#endif
 
-#if defined(_WIN32) || defined(_WIN64)
+#if PLATFORM_WINDOWS
 	// Change color back to white
 	SetConsoleTextAttribute(hConsole, 7);
 #endif
