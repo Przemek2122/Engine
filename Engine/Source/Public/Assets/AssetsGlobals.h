@@ -1,10 +1,12 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 /**
  * How should file be read?
  * https://wiki.libsdl.org/SDL3/SDL_IOFromFile
  */
-enum class ENGINE_API EAssetReadMethod : uint8
+enum class EAssetReadMethod : uint8
 {
 	// "r": Open a file for reading. The file must exist.
 	OpenForReading,
