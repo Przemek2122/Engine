@@ -1,4 +1,4 @@
-// Created by Przemys�aw Wiewi�ra 2020
+// Created by Przemys�aw Wiewi�ra 2020-2025
 
 #include "CoreEngine.h"
 #include "Misc/FileSystem.h"
@@ -74,11 +74,54 @@ void FFileSystem::File::Clear(const std::string& InPath)
     File.close();
 }
 
+bool ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
+{
+    CurrentLine = "";
+
+    while (true)
+    {
+        // @TODO: In ideal scenario, we would like to read bigger chunks of data.
+        char c;
+
+        // Read exactly 1 byte
+        size_t bytesRead = SDL_ReadIO(IOStream, &c, 1);
+
+        if (bytesRead == 0)
+        {
+            // We have some data but no newline, so treat it as the final line
+            break;
+        }
+
+        if (c == '\n') {
+            // Stop reading at newline
+            break;
+        }
+
+        // If needed, you can handle '\r' specially here (e.g., Windows "\r\n" line endings).
+        CurrentLine.push_back(c);
+    }
+
+
+    return !CurrentLine.empty();
+}
+
 void FFileSystem::File::GetFileContentLineByLine(FDelegateSafe<void, const std::string&>& DelegateCalledForEachLine, const std::string& InPath)
 {
     // Create a text string, which is used to output the text file
     std::string CurrentLine;
 
+#if PLATFORM_ANDROID
+    SDL_IOStream *IOStream = SDL_IOFromFile(InPath.c_str(), FAssetsGlobals::GetAssetReadType(EAssetReadMethod::OpenForReading).c_str());
+    if (!IOStream)
+    {
+        while (ReadLine(IOStream, CurrentLine))
+        {
+            DelegateCalledForEachLine.Execute(CurrentLine);
+        }
+
+        SDL_CloseIO(IOStream);
+    }
+#else
     // Read from the text file
     std::ifstream MyReadFile(InPath);
 
@@ -90,6 +133,7 @@ void FFileSystem::File::GetFileContentLineByLine(FDelegateSafe<void, const std::
 
     // Close the file
     MyReadFile.close();
+#endif
 }
 
 void FFileSystem::File::AddFileContentLine(const std::string& Line, const std::string& InPath)
