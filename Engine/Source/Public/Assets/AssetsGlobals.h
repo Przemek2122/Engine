@@ -4,7 +4,7 @@
  * How should file be read?
  * https://wiki.libsdl.org/SDL3/SDL_IOFromFile
  */
-enum class ENGINE_API EAssetReadType : uint8
+enum class ENGINE_API EAssetReadMethod : uint8
 {
 	// "r": Open a file for reading. The file must exist.
 	OpenForReading,
@@ -26,6 +26,6 @@ enum class ENGINE_API EAssetReadType : uint8
 class ENGINE_API FAssetsGlobals
 {
 public:
-	static std::string GetAssetReadType(EAssetReadType AssetReadType, bool bUseFileAsBinary = false);
+	static std::string GetAssetReadType(EAssetReadMethod AssetReadType, bool bUseFileAsBinary = false);
 
 };

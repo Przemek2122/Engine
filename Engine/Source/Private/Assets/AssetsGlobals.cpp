@@ -1,45 +1,45 @@
-// See https://github.com/Przemek2122/GameEngine
+// Created by Przemys�aw Wiewi�ra 2020-2025
 
 #include "CoreEngine.h"
 #include "Assets/AssetsGlobals.h"
 
-std::string FAssetsGlobals::GetAssetReadType(const EAssetReadType AssetReadType, const bool bUseFileAsBinary)
+std::string FAssetsGlobals::GetAssetReadType(const EAssetReadMethod AssetReadType, const bool bUseFileAsBinary)
 {
 	std::string OutValue;
 
 	switch (AssetReadType)
 	{
-		case EAssetReadType::OpenForReading:
+		case EAssetReadMethod::OpenForReading:
 		{
 			OutValue = "r";
 
 			break;
 		}
-		case EAssetReadType::CreateEmptyFile:
+		case EAssetReadMethod::CreateEmptyFile:
 		{
 			OutValue = "w";
 
 			break;
 		}
-		case EAssetReadType::AppendToFile:
+		case EAssetReadMethod::AppendToFile:
 		{
 			OutValue = "a";
 
 			break;
 		}
-		case EAssetReadType::OpenFile:
+		case EAssetReadMethod::OpenFile:
 		{
 			OutValue = "r+";
 
 			break;
 		}
-		case EAssetReadType::CreateEmptyFileForReadingAndWriting:
+		case EAssetReadMethod::CreateEmptyFileForReadingAndWriting:
 		{
 			OutValue = "w+";
 
 			break;
 		}
-		case EAssetReadType::OpenFileForReadingAndAppending:
+		case EAssetReadMethod::OpenFileForReadingAndAppending:
 		{
 			OutValue = "a+";
 
