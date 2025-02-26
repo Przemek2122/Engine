@@ -75,12 +75,16 @@ public:
 	void OnWindowMinimized(Uint32 WindowId);
 	void OnWindowMaximized(Uint32 WindowId);
 
+	void OnWindowCloseRequested(Uint32 WindowId);
+
 	void SetWindowFocus(Uint32 WindowId, const bool bIsFocused);
 	void SetWindowIsMouseInside(Uint32 WindowId, const bool bIsInside);
 			
 protected:
 	virtual void OnWindowMadeVisible(FWindow* Window);
-	virtual void OnWindowMadeInVisible(FWindow* Window);
+	virtual void OnWindowMadeInvisible(FWindow* Window);
+
+	virtual void OnWindowClose(FWindow* Window);
 
 	virtual void OnWindowSizeChanged(FWindow* Window, Sint32 X, Sint32 Y);
 	virtual void OnWindowLocationChanged(FWindow* Window, Sint32 X, Sint32 Y);

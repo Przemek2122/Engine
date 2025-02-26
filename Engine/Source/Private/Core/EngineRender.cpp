@@ -137,7 +137,7 @@ void FEngineRender::OnWindowHidden(const Uint32 WindowId)
 	FWindow* Window = GetWindowById(WindowId);
 	if (Window != nullptr)
 	{
-		OnWindowMadeInVisible(Window);
+		OnWindowMadeInvisible(Window);
 	}
 }
 
@@ -174,7 +174,7 @@ void FEngineRender::OnWindowMinimized(const Uint32 WindowId)
 	FWindow* Window = GetWindowById(WindowId);
 	if (Window != nullptr)
 	{
-		OnWindowMadeVisible(Window);
+		OnWindowMadeInvisible(Window);
 	}
 }
 
@@ -183,7 +183,16 @@ void FEngineRender::OnWindowMaximized(const Uint32 WindowId)
 	FWindow* Window = GetWindowById(WindowId);
 	if (Window != nullptr)
 	{
-		OnWindowMadeInVisible(Window);
+		OnWindowMadeVisible(Window);
+	}
+}
+
+void FEngineRender::OnWindowCloseRequested(Uint32 WindowId)
+{
+	FWindow* Window = GetWindowById(WindowId);
+	if (Window != nullptr)
+	{
+		(Window);
 	}
 }
 
@@ -210,9 +219,14 @@ void FEngineRender::OnWindowMadeVisible(FWindow* Window)
 	Window->OnWindowMadeVisible();
 }
 
-void FEngineRender::OnWindowMadeInVisible(FWindow* Window)
+void FEngineRender::OnWindowMadeInvisible(FWindow* Window)
 {
 	Window->OnWindowMadeInvisible();
+}
+
+void FEngineRender::OnWindowClose(FWindow* Window)
+{
+	Window->OnWindowCloseRequested();
 }
 
 void FEngineRender::OnWindowSizeChanged(FWindow* Window, const Sint32 X, const Sint32 Y)

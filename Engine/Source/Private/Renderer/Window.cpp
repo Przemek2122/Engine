@@ -30,10 +30,7 @@ FWindow::FWindow(const std::string& InName, FVector2D<int32> InLocation, const F
 {
 #if PLATFORM_ANDROID
 	// Special flags for android (due to single window)
-	BITMASK_SET(InWindowFlags, SDL_WINDOW_MAXIMIZED);
-	BITMASK_SET(InWindowFlags, SDL_WINDOW_BORDERLESS);
 	BITMASK_SET(InWindowFlags, SDL_WINDOW_ALWAYS_ON_TOP);
-
 #endif
 
 	Window = SDL_CreateWindow(InName.c_str(), InSize.X, InSize.Y, InWindowFlags);
@@ -224,6 +221,10 @@ void FWindow::OnWindowMadeVisible()
 void FWindow::OnWindowMadeInvisible()
 {
 	bIsWindowVisible = false;
+}
+
+void FWindow::OnWindowCloseRequested()
+{
 }
 
 void FWindow::OnWindowSizeChanged(const Sint32 X, const Sint32 Y)

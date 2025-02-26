@@ -17,7 +17,7 @@ class FWidget;
 class FWidgetDebugger;
 #endif
 
-#define WINDOW_DEFAULT_FLAGS (SDL_WINDOW_RESIZABLE)
+#define WINDOW_DEFAULT_FLAGS (SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY)
 
 /**
  * Window class. Has SDL_Window and FRender.
@@ -76,6 +76,8 @@ public:
 
 	virtual void OnWindowMadeVisible();
 	virtual void OnWindowMadeInvisible();
+
+	virtual void OnWindowCloseRequested();
 
 	virtual void OnWindowSizeChanged(Sint32 X, Sint32 Y);
 
