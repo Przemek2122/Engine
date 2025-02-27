@@ -57,9 +57,6 @@ FEngine::FEngine()
 FEngine::~FEngine()
 {
 	LOG_INFO("GEngine finish (is being destroyed now).");
-
-	TTF_Quit();
-	SDL_Quit();
 }
 
 void FEngine::EngineInit(int Argc, char* Argv[])
@@ -321,6 +318,9 @@ void FEngine::Clean()
 #if ENGINE_TESTS_ALLOW_ANY
 	delete TestManager;
 #endif
+
+	//TTF_Quit();
+	SDL_Quit();
 }
 
 bool FEngine::IsEngineInitialized() const
