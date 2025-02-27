@@ -52,7 +52,7 @@ std::string FStringHelpers::ReplaceCharsInString(const std::string& BaseString, 
 
     for (const char& FromChar : ReplaceFrom)
     {
-        Out = ReplaceCharInString(BaseString, FromChar, ReplaceTo);
+        Out = ReplaceCharInString(Out, FromChar, ReplaceTo);
     }
 
     return Out;
@@ -64,7 +64,10 @@ std::string FStringHelpers::RemoveCharInString(const std::string& BaseString, co
 
     for (const char& Char : BaseString)
     {
-        OutputString += Char;
+        if (Char != RemovedChar)
+        {
+            OutputString += Char;
+        }
     }
 
     return OutputString;
