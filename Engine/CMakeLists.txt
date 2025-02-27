@@ -24,6 +24,23 @@ set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (APPLE OR EMSCRIPTEN)
+	# Disable shared builds on platforms where it does not make sense to use them
+    set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+endif()
+
+if(MSVC)
+    if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
+        # parallelize each target, unless Ninja is the generator
+		add_definitions(/MP)
+    endif()
+endif()
+
+# on Web targets, we need CMake to generate a HTML webpage. 
+if(EMSCRIPTEN)
+	set(CMAKE_EXECUTABLE_SUFFIX ".html" CACHE INTERNAL "")
+endif()
+
 # Collect all files recursively and set public accesss
 file(GLOB_RECURSE ENGINE_SOURCE_FILES_PRIVATE_INTERNAL "${ENGINE_SOURCE_PRIVATE_DIR}/*.cpp")
 set_property(GLOBAL PROPERTY ENGINE_SOURCE_FILES_PRIVATE ${ENGINE_SOURCE_FILES_PRIVATE_INTERNAL})
@@ -220,9 +237,9 @@ message(STATUS "Adding SDL_ttf...")
     
 if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
-        option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
-        set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
-		set(SDLTTF_SHARED ON CACHE BOOL "Build SDL3_ttf as a shared library" FORCE)
+        #option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
+        #set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
+		#set(SDLTTF_SHARED ON CACHE BOOL "Build SDL3_ttf as a shared library" FORCE)
 
         set(SDL_TTF_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
         set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
@@ -250,9 +267,9 @@ message(STATUS "Adding SDL_mixer...")
     
 if(ENGINE_VENDORED)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
-        option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
-        set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
-		set(SDLMIXER_SHARED ON CACHE BOOL "Build SDL3_mixer as a shared library" FORCE)
+        #option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
+        #set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
+		#set(SDLMIXER_SHARED ON CACHE BOOL "Build SDL3_mixer as a shared library" FORCE)
 
         set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
         set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
@@ -288,10 +305,10 @@ if(ENGINE_VENDORED)
         set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
         set(SDLIMAGE_TESTS_INSTALL OFF CACHE BOOL "" FORCE)
         set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
-		set(SDLIMAGE_SHARED ON CACHE BOOL "Build SDL3_image as a shared library" FORCE)
+		#set(SDLIMAGE_SHARED ON CACHE BOOL "Build SDL3_image as a shared library" FORCE)
 
-        option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
-        set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
+        #option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
+        #set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
 
         set(SDL_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
         set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
@@ -370,20 +387,26 @@ else()
     find_package(uvw REQUIRED)
 endif()
 
-# Link SDL3 to target
-target_link_libraries(Engine PUBLIC SDL3::SDL3)
+if(ANDROID)
+	# Link shared on android
+	target_link_libraries(Engine PUBLIC
+		SDL3_ttf-shared
+		SDL3_mixer-shared
+		SDL3_image-shared
+	)
+else()
+	# Link
+	target_link_libraries(Engine PUBLIC
+		SDL3_ttf
+		SDL3_mixer
+		SDL3_image
+	)
+endif()
 
-# Link SDL_ttf to target
-target_link_libraries(Engine PUBLIC SDL3_ttf-shared)
+# Link
+target_link_libraries(Engine PUBLIC
+	uv
+	uvw
+	SDL3::SDL3
+)
 
-# Link SDL_mixer to target
-target_link_libraries(Engine PUBLIC SDL3_mixer-shared)
-
-# Link SDL3_image to target
-target_link_libraries(Engine PUBLIC SDL3_image-shared)
-
-# Link uv to target
-target_link_libraries(Engine PUBLIC uv)
-
-# Link uvw to target
-target_link_libraries(Engine PUBLIC uvw)
