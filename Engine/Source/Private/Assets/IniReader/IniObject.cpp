@@ -77,11 +77,11 @@ void FIniObject::LoadIni()
 			{
 				if (IniKey.empty())
 				{
-					IniKey = Text.Text;
+					IniKey = FStringHelpers::RemoveCharsInString(Text.Text, FFileSystem::GetNewLineChars());
 				}
 				else if (Text.Text != "=" && IniValue.empty())
 				{
-					IniValue = Text.Text;
+					IniValue = FStringHelpers::RemoveCharsInString(Text.Text, FFileSystem::GetNewLineChars());
 				}
 			}
 		}

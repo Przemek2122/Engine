@@ -86,11 +86,7 @@ char FAssetsManager::GetPlatformSlash() const
 
 bool FAssetsManager::ExistsFileOrDirectory(const std::string& InAssetPath)
 {
-#if !PLATFORM_ANDROID
-	return true;
-#else
 	return (FFileSystem::File::Exists(InAssetPath) || FFileSystem::Directory::Exists(InAssetPath));
-#endif
 }
 
 std::string FAssetsManager::GetAssetsPathRelative() const

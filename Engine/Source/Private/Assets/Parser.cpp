@@ -46,7 +46,7 @@ FParser::FParser(const CArray<char>& InSeparatorCharArray, const CArray<char>& I
 		LOG_INFO("FParser has no ignored characters.");
 	}
 
-	NewLineChar = FFileSystem::GetPlatformEndLine();
+	NewLineChar = FFileSystem::GetNewLineChar();
 }
 
 CArray<std::string> FParser::SimpleParseLineIntoStrings(const std::string& Line)

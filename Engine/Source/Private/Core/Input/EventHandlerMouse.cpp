@@ -64,7 +64,7 @@ void FMouseDelegates::Init(FEventHandler* EventHandler)
 
 void FMouseDelegates::AddInput(FEventHandler* EventHandler, FIniObject* InIniObject, const std::string& RawInputName)
 {
-#if _DEBUG
+#if DEBUG
 	if (EventHandler != nullptr)
 	{
 #endif
@@ -81,7 +81,7 @@ void FMouseDelegates::AddInput(FEventHandler* EventHandler, FIniObject* InIniObj
 			}
 		}
 
-#if _DEBUG
+#if DEBUG
 	}
 	else
 	{

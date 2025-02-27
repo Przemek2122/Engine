@@ -13,5 +13,9 @@ public:
 	static bool ToBoolValue(const std::string& String);
 
 	static std::string ReplaceCharInString(const std::string& BaseString, const char ReplaceFrom, const char ReplaceTo);
+	static std::string ReplaceCharsInString(const std::string& BaseString, const CArray<char>& ReplaceFrom, const char ReplaceTo);
+
+	static std::string RemoveCharInString(const std::string& BaseString, const char RemovedChar);
+	static std::string RemoveCharsInString(const std::string& BaseString, const CArray<char>& ReplaceFrom);
 
 };

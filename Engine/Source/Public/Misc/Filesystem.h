@@ -36,6 +36,8 @@ public:
 		static void AddFileContentLines(const CArray<std::string>& Lines, const std::string& InPath);
 	};
 
+	static bool ReadLine(SDL_IOStream* IOStream, std::string& CurrentLine);
+
 	/** Determine if file is directory */
 	static bool IsDirectory(const std::string& InPath);
 
@@ -48,7 +50,11 @@ public:
 	/** @returns slash for current filesystem */
 	static char GetPlatformSlash();
 
-	static char GetPlatformEndLine();
+	/** @returns newline specific to platform */
+	static char GetNewLineChar();
+
+	/** @returns newline char array */
+	static CArray<char> GetNewLineChars();
 
 	static std::string GetBasePathCached();
 

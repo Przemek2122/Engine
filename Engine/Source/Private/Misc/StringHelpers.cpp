@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2024
+// Created by Przemysï¿½aw Wiewiï¿½ra 2024
 
 #include "CoreEngine.h"
 #include "Misc/StringHelpers.h"
@@ -44,4 +44,40 @@ std::string FStringHelpers::ReplaceCharInString(const std::string& BaseString, c
     }
 
     return OutputString;
+}
+
+std::string FStringHelpers::ReplaceCharsInString(const std::string& BaseString, const CArray<char>& ReplaceFrom, const char ReplaceTo)
+{
+    std::string Out = BaseString;
+
+    for (const char& FromChar : ReplaceFrom)
+    {
+        Out = ReplaceCharInString(BaseString, FromChar, ReplaceTo);
+    }
+
+    return Out;
+}
+
+std::string FStringHelpers::RemoveCharInString(const std::string& BaseString, const char RemovedChar)
+{
+    std::string OutputString;
+
+    for (const char& Char : BaseString)
+    {
+        OutputString += Char;
+    }
+
+    return OutputString;
+}
+
+std::string FStringHelpers::RemoveCharsInString(const std::string& BaseString, const CArray<char>& ReplaceFrom)
+{
+    std::string Out = BaseString;
+
+    for (const char& FromChar : ReplaceFrom)
+    {
+        Out = RemoveCharInString(BaseString, FromChar);
+    }
+
+    return Out;
 }

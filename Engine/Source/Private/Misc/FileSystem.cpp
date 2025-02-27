@@ -74,7 +74,7 @@ void FFileSystem::File::Clear(const std::string& InPath)
     File.close();
 }
 
-bool ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
+bool FFileSystem::ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
 {
     CurrentLine = "";
 
@@ -92,7 +92,7 @@ bool ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
             break;
         }
 
-        if (c == '\n') {
+        if (c == GetNewLineChar()) {
             // Stop reading at newline
             break;
         }
@@ -113,7 +113,7 @@ void FFileSystem::File::GetFileContentLineByLine(FDelegateSafe<void, const std::
 #if PLATFORM_ANDROID
     std::string OpenForReading = FAssetsGlobals::GetAssetReadType(EAssetReadMethod::OpenForReading);
     SDL_IOStream *IOStream = SDL_IOFromFile(InPath.c_str(), OpenForReading.c_str());
-    if (!IOStream)
+    if (IOStream != nullptr)
     {
         while (ReadLine(IOStream, CurrentLine))
         {
@@ -212,12 +212,20 @@ char FFileSystem::GetPlatformSlash()
 	return *PlatformSlash;
 }
 
-char FFileSystem::GetPlatformEndLine()
+char FFileSystem::GetNewLineChar()
 {
-	// This should be refactored to use the real platform end line not just windows hardcoded
-	static char* PlatformEndLine = TEXT_CHAR("\n");
+#if PLATFORM_ANDROID
+    return '\r';
+#else
+    return '\n';
+#endif
+}
 
-	return *PlatformEndLine;
+CArray<char> FFileSystem::GetNewLineChars()
+{
+    static CArray<char> NewlineChars = { '\r', '\n' };
+
+    return NewlineChars;
 }
 
 std::string FFileSystem::GetBasePathCached()

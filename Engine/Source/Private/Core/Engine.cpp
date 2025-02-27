@@ -130,13 +130,11 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 		ForceExit(EEngineErrorCode::Mixer_OpenAudioFailed);
 	}
 
-    // Get launch location
 #if PLATFORM_ANDROID
-	//LaunchRelativePath = std::string(SDL_GetAndroidInternalStoragePath()) + FFileSystem::GetPlatformSlash();
-
 	// In Android, we use SDL to check paths, we do not specify them themselves
 	LaunchRelativePath = std::string("");
 #else
+	// Get launch location
 	LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\')) + FFileSystem::GetPlatformSlash();
 #endif
 
@@ -319,7 +317,6 @@ void FEngine::Clean()
 	delete TestManager;
 #endif
 
-	//TTF_Quit();
 	SDL_Quit();
 }
 
