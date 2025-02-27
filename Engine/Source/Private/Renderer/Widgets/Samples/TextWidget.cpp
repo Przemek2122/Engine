@@ -238,10 +238,6 @@ void FTextWidget::RedrawText()
 
 			CurrentTextRenderMode = DesiredTextRenderMode;
 		}
-		else
-		{
-			LOG_ERROR("Font is NULL");
-		}
 
 		if (SdlSurface != nullptr)
 		{
@@ -277,10 +273,6 @@ void FTextWidget::RedrawText()
 			SDL_GetTextureSize(TextTexture, &WidgetSize.X, &WidgetSize.Y);
 
 			AutoAdjustSize();
-		}
-		else
-		{
-			LOG_ERROR("SdlSurface is NULL");
 		}
 	}
 	else

@@ -57,7 +57,7 @@ void FWidgetDebugger::RefreshDisplayedWidgets()
 
 		FVerticalBoxWidget* VerticalBox = DebuggerWindowWidgetManager->CreateWidget<FVerticalBoxWidget>();
 		VerticalBox->SetVerticalBoxAlignMethod(EVerticalBoxAlignMethod::AlignToLeft);
-		VerticalBox->SetWidgetSizePercent({ 1, 1 });
+		VerticalBox->SetWidgetSizePercent({ 1, 1 }, EWidgetSizeType::ParentPercentage);
 
 		CArray<FWidget*> Widgets = WindowWidgetManager->GetManagedWidgets();
 

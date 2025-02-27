@@ -36,10 +36,13 @@ public:
 	NO_DISCARD virtual const FVector2D<int32>& GetWidgetSize() const;
 
 	/** Set size of this widget in pixels. */
-	virtual void SetWidgetSize(const FVector2D<int32> InWidgetSize, const bool bWasSentFromRebuild = false);
+	virtual void SetWidgetSize(const FVector2D<int32> InSizeInPixels, const bool bWasSentFromRebuild = false);
 
-	/** Set size of this widget in percentage of parent size (0.0 to 1.0) where 1.0 means 100% size. */
-	virtual void SetWidgetSizePercent(const FVector2D<float> InScreenPercentage);
+	/**
+	 * Set size of this widget in percentage of parent widget
+	 * @param InSizePercentage size (0.0 to 1.0) where 1.0 means 100% size.
+	 */
+	virtual void SetWidgetSizePercent(const FVector2D<float> InSizePercentage, const EWidgetSizeType InWidgetSizeType);
 
 	virtual void UpdateWidget();
 
@@ -63,6 +66,8 @@ public:
 	const FWidgetMargin& GetWidgetMargin() const { return WidgetMargin; }
 
 	NO_DISCARD virtual std::string GetName() const;
+
+	EWidgetSizeType GetWidgetSizeType() const { return WidgetSizeType; }
 
 	FDelegateSafe<void> OnLocationChanged;
 	FDelegateSafe<void> OnSizeChanged;
@@ -96,7 +101,7 @@ private:
 	FVector2D<int32> WidgetSizeInPixelsInterface;
 
 	/** Size of this widget in screen percentage */
-	FVector2D<float> WidgetSizeInScreenPercentInterface;
+	FVector2D<float> WidgetSizePercentInterface;
 
 	/** Default anchor when this widget is created.\n @See Init() */
 	EAnchor DefaultAnchor;

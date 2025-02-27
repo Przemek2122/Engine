@@ -102,7 +102,7 @@ void FButtonWidget::NativeMouseExitWidget()
 void FButtonWidget::UseDefaultSize()
 {
 	// Default size of button
-	SetWidgetSizePercent( { 0.3, 0.02 } );
+	SetWidgetSizePercent( { 1.0, 0.2f }, EWidgetSizeType::ParentPercentage );
 }
 
 void FButtonWidget::SetScaleHorizontally(const bool bInScaleHorizontally)

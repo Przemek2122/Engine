@@ -39,6 +39,7 @@ public:
 	void NativeMouseExitWidget() override;
 	/** End FInteractionBaseWidget */
 
+	/** Use whole width and 20% of height. */
 	void UseDefaultSize();
 	void SetScaleHorizontally(const bool bInScaleHorizontally);
 

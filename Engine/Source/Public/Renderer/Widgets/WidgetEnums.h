@@ -49,9 +49,10 @@ enum class EWidgetOrientation : Uint8
 /** Widget size type */
 enum class EWidgetSizeType : Uint8
 {
-	Pixels = 0,				// Size in pixels
-	ScreenPercentage,		// Size in screen percentage
-	ParentPercentage,		// Size in parent percentage
+	/** Size in pixels */
+	Pixels = 0,
+	/** Size in parent percentage */
+	ParentPercentage,
 };
 
 inline const char* WidgetVisibilityToString(const EWidgetVisibility InWidgetVisibility)

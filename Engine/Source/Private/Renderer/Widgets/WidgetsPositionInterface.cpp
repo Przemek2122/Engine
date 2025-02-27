@@ -121,10 +121,10 @@ const FVector2D<int32>& IWidgetPositionInterface::GetWidgetSize() const
 	return WidgetSizeInPixelsInterface;
 }
 
-void IWidgetPositionInterface::SetWidgetSize(const FVector2D<int32> InWidgetSize, const bool bWasSentFromRebuild)
+void IWidgetPositionInterface::SetWidgetSize(const FVector2D<int32> InSizeInPixels, const bool bWasSentFromRebuild)
 {
 	WidgetSizeType = EWidgetSizeType::Pixels;
-	WidgetSizeInPixelsInterface = InWidgetSize;
+	WidgetSizeInPixelsInterface = InSizeInPixels;
 
 	bShouldChangeSizeToFitChildren = false;
 
@@ -142,11 +142,18 @@ void IWidgetPositionInterface::SetWidgetSize(const FVector2D<int32> InWidgetSize
 	}
 }
 
-void IWidgetPositionInterface::SetWidgetSizePercent(const FVector2D<float> InScreenPercentage)
+void IWidgetPositionInterface::SetWidgetSizePercent(const FVector2D<float> InSizePercentage, const EWidgetSizeType InWidgetSizeType)
 {
-	WidgetSizeType = EWidgetSizeType::ParentPercentage;
+#if DEBUG
+	if ((InSizePercentage.X < 0.f || InSizePercentage.X > 1.f) || (InSizePercentage.Y < 0.f || InSizePercentage.Y > 1.f))
+	{
+		LOG_WARN("Found in correct size, percent should be betweeen 0.0 and 1.0");
+	}
+#endif
 
-	WidgetSizeInScreenPercentInterface = InScreenPercentage;
+	WidgetSizeType = InWidgetSizeType;
+
+	WidgetSizePercentInterface = InSizePercentage;
 
 	UpdateSizeInPercent(false);
 
@@ -398,55 +405,58 @@ void IWidgetPositionInterface::UpdateLocation()
 
 void IWidgetPositionInterface::UpdateSizeInPercent(const bool bWasSentFromRebuild)
 {
-	if (WidgetSizeType == EWidgetSizeType::ParentPercentage)
+	if (!bWasSentFromRebuild && WidgetSizeType == EWidgetSizeType::ParentPercentage)
 	{
 		const FVector2D<int> ParentSize = GetParent()->GetWidgetManagerSize();
 
-		WidgetSizeInPixelsInterface.X = FMath::RoundToInt(static_cast<float>(ParentSize.X) * WidgetSizeInScreenPercentInterface.X);
-		WidgetSizeInPixelsInterface.Y = FMath::RoundToInt(static_cast<float>(ParentSize.Y) * WidgetSizeInScreenPercentInterface.Y);
+		WidgetSizeInPixelsInterface.X = FMath::RoundToInt(static_cast<float>(ParentSize.X) * WidgetSizePercentInterface.X);
+		WidgetSizeInPixelsInterface.Y = FMath::RoundToInt(static_cast<float>(ParentSize.Y) * WidgetSizePercentInterface.Y);
 	}
 }
 
 void IWidgetPositionInterface::UpdateWidgetSizePixels(const bool bWasSentFromRebuild)
 {
-	switch (ClippingMethodInterface)
+	if (!bWasSentFromRebuild)
 	{
-		case EClipping::None:
+		switch (ClippingMethodInterface)
 		{
-			break;
-		}
-
-		case EClipping::Resize:
-		{
-			const FVector2D<int> ParentSize = GetWidgetManagerSize();
-
-			if (ParentSize.X < WidgetSizeInPixelsInterface.X)
+			case EClipping::None:
 			{
-				WidgetSizeInPixelsInterface.X = ParentSize.X;
+				break;
 			}
 
-			if (ParentSize.Y < WidgetSizeInPixelsInterface.Y)
+			case EClipping::Resize:
 			{
-				WidgetSizeInPixelsInterface.Y = ParentSize.Y;
+				const FVector2D<int> ParentSize = GetWidgetManagerSize();
+
+				if (ParentSize.X < WidgetSizeInPixelsInterface.X)
+				{
+					WidgetSizeInPixelsInterface.X = ParentSize.X;
+				}
+
+				if (ParentSize.Y < WidgetSizeInPixelsInterface.Y)
+				{
+					WidgetSizeInPixelsInterface.Y = ParentSize.Y;
+				}
+
+				break;
 			}
-
-			break;
-		}
-		case EClipping::Cut:
-		{
-			const FVector2D<int> ParentSize = GetWidgetManagerSize();
-
-			if (ParentSize.X < WidgetSizeInPixelsInterface.X)
+			case EClipping::Cut:
 			{
-				WidgetSizeInPixelsInterface.X = ParentSize.X;
-			}
+				const FVector2D<int> ParentSize = GetWidgetManagerSize();
 
-			if (ParentSize.Y < WidgetSizeInPixelsInterface.Y)
-			{
-				WidgetSizeInPixelsInterface.Y = ParentSize.Y;
-			}
+				if (ParentSize.X < WidgetSizeInPixelsInterface.X)
+				{
+					WidgetSizeInPixelsInterface.X = ParentSize.X;
+				}
 
-			break;
+				if (ParentSize.Y < WidgetSizeInPixelsInterface.Y)
+				{
+					WidgetSizeInPixelsInterface.Y = ParentSize.Y;
+				}
+
+				break;
+			}
 		}
 	}
 }
