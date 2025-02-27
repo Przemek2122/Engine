@@ -76,7 +76,7 @@ std::string FStringHelpers::RemoveCharsInString(const std::string& BaseString, c
 
     for (const char& FromChar : ReplaceFrom)
     {
-        Out = RemoveCharInString(BaseString, FromChar);
+        Out = RemoveCharInString(Out, FromChar);
     }
 
     return Out;
