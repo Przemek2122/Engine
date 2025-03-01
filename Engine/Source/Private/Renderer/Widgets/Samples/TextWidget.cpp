@@ -2,19 +2,33 @@
 
 #include "CoreEngine.h"
 #include "Renderer/Widgets/Samples/TextWidget.h"
-#include "SDL3/SDL.h"
-#include "SDL3_ttf/SDL_ttf.h"
 #include "Assets/TypesForAssets/Font.h"
 #include "Assets/Assets/FontAsset.h"
 
 static const char* DefaultText = "Default text"; 
 static const char* DefaultFont = "OpenSans";
 
+int32 FFontStatics::GetFontSizeFromPixels(const int32 SizeInPixels)
+{
+	static float FontMultiplier = 0.75f;
+
+	return static_cast<float>(SizeInPixels) * FontMultiplier;
+}
+
+int32 FFontStatics::GetPixelsFromFontSize(const int32 FontSize)
+{
+	static float FontMultiplier = 1.33f;
+
+	return static_cast<float>(FontSize) * FontMultiplier;
+}
+
 FTextWidget::FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface, const std::string& InWidgetName, const int32 InWidgetOrder)
 	: FWidget(InWidgetManagementInterface, InWidgetName, InWidgetOrder)
 	, DesiredText(DefaultText)
 	, RenderedText(DefaultText)
 	, TextSize(16)
+	, RenderedTextSize(0)
+	, TextWidgetSizeType(ETextWidgetSizeType::ResizeFontToFit)
 	, AssetsManager(FGlobalDefines::GEngine->GetAssetsManager())
 	, FontAsset(nullptr)
 	, TextRenderColor(255)
@@ -24,8 +38,9 @@ FTextWidget::FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface
 	, LastTextTextureSize({ 0, 0 })
 	, CurrentTextRenderMode(ETextRenderMode::None)
 	, DesiredTextRenderMode(ETextRenderMode::Blended)
-	, bAutoCutTextToFitInsideOfParent(false)
 {
+	SetClippingMethod(EClipping::None);
+
     FontAsset = AssetsManager->GetAsset<FFontAsset>(DefaultFont);
 
 #if _DEBUG
@@ -98,6 +113,11 @@ void FTextWidget::SetText(const std::string& InText)
 	OnTextChanged();
 }
 
+void FTextWidget::SetTextWidgetSizeType(const ETextWidgetSizeType InTextWidgetSizeType)
+{
+	TextWidgetSizeType = InTextWidgetSizeType;
+}
+
 std::string FTextWidget::GetDesiredText() const
 {
 	return DesiredText;
@@ -124,7 +144,31 @@ void FTextWidget::OnTextChanged()
 	RequestWidgetRebuild();
 }
 
-void FTextWidget::AutoAdjustSize(const bool bLimitToParentSize)
+void FTextWidget::AutoAdjustSize()
+{
+	switch (TextWidgetSizeType)
+	{
+		case ETextWidgetSizeType::None:
+		{
+			break;
+		}
+		case ETextWidgetSizeType::ClipWidgetSizeToText:
+		{
+			AutoAdjustSizeToText(GetClippingMethod() == EClipping::Cut);
+
+			break;
+		}
+		case ETextWidgetSizeType::ResizeFontToFit:
+		{
+			// Find font size
+			AutoAdjustFontToFit();
+
+			break;
+		}
+	}
+}
+
+void FTextWidget::AutoAdjustSizeToText(const bool bLimitToParentSize)
 {
 	FVector2D<int> NewWidgetSize;
 
@@ -136,6 +180,23 @@ void FTextWidget::AutoAdjustSize(const bool bLimitToParentSize)
 	CalculateDefaultSizeForRenderText(NewWidgetSize);
 	
 	SetWidgetSize(NewWidgetSize);
+}
+
+bool FTextWidget::AutoAdjustFontToFit()
+{
+	FVector2D<int32> ParentSize = GetParent()->GetWidgetManagerSize();
+	const int32 NewTextSize = FFontStatics::GetFontSizeFromPixels(ParentSize.Y);
+
+	bool bWasChanged = false;
+
+	if (NewTextSize != 0 && NewTextSize != TextSize)
+	{
+		TextSize = NewTextSize;
+
+		bWasChanged = true;
+	}
+
+	return bWasChanged;
 }
 
 void FTextWidget::AutoAdjustTextSize(const FVector2D<int>& InMaxSize)
@@ -165,11 +226,7 @@ int FTextWidget::CalculateDefaultSizeForRenderText(FVector2D<int>& InOutSize) co
 {
 	bool bIsRendering = false;
 
-	static TTF_Font* Font;
-	if (Font == nullptr)
-	{
-		Font = FontAsset->GetFont(TextSize)->GetFont();
-	}
+	TTF_Font* Font = FontAsset->GetFont(TextSize)->GetFont();
 	if (Font != nullptr)
 	{
 		bIsRendering = TTF_GetStringSize(Font, RenderedText.c_str(), 0, &InOutSize.X, &InOutSize.Y);
@@ -199,20 +256,19 @@ ETextRenderMode FTextWidget::GetTextRenderMode() const
 void FTextWidget::RedrawText()
 {
 	const bool bIsInputDataCorrect = (FontAsset != nullptr && !DesiredText.empty());
-	const bool bIsAnyDataChanged = (DesiredText != RenderedText || CurrentTextRenderMode != DesiredTextRenderMode);
+	const bool bIsAnyDataChanged = (DesiredText != RenderedText || CurrentTextRenderMode != DesiredTextRenderMode || RenderedTextSize != TextSize);
 	if (bIsInputDataCorrect && bIsAnyDataChanged)
 	{
 		RenderedText = DesiredText;
 
-		if (bAutoCutTextToFitInsideOfParent)
-		{
-			AutoAdjustSize(GetClippingMethod() == EClipping::Cut);
-		}
+		AutoAdjustSize();
 
 		SDL_Surface* SdlSurface = nullptr;
 		TTF_Font* Font = FontAsset->GetFont(TextSize)->GetFont();
 		if (Font != nullptr)
 		{
+			RenderedTextSize = TextSize;
+
 			switch (DesiredTextRenderMode)
 			{
 				case ETextRenderMode::Solid:
@@ -243,7 +299,7 @@ void FTextWidget::RedrawText()
 		{
 			SDL_LockSurface(SdlSurface); // Lock surface for safe pixel access
 
-			FVector2D<float> WidgetSize = GetWidgetSize();
+			FVector2D<int32> WidgetSize = GetWidgetSize();
 
 			// If we have texture and X or Y size has changed and we need texture of different size
 			if (TextTexture == nullptr || (WidgetSize.X != LastTextTextureSize.X || WidgetSize.Y != LastTextTextureSize.Y))
@@ -254,7 +310,9 @@ void FTextWidget::RedrawText()
 				// Create new texture
 				TextTexture = SDL_CreateTextureFromSurface(GetRenderer()->GetSDLRenderer(), SdlSurface);
 
-				LastTextTextureSize = GetWidgetSize();
+				FVector2D<float> TempSizeOfTexture;
+				SDL_GetTextureSize(TextTexture, &TempSizeOfTexture.X, &TempSizeOfTexture.Y);
+				LastTextTextureSize = TempSizeOfTexture;
 			}
 			else
 			{
@@ -270,9 +328,8 @@ void FTextWidget::RedrawText()
 			SDL_UnlockSurface(SdlSurface);
 			SDL_DestroySurface(SdlSurface);
 
-			SDL_GetTextureSize(TextTexture, &WidgetSize.X, &WidgetSize.Y);
-
-			AutoAdjustSize();
+			// Update widget size	
+			AutoAdjustSizeToText(GetClippingMethod() == EClipping::Cut);
 		}
 	}
 	else

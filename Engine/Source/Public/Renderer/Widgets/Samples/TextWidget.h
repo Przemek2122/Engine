@@ -13,6 +13,25 @@ enum class ETextRenderMode : Uint8
 	Blended,					// Render
 };
 
+/** How should we adjust size of this widget */
+enum class ETextWidgetSizeType : Uint8
+{
+	/** Do nothing to widget size */
+	None,
+	/** check text size and set widget size to be exact size to fit */
+	ClipWidgetSizeToText,
+	/** Check Widget size and align size of font to fit vertically */
+	ResizeFontToFit
+};
+
+class FFontStatics
+{
+public:
+	static int32 GetFontSizeFromPixels(const int32 SizeInPixels);
+	static int32 GetPixelsFromFontSize(const int32 FontSize);
+
+};
+
 class ENGINE_API FTextWidget : public FWidget
 {
 public:
@@ -33,12 +52,16 @@ public:
 public:
 	/** Use for advanced text with parameters like InText='"Test button " << 1' */
 #define SET_TEXT_ADV(InText) SetText(TEXT_ADV(InText))
+
 	/**
 	 * Use for simple string InText='"Some text ..."'
 	 * You can use SetTextM("Test button " << 1 << SomeParameter)
 	 * or std::format("{1} to {0}", "a", "b") for parameterized versions.
 	 */
 	void SetText(const std::string& InText);
+
+	/** How should we change size of widget? */
+	void SetTextWidgetSizeType(ETextWidgetSizeType InTextWidgetSizeType);
 
 	NO_DISCARD std::string GetDesiredText() const;
 	NO_DISCARD std::string GetRenderedText() const;
@@ -52,10 +75,16 @@ protected:
 	/** Redraw text and auto calc size */
 	virtual void OnTextChanged();
 
-	/** Auto adjusts size for @RenderedText */
-	void AutoAdjustSize(const bool bLimitToParentSize = false);
+	/** Call to adjust size depending on settings */
+	void AutoAdjustSize();
 
-	/** Helper for AutoAdjustSize */
+	/** Auto adjusts size for @RenderedText */
+	void AutoAdjustSizeToText(const bool bLimitToParentSize = false);
+
+	/** Auto adjust size @returns if font size has been changed */
+	bool AutoAdjustFontToFit();
+
+	/** Helper for AutoAdjustSizeToText */
 	virtual void AutoAdjustTextSize(const FVector2D<int>& InMaxSize);
 
 	/** SDL Wrapper */
@@ -68,7 +97,11 @@ protected:
 	std::string DesiredText;
 	std::string RenderedText;
 
-	int TextSize;
+	int32 TextSize;
+	int32 RenderedTextSize;
+
+	/** How should we change size of widget? */
+	ETextWidgetSizeType TextWidgetSizeType;
 
 	FAssetsManager* AssetsManager;
 	FFontAsset* FontAsset;
@@ -79,13 +112,9 @@ protected:
 	SDL_FRect* SDLRect;
 	SDL_Texture* TextTexture;
 
-	FVector2D<int> LastTextTextureSize;
+	FVector2D<int32> LastTextTextureSize;
 
 	ETextRenderMode CurrentTextRenderMode;
 	ETextRenderMode DesiredTextRenderMode;
-
-protected:
-	/** if this property is set to true it will cut text to fit inside of parent */
-	bool bAutoCutTextToFitInsideOfParent;
 	
 };

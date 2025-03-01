@@ -21,10 +21,10 @@ public:
 	virtual ~IWidgetManagementInterface();
 
 	/** @returns size, this is used to move widgets by default to relative location. */
-	NO_DISCARD virtual FVector2D<int> GetWidgetManagerOffset() const = 0;
+	NO_DISCARD virtual FVector2D<int32> GetWidgetManagerOffset() const = 0;
 
 	/** @returns Size of this interface. */
-	NO_DISCARD virtual FVector2D<int> GetWidgetManagerSize() const = 0;
+	NO_DISCARD virtual FVector2D<int32> GetWidgetManagerSize() const = 0;
 
 	/** Get owner or nullptr if there is none */
 	NO_DISCARD virtual IWidgetManagementInterface* GetParent() const = 0;

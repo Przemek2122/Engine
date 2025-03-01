@@ -8,10 +8,10 @@
 #include <Windows.h>
 #endif
 
+static const std::string ThreadName = "Log";
+
 void FUtil::LogInit(bool EnableLogging)
 {
-	LogThread = nullptr;
-
 	if (EnableLogging)
 	{
 #if PLATFORM_ANDROID
@@ -36,12 +36,19 @@ void FUtil::LogInit(bool EnableLogging)
 		bIsLoggingEnabled = false;
 	}
 
-	SDL_CreateThread(MessagesPrinter, "Log", nullptr);
+	SDL_Thread = SDL_CreateThread(MessagesPrinter, ThreadName.c_str(), nullptr);
+}
+
+void FUtil::EndLogging()
+{
+	bKeepLogging = false;
+
+	SDL_DetachThread(SDL_Thread);
 }
 
 int FUtil::MessagesPrinter(void* ptr)
 {
-	while (KeepLogging)
+	while (bKeepLogging)
 	{
 		if (MessagesQueue.Size() == 0)
 		{

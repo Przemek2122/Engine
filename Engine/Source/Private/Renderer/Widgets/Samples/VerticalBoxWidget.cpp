@@ -151,7 +151,7 @@ void FVerticalBoxWidget::AlignToCenter()
 	}
 
 	// @TODO Enable this and debug why children do not align properly if rebuilt only once
-	//if (CurrentNumberOfCalculatedChildren != GetChildrenCount())
+	if (CurrentNumberOfCalculatedChildren != GetChildrenCount())
 	{
 		RequestWidgetRebuild();
 

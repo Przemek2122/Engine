@@ -33,6 +33,7 @@ public:
 	 * @param EnableLogging specify if it should log to file or not
 	 */
 	static void LogInit(bool EnableLogging = true);
+	static void EndLogging();
 
 	/** Thread for messages on console. */
 	static int MessagesPrinter(void* ptr);
@@ -181,8 +182,8 @@ public:
 	}
 
 private:
-	/** Thread for console and log output */
-	static inline SDL_Thread* LogThread = nullptr;
+	/** Logging thread */
+	static inline SDL_Thread* SDL_Thread = nullptr;
 
 	/** Queue for messages. */
 	static inline CQueueSafe<FLogMessage> MessagesQueue;
@@ -214,6 +215,6 @@ private:
 	static inline bool bIsLoggingEnabled = false;
 
 	/** Set to false to stop logging (on thread). */
-	static inline bool KeepLogging = true;
+	static inline bool bKeepLogging = true;
 
 };

@@ -6,48 +6,52 @@
 
 #include "CoreMinimal.h"
 
-//#define DEBUG ((defined _DEBUG) && _DEBUG)
 #define WITH_WIDGET_DEBUGGER DEBUG
 
 /** define platform defaults */
 /* ANDROID */
 #if defined(__ANDROID__) && (__ANDROID__ == 1)
-#define PLATFORM_ANDROID 1
+	#define PLATFORM_ANDROID 1
+	#define PLATFORM_DESKTOP 0
 #else
-#define PLATFORM_ANDROID 0
+	#define PLATFORM_ANDROID 0
 #endif
 
 /* LINUX */
 #if defined(__linux__) && !PLATFORM_ANDROID
-#define PLATFORM_LINUX 1
+	#define PLATFORM_LINUX 1
+	#define PLATFORM_DESKTOP 1
 #else
-#define PLATFORM_LINUX 0
+	#define PLATFORM_LINUX 0
 #endif
 
 /* WINDOWS */
 #if defined(_WIN32) || defined(_WIN64) /* SDL also defines WIN32 on Windows */
-#define PLATFORM_WINDOWS 1
+	#define PLATFORM_WINDOWS 1
+	#define PLATFORM_DESKTOP 1
 #else
-#define PLATFORM_WINDOWS 0
+	#define PLATFORM_WINDOWS 0
 #endif
 
 /* APPLE / macOS / iOS */
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
 #define PLATFORM_APPLE 1
-#if TARGET_OS_IPHONE
-    /* This covers both iOS devices and simulator. */
-#define PLATFORM_IOS 1
-#define PLATFORM_MAC 0
+	#if TARGET_OS_IPHONE
+	    /* This covers both iOS devices and simulator. */
+		#define PLATFORM_IOS 1
+		#define PLATFORM_MAC 0
+		#define PLATFORM_DESKTOP 0
+	#else
+	    /* Assume macOS if not iOS. */
+		#define PLATFORM_IOS 0
+		#define PLATFORM_MAC 1
+		#define PLATFORM_DESKTOP 1
+	#endif
 #else
-    /* Assume macOS if not iOS. */
-#define PLATFORM_IOS 0
-#define PLATFORM_MAC 1
-#endif
-#else
-#define PLATFORM_APPLE 0
-#define PLATFORM_IOS   0
-#define PLATFORM_MAC   0
+	#define PLATFORM_APPLE 0
+	#define PLATFORM_IOS   0
+	#define PLATFORM_MAC   0
 #endif
 
 #if DEBUG
