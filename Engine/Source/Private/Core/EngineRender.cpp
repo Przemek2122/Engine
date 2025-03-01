@@ -141,6 +141,15 @@ void FEngineRender::OnWindowHidden(const Uint32 WindowId)
 	}
 }
 
+void FEngineRender::OnWindowShown(Uint32 WindowId)
+{
+	FWindow* Window = GetWindowById(WindowId);
+	if (Window != nullptr)
+	{
+		OnWindowMadeVisible(Window);
+	}
+}
+
 void FEngineRender::OnWindowMoved(const Uint32 WindowId, const Sint32 X, const Sint32 Y)
 {
 	FWindow* Window = GetWindowById(WindowId);

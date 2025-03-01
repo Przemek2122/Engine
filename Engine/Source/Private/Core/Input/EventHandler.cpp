@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
 #include "Input/EventHandler.h"
@@ -587,6 +587,7 @@ void FEventHandler::InputWindowEvent()
 		case SDL_EVENT_WINDOW_SHOWN:
 		{
 			LOG_DEBUG("Window " << Event.window.windowID << " shown");
+            FGlobalDefines::GEngine->GetEngineRender()->OnWindowShown(Event.window.windowID);
 			break;
 		}
 

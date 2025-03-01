@@ -66,6 +66,7 @@ public:
 
 	void OnWindowExposed(Uint32 WindowId);
 	void OnWindowHidden(Uint32 WindowId);
+	void OnWindowShown(Uint32 WindowId);
 
 	void OnWindowMoved(Uint32 WindowId, Sint32 X, Sint32 Y);
 
