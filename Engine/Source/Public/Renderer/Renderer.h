@@ -56,9 +56,9 @@ public:
 	NO_DISCARD INLINE_DEBUGABLE SDL_Surface* GetSdlWindowSurface() const;
 
 	/** @returns cached window size */
-	NO_DISCARD INLINE_DEBUGABLE FVector2D<int> GetWindowSize() const;
+	NO_DISCARD INLINE_DEBUGABLE FVector2D<int32> GetWindowSize() const;
 
-	void SetWindowSize(const int X, const int Y, const bool bUpdateSDL = true) const;
+	void SetWindowSize(const int32 X, const int32 Y, const bool bUpdateSDL = true) const;
 
 	void DrawTexture(const FTextureAsset* Texture,	FVector2D<float> Location, const FVector2D<float> Size, const bool bIsLocationRelative = true) const;
 

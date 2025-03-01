@@ -102,12 +102,12 @@ SDL_Surface* FRenderer::GetSdlWindowSurface() const
 	return SDL_GetWindowSurface(Window->GetSdlWindow());
 }
 
-FVector2D<int> FRenderer::GetWindowSize() const
+FVector2D<int32> FRenderer::GetWindowSize() const
 {
 	return Window->GetWindowSize();
 }
 
-void FRenderer::SetWindowSize(const int X, const int Y, const bool bUpdateSDL) const
+void FRenderer::SetWindowSize(const int32 X, const int32 Y, const bool bUpdateSDL) const
 {
 	Window->SetWindowSize(X, Y, bUpdateSDL);
 }

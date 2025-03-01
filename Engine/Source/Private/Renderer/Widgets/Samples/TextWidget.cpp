@@ -77,7 +77,7 @@ void FTextWidget::UpdateWidgetLocation()
 {
 	FWidget::UpdateWidgetLocation();
 
-	const FVector2D<int>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
+	const FVector2D<int32>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
 
 	SDLRect->x = LocationCache.X;
 	SDLRect->y = LocationCache.Y;
@@ -87,7 +87,7 @@ void FTextWidget::UpdateWidgetSize(const bool bWasSentFromRebuild)
 {
 	FWidget::UpdateWidgetSize(bWasSentFromRebuild);
 
-	const FVector2D<int>& SizeCache = GetWidgetSize();
+	const FVector2D<int32>& SizeCache = GetWidgetSize();
 
 	SDLRect->w = SizeCache.X;
 	SDLRect->h = SizeCache.Y;
@@ -97,8 +97,8 @@ void FTextWidget::UpdateAnchor(const bool bIsFromRebuild)
 {
 	FWidget::UpdateAnchor(bIsFromRebuild);
 
-	const FVector2D<int>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
-	const FVector2D<int>& SizeCache = GetWidgetSize();
+	const FVector2D<int32>& LocationCache = GetWidgetLocation(EWidgetOrientation::Absolute);
+	const FVector2D<int32>& SizeCache = GetWidgetSize();
 
 	SDLRect->x = LocationCache.X;
 	SDLRect->y = LocationCache.Y;
@@ -170,7 +170,7 @@ void FTextWidget::AutoAdjustSize()
 
 void FTextWidget::AutoAdjustSizeToText(const bool bLimitToParentSize)
 {
-	FVector2D<int> NewWidgetSize;
+	FVector2D<int32> NewWidgetSize;
 
 	if (bLimitToParentSize)
 	{
@@ -199,11 +199,11 @@ bool FTextWidget::AutoAdjustFontToFit()
 	return bWasChanged;
 }
 
-void FTextWidget::AutoAdjustTextSize(const FVector2D<int>& InMaxSize)
+void FTextWidget::AutoAdjustTextSize(const FVector2D<int32>& InMaxSize)
 {
 	auto StringSize = RenderedText.length();
 
-	FVector2D<int> OutSize(0);
+	FVector2D<int32> OutSize(0);
 
 	CalculateDefaultSizeForRenderText(OutSize);
 	
@@ -222,7 +222,7 @@ void FTextWidget::AutoAdjustTextSize(const FVector2D<int>& InMaxSize)
 	}
 }
 
-int FTextWidget::CalculateDefaultSizeForRenderText(FVector2D<int>& InOutSize) const
+int32 FTextWidget::CalculateDefaultSizeForRenderText(FVector2D<int32>& InOutSize) const
 {
 	bool bIsRendering = false;
 

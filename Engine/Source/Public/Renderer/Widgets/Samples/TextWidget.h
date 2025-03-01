@@ -85,10 +85,10 @@ protected:
 	bool AutoAdjustFontToFit();
 
 	/** Helper for AutoAdjustSizeToText */
-	virtual void AutoAdjustTextSize(const FVector2D<int>& InMaxSize);
+	virtual void AutoAdjustTextSize(const FVector2D<int32>& InMaxSize);
 
 	/** SDL Wrapper */
-	int CalculateDefaultSizeForRenderText(FVector2D<int>& InOutSize) const;
+	int32 CalculateDefaultSizeForRenderText(FVector2D<int32>& InOutSize) const;
 
 	/** Makes new texture for text */
 	void RedrawText();
