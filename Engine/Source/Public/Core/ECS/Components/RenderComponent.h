@@ -22,7 +22,7 @@ struct FAssetCollectionItem;
 /**
  * Component for handling transform of the entity
  */
-class URenderComponent : public UComponent
+class ENGINE_API URenderComponent : public UComponent
 {
 public:
 	URenderComponent(IComponentManagerInterface* InComponentManagerInterface);
