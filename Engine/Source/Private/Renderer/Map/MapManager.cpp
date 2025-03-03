@@ -9,7 +9,6 @@
 FMapManager::FMapManager(FWindow* InWindow)
 	: CurrentMap(nullptr)
 	, MapEditor(nullptr)
-	, MapAssets()
 	, OwnerWindow(InWindow)
 {
 }
@@ -70,7 +69,7 @@ void FMapManager::SetActiveGameMap(FMapAsset* MapAsset)
 				DeactivateCurrentGameMap();
 			}
 
-			CurrentMap = new FMap(MapAsset, this);
+			CurrentMap = MapClass.Allocate(MapAsset, this);
 			CurrentMap->Initialize();
 		}
 		else
@@ -188,6 +187,9 @@ FMapAsset* FMapManager::LoadMap(const std::string& Name)
 		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name);
 		if (MapAsset != nullptr)
 		{
+			delete MapGenerator;
+			MapGenerator = MapGeneratorClass.Allocate();
+
 			if (!MapAsset->IsLoaded())
 			{
 				MapAsset->SetMapManager(this);

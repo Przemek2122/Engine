@@ -17,16 +17,16 @@ public:
 	FMap(FMapAsset* InMapAsset, FMapManager* InMapManager);
 	virtual ~FMap() = default;
 
-	void Initialize();
-	void DeInitialize();
+	virtual void Initialize();
+	virtual void DeInitialize();
 
 	FEntityManager* GetEntityManager() const;
 
-	int GetMapWidth() const;
-	int GetMapHeight() const;
+	int32 GetMapWidth() const;
+	int32 GetMapHeight() const;
 
-	FVector2D<int> GetMapSizeInTiles() const;
-	FVector2D<int> GetMapSizeInPixels() const;
+	FVector2D<int32> GetMapSizeInTiles() const;
+	FVector2D<int32> GetMapSizeInPixels() const;
 
 	virtual void Tick(float DeltaTime);
 
@@ -51,13 +51,13 @@ public:
 	void AddMapRenderOffset(const FVector2D<int>& LocationChange);
 
 	/** Get map render offset */
-	FVector2D<int> GetMapRenderOffset() const;
+	FVector2D<int32> GetMapRenderOffset() const;
 
 	/** Delegate triggered each time when map is moved */
-	FDelegate<void, FVector2D<int>>& GetMapLocationChangeDelegate();
+	FDelegate<void, FVector2D<int32>>& GetMapLocationChangeDelegate();
 
 	/** Changes tile at given @Location with given @MapAssetIndexToSet. */
-	void ChangeTileAtLocation(const FVector2D<int>& Location, int MapAssetIndexToSet);
+	void ChangeTileAtLocation(const FVector2D<int32>& Location, int32 MapAssetIndexToSet);
 
 protected:
 	/** Reads data from asset into this class from MapAsset memory */
@@ -81,7 +81,7 @@ protected:
 	FMapManager* MapManager;
 
 	/** This property is for moving map */
-	FVector2D<int> MapRenderOffset;
+	FVector2D<int32> MapRenderOffset;
 
 	/** Camera manager entity for map movement */
 	ECameraManager* CameraManagerEntity;
@@ -90,8 +90,8 @@ protected:
 	FDelegate<void, FVector2D<int>> MapLocationChangeDelegate;
 
 	/** Minimal render tile offset - Everything before that vector will not be rendered */
-	FVector2D<int> MapLocationTileOffsetMin;
-	FVector2D<int> MapLocationTileOffsetMax;
+	FVector2D<int32> MapLocationTileOffsetMin;
+	FVector2D<int32> MapLocationTileOffsetMax;
 
 	/** Is map activated */
 	bool bIsActive;

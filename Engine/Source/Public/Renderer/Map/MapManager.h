@@ -1,9 +1,10 @@
-// See https://github.com/Przemek2122/GameEngine
+// Created by Przemys³aw Wiewióra 2020-2025 https://github.com/Przemek2122/Engine
 
 #pragma once
 
 #include "CoreMinimal.h"
 
+class FMapGeneratorBase;
 class FMapEditor;
 class FMap;
 class FMapAsset;
@@ -75,6 +76,9 @@ public:
 	FMapEditor* GetMapEditor() const;
 
 protected:
+	/** Class for map */
+	FClassStorage<FMap, FMapAsset*, FMapManager*> MapClass;
+
 	/** Current map, has refrence to map asset and renders map. */
 	FMap* CurrentMap;
 

@@ -44,22 +44,22 @@ FEntityManager* FMap::GetEntityManager() const
 	return EntityManager;
 }
 
-int FMap::GetMapWidth() const
+int32 FMap::GetMapWidth() const
 {
 	return MapData.MapArray[0].Array.Size();
 }
 
-int FMap::GetMapHeight() const
+int32 FMap::GetMapHeight() const
 {
 	return MapData.MapArray.Size();
 }
 
-FVector2D<int> FMap::GetMapSizeInTiles() const
+FVector2D<int32> FMap::GetMapSizeInTiles() const
 {
 	return { GetMapWidth(), GetMapHeight() };
 }
 
-FVector2D<int> FMap::GetMapSizeInPixels() const
+FVector2D<int32> FMap::GetMapSizeInPixels() const
 {
 	return { GetMapWidth() * MapData.AssetsTileSize.X, GetMapHeight() * MapData.AssetsTileSize.Y };
 }
@@ -245,17 +245,17 @@ void FMap::AddMapRenderOffset(const FVector2D<int>& LocationChange)
 	UpdateMapOffsetOnRenderer();
 }
 
-FVector2D<int> FMap::GetMapRenderOffset() const
+FVector2D<int32> FMap::GetMapRenderOffset() const
 {
 	return MapRenderOffset;
 }
 
-FDelegate<void, FVector2D<int>>& FMap::GetMapLocationChangeDelegate()
+FDelegate<void, FVector2D<int32>>& FMap::GetMapLocationChangeDelegate()
 {
 	return MapLocationChangeDelegate;
 }
 
-void FMap::ChangeTileAtLocation(const FVector2D<int>& Location, const int MapAssetIndexToSet)
+void FMap::ChangeTileAtLocation(const FVector2D<int32>& Location, const int32 MapAssetIndexToSet)
 {
 	const bool bDoesAssetIndexExists = MapData.MapSubAssetSettingsArray.IsValidIndex(MapAssetIndexToSet);
 
