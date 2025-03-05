@@ -74,17 +74,17 @@ public:
 	FMap* GetCurrentMap() const;
 	FMapEditor* GetMapEditor() const;
 
+	/** Class for map */
+	FClassStorage<FMap, FMapAsset*, FMapManager*> MapClass;
+
+	/** Class for map editor */
+	FClassStorage<FMapEditor, FMap*> MapEditorClass;
+
 protected:
 	void CreateEditorMap();
 	void CreateGameMap(FMapAsset* MapAsset);
 
 protected:
-	/** Class for map */
-	FClassStorage<FMap, FMapAsset*, FMapManager*> MapClass;
-
-	/** Class for map */
-	FClassStorage<FMapEditor, FMap*> MapEditorClass;
-
 	/** Current map, has refrence to map asset and renders map. */
 	FMap* CurrentMap;
 
