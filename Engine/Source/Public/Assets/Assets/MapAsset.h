@@ -35,7 +35,7 @@ namespace FMapGlobalSettings
 	}
 }
 
-struct FMapSubAssetSettings
+struct ENGINE_API FMapSubAssetSettings
 {
 	FMapSubAssetSettings();
 
@@ -57,13 +57,13 @@ private:
 
 };
 
-struct FMapRow
+struct ENGINE_API FMapRow
 {
 	CArray<int> Array;
 };
 
 /** Map data: tiles size, tiles location and assets for map */
-struct FMapData
+struct ENGINE_API FMapData
 {
 	FMapData()
 		: AssetsTileSize(32, 32)
@@ -85,7 +85,7 @@ struct FMapData
 /**
  * For loading storing and using font.
  */
-class FMapAsset : public FAssetBase
+class ENGINE_API FMapAsset : public FAssetBase
 {
 public:
 	FMapAsset(const std::string& InAssetName, const std::string& InAssetPath);

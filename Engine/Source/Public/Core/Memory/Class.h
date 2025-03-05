@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 
-class EUnitBase;
-
 /** Do not use directly - Use FClassStorage instead */
 template<typename TType, typename... TArgs>
 class TClass

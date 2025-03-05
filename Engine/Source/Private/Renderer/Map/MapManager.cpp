@@ -1,16 +1,16 @@
 // See https://github.com/Przemek2122/GameEngine
 
 #include "CoreEngine.h"
-#include "Assets/Assets/MapAsset.h"
-#include "Renderer/Map/Map.h"
-#include "Renderer/Map/MapEditor.h"
 #include "Renderer/Map/MapManager.h"
+#include "Assets/Assets/MapAsset.h"
+#include "Renderer/Map/EngineMap.h"
 
 FMapManager::FMapManager(FWindow* InWindow)
 	: CurrentMap(nullptr)
 	, MapEditor(nullptr)
 	, OwnerWindow(InWindow)
 {
+	MapClass.Set<FEngineMap>();
 }
 
 FMapManager::~FMapManager()
@@ -64,13 +64,9 @@ void FMapManager::SetActiveGameMap(FMapAsset* MapAsset)
 	{
 		if (MapAsset->IsLoaded())
 		{
-			if (CurrentMap != nullptr)
-			{
-				DeactivateCurrentGameMap();
-			}
+			DeactivateCurrentGameMap();
 
-			CurrentMap = MapClass.Allocate(MapAsset, this);
-			CurrentMap->Initialize();
+			CreateGameMap(MapAsset);
 		}
 		else
 		{
@@ -101,16 +97,11 @@ void FMapManager::SetActiveEditorMap(FMapAsset* MapAsset)
 	{
 		if (MapAsset->IsLoaded())
 		{
-			if (CurrentMap != nullptr)
-			{
-				DeactivateCurrentEditorMap();
-			}
+			DeactivateCurrentEditorMap();
 
-			CurrentMap = new FMap(MapAsset, this);
-			CurrentMap->Initialize();
+			CreateGameMap(MapAsset);
 
-			MapEditor = new FMapEditor(CurrentMap);
-			MapEditor->Initialize();
+			CreateEditorMap();
 		}
 		else
 		{
@@ -187,9 +178,6 @@ FMapAsset* FMapManager::LoadMap(const std::string& Name)
 		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name);
 		if (MapAsset != nullptr)
 		{
-			delete MapGenerator;
-			MapGenerator = MapGeneratorClass.Allocate();
-
 			if (!MapAsset->IsLoaded())
 			{
 				MapAsset->SetMapManager(this);
@@ -272,4 +260,16 @@ FMap* FMapManager::GetCurrentMap() const
 FMapEditor* FMapManager::GetMapEditor() const
 {
 	return MapEditor;
+}
+
+void FMapManager::CreateGameMap(FMapAsset* MapAsset)
+{
+	CurrentMap = MapClass.Allocate(MapAsset, this);
+	CurrentMap->Initialize();
+}
+
+void FMapManager::CreateEditorMap()
+{
+	MapEditor = MapEditorClass.Allocate(CurrentMap);
+	MapEditor->Initialize();
 }

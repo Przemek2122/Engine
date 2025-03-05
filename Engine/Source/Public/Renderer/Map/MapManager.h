@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Renderer/Map/Map.h"
+#include "Renderer/Map/MapEditor.h"
 
 class FMapGeneratorBase;
-class FMapEditor;
-class FMap;
 class FMapAsset;
 
 /**
@@ -72,12 +72,18 @@ public:
 	bool IsMapAssetCurrentlyUsed(const FMapAsset* MapAsset) const;
 
 	FMap* GetCurrentMap() const;
-
 	FMapEditor* GetMapEditor() const;
+
+protected:
+	void CreateEditorMap();
+	void CreateGameMap(FMapAsset* MapAsset);
 
 protected:
 	/** Class for map */
 	FClassStorage<FMap, FMapAsset*, FMapManager*> MapClass;
+
+	/** Class for map */
+	FClassStorage<FMapEditor, FMap*> MapEditorClass;
 
 	/** Current map, has refrence to map asset and renders map. */
 	FMap* CurrentMap;

@@ -20,14 +20,6 @@ public:
 	virtual void Initialize();
 	virtual void DeInitialize();
 
-	FEntityManager* GetEntityManager() const;
-
-	int32 GetMapWidth() const;
-	int32 GetMapHeight() const;
-
-	FVector2D<int32> GetMapSizeInTiles() const;
-	FVector2D<int32> GetMapSizeInPixels() const;
-
 	virtual void Tick(float DeltaTime);
 
 	virtual void Render();
@@ -40,6 +32,14 @@ public:
 
 	/** Function used for saving a map */
 	virtual void Save();
+
+	FEntityManager* GetEntityManager() const;
+
+	int32 GetMapWidth() const;
+	int32 GetMapHeight() const;
+
+	FVector2D<int32> GetMapSizeInTiles() const;
+	FVector2D<int32> GetMapSizeInPixels() const;
 
 	/** Map asset used to load / save this map */
 	FMapAsset* GetMapAsset() const { return MapAsset; }
