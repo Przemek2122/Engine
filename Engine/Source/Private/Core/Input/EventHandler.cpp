@@ -673,7 +673,7 @@ void FEventHandler::InputWindowEvent()
 
 		default:
 		{
-			LOG_DEBUG("Window " << Event.window.windowID << " got unknown event" << Event.window.type);
+			//LOG_DEBUG("Window " << Event.window.windowID << " got unknown event" << Event.window.type);
 		}
 	}
 }

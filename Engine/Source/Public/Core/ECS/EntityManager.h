@@ -37,7 +37,7 @@ public:
 	}
 
 	template<typename TEntityClass, typename... TInParams>
-	TEntityClass* CreateEntityAt(const FVector2D<int> Location, TInParams... InParams)
+	TEntityClass* CreateEntityAt(const FVector2D<int32> Location, TInParams... InParams)
 	{
 		TEntityClass* NewEntity = CreateEntity<TEntityClass>();
 

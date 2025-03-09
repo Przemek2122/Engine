@@ -59,7 +59,7 @@ private:
 
 struct ENGINE_API FMapRow
 {
-	CArray<int> Array;
+	CArray<int32> Array;
 };
 
 /** Map data: tiles size, tiles location and assets for map */
@@ -79,7 +79,7 @@ struct ENGINE_API FMapData
 	CArray<FMapSubAssetSettings> MapSubAssetSettingsArray;
 
 	/** Size of tile in pixels, for example 32x32 */
-	FVector2D<int> AssetsTileSize;
+	FVector2D<int32> AssetsTileSize;
 };
 
 /**
