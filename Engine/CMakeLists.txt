@@ -10,6 +10,7 @@ project(Engine VERSION 0.0.1)
 option(ENGINE_VENDORED "Use vendored libraries" ON)
 option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable" ON)
 option(ENGINE_COPY_ASSETS "Copy asssets to target" ON)
+option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
 
 set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 set(ENGINE_SOURCE_PRIVATE_DIR "${ENGINE_SOURCE_DIR}/Private")
@@ -202,6 +203,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ENGINE_BIN_DIRECTORY_PATH})
 set(ASSETS_ENGINE_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_DIR_NAME}")
 set(ASSETS_ENGINE_TARGET_PATH "${ENGINE_BIN_DIRECTORY_PATH}/${ASSETS_DIR_NAME}")
 
+set_property(GLOBAL PROPERTY ASSETS_ENGINE_TARGET_PATH ${ASSETS_ENGINE_TARGET_PATH})
+
 # Get assets
 file(GLOB ASSET_FILES_TO_COPY "${ASSETS_ENGINE_SOURCE_PATH}/*")
 
@@ -212,7 +215,9 @@ message(STATUS "COPY ENGINE ASSETS: '${ASSETS_ENGINE_SOURCE_PATH}', DESTINATION:
 foreach(file ${ASSET_FILES_TO_COPY})
     get_filename_component(filename ${file} NAME)
     if (NOT filename MATCHES "^\\..*" AND EXISTS ${file})
-        file(COPY ${file} DESTINATION ${ASSETS_ENGINE_TARGET_PATH} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+        if (ENGINE_COPY_ENGINE_MAPS OR (NOT filename MATCHES "[\/\\]Maps[\/\\]"))
+            file(COPY ${file} DESTINATION ${ASSETS_ENGINE_TARGET_PATH} FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+        endif()
     else()
         message(WARNING "Could not access file: ${file} (skipping)")
     endif()
