@@ -8,7 +8,14 @@
 struct ENGINE_API FAssetCollectionItem
 {
 protected:
+	/** Unique name for the asset, should be unique across all asset types */
 	std::string AssetName;
+
+	/**
+	 * Relative path to asset
+	 * Sample: 'Textures\UI\Squares\Red.jpg'
+	 * @Note: Do not add Assets dir
+	 */
 	std::string AssetPath;
 
 public:
