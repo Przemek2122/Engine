@@ -79,8 +79,6 @@ void FEngineMap::Render()
 			}
 		}
 
-		EntityManager->Render();
-
 		RenderSubSystems();
 	}
 }

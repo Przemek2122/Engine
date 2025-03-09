@@ -30,6 +30,7 @@
 
 #include "Core/ECS/EntityManager.h"
 #include "Core/ECS/Component.h"
+#include "Core/ECS/Components/ParentComponent.h"
 
 #include "Misc/VectorMath.h"
 

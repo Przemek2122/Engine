@@ -50,6 +50,12 @@ void FMap::Tick(float DeltaTime)
 
 void FMap::Render()
 {
+	if (bIsActive)
+	{
+		EntityManager->Render();
+
+		RenderSubSystems();
+	}
 }
 
 void FMap::Load()
