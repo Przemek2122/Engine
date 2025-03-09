@@ -38,6 +38,7 @@ FMapAsset::FMapAsset(const std::string& InAssetName, const std::string& InAssetP
 	: FAssetBase(InAssetName, InAssetPath)
 	, MapManager(nullptr)
 	, bIsLoaded(false)
+	, bHasAssets(false)
 {
 }
 
@@ -64,14 +65,14 @@ void FMapAsset::LoadMap()
 			LOG_INFO("Loading map: " << AssetName);
 
 			FParser Parser = CreateMapFilesParser();
-
-			CArray<std::string> MapAssetFiles = FFileSystem::GetFilesFromDirectory(MapAssetsDirPath);
-
 			FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 			SDL_Renderer* WindowRenderer = MapManager->GetOwnerWindow()->GetRenderer()->GetSDLRenderer();
 
-			if (FFileSystem::Directory::Exists(MapAssetsDirPath))
+			// Map assets are optional
+			if (!MapAssetsDirPath.empty() && FFileSystem::Directory::Exists(MapAssetsDirPath))
 			{
+				CArray<std::string> MapAssetFiles = FFileSystem::GetFilesFromDirectory(MapAssetsDirPath);
+
 				LoadMapAssets(Parser, AssetsManager, WindowRenderer);
 
 				bHasAssets = true;
@@ -137,7 +138,7 @@ void FMapAsset::SaveMapData()
 
 bool FMapAsset::IsMapDataValid() const
 {
-	return (MapData.MapArray.Size() > 0 && MapData.MapSubAssetSettingsArray.Size() > 0);
+	return (MapData.MapArray.Size() > 0 && (!bHasAssets || MapData.MapSubAssetSettingsArray.Size() > 0));
 }
 
 const FMapData& FMapAsset::GetMapData() const
@@ -230,10 +231,8 @@ void FMapAsset::LoadMapTilesLocationInformation(FParser& Parser)
 {
 	const int MaxAssetIndex = MapData.MapSubAssetSettingsArray.Size();
 
-	// Map - each tile location
-	std::ifstream MapNameFilePathStream(MapNameFilePath);
-
-	for (std::string Line; getline(MapNameFilePathStream, Line); )
+	FDelegateSafe<void, const std::string&> FileReaderDelegate;
+	FileReaderDelegate.BindLambda([&](const std::string& Line)
 	{
 		CArray<std::string> ParsedArray = Parser.SimpleParseLineIntoStrings(Line);
 
@@ -246,7 +245,7 @@ void FMapAsset::LoadMapTilesLocationInformation(FParser& Parser)
 				// @TODO Could switch to strtol to make sure conversion does not fail
 				const int Index = atoi(Element.c_str());
 
-				if (Index >= MaxAssetIndex)
+				if (bHasAssets && Index >= MaxAssetIndex)
 				{
 					LOG_WARN("Found invalid index: '" << Index << "' Plase make sure asset for that index exists.");
 
@@ -260,9 +259,8 @@ void FMapAsset::LoadMapTilesLocationInformation(FParser& Parser)
 
 			MapData.MapArray.Push(MapRow);
 		}
-	}
-
-	MapNameFilePathStream.close();
+	});
+	FFileSystem::File::GetFileContentLineByLine(FileReaderDelegate, MapNameFilePath);
 }
 
 void FMapAsset::SaveMapFile(FParser& Parser)
