@@ -16,7 +16,7 @@ class FMapAsset;
  * How to use?
  * 1. CacheAvailableMaps
  * 2. Find map you would like to load. (by name or iterative, show on ui) string with name is required.
- * 3. Use LoadMap
+ * 3. Use LoadMap (You can also load map without step 2 by just providing name)
  * 4. Use SetActiveGameMap or SetActiveEditorMap
  * 5. OPTIONAL - Map can be deactivated using DeactivateCurrentGameMap or DeactivateCurrentEditorMap
  */
@@ -25,6 +25,11 @@ class ENGINE_API FMapManager
 public:
 	FMapManager(FWindow* InWindow);
 	virtual ~FMapManager();
+
+	/** Do not allow copy constructor, this class is not intended for copying anywhere */
+	FMapManager(FMapManager& MapManager) = delete;
+	/** Do not allow move constructor, this class is not intended for copying anywhere */
+	FMapManager(FMapManager&& MapManager) = delete;
 
 	virtual void TickMap(const float DeltaTime);
 	virtual void DrawMap();
