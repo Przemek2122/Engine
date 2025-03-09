@@ -28,10 +28,10 @@ public:
 
 protected:
 	/** Generates default menu layout */
-	virtual void Initialize();
+	virtual void Initialize() { }
 
 	/** Clears widgets and calls delegate */
-	virtual void DeInitialize();
+	virtual void DeInitialize() { }
 
 private:
 	bool bIsInitializedUIMenu;

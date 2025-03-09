@@ -47,11 +47,3 @@ bool FUIMenu::IsInitialized() const
 {
 	return bIsInitializedUIMenu;
 }
-
-void FUIMenu::Initialize()
-{
-}
-
-void FUIMenu::DeInitialize()
-{
-}

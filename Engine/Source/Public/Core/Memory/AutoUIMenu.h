@@ -10,7 +10,7 @@
  * \tparam TTypeToStore must be of type FUIMenu
  */
 template<typename TTypeToStore>
-class ENGINE_API FAutoUIMenu : public FAutoDeletePointer<TTypeToStore>
+class FAutoUIMenu : public FAutoDeletePointer<TTypeToStore>
 {
 public:
 	FAutoUIMenu()

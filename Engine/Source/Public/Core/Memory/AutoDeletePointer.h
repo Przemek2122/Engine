@@ -10,7 +10,7 @@ class FUIMenu;
  * @Note if you declare this class twice with the same pointer, it will crash.
  */
 template<typename TTypeToStore>
-class ENGINE_API FAutoDeletePointer
+class FAutoDeletePointer
 {
 public:
 	FAutoDeletePointer()

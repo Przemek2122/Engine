@@ -96,16 +96,12 @@ std::string FAssetsManager::GetAssetsPathRelative() const
 
 std::string FAssetsManager::GetConfigPathRelative() const
 {
-	std::string ConfigPath;
-
-	ConfigPath = ConfigDirName;
-
-	return std::move(ConfigPath);
+	return ConfigDirName;
 }
 
 std::string FAssetsManager::GetMapsPathRelative() const
 {
-	return GetAssetsPathRelative() + MapsDirName;
+	return MapsDirName;
 }
 
 std::string FAssetsManager::GetFontsPathRelative() const
@@ -123,5 +119,5 @@ std::string FAssetsManager::ConvertRelativeToFullPath(const std::string& InPathR
 
 	OutPath += InPathRelative;
 
-	return std::move(OutPath);
+	return OutPath;
 }
