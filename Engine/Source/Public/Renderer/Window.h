@@ -118,12 +118,18 @@ public:
 		return GetWidgetManager()->DestroyChildWidget(Widget);
 	}
 
+	/** Delegate called when window size changed */
+	FDelegateSafe<void, FVector2D<int32>> OnWindowSizeChangedDelegate;
+
+	/** Delegate called when close of window is requested */
+	FDelegateSafe<void> OnWindowCloseRequestedDelegate;
+
 protected:
 	SDL_Window* Window;
 	FRenderer* Renderer;
 
 	std::string WindowName;
-	FVector2D<int> Size;
+	FVector2D<int32> Size;
 	Uint32 WindowFlags;
 	Uint32 WindowId;
 

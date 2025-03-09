@@ -24,10 +24,14 @@ void FMap::Initialize()
 	CameraManagerEntity = EntityManager->CreateEntity<ECameraManager>();
 
 	UpdateMapOffsetOnRenderer();
+
+	MapManager->GetOwnerWindow()->OnWindowSizeChangedDelegate.BindObject(this, &FMap::OnWindowSizeChanged);
 }
 
 void FMap::DeInitialize()
 {
+	MapManager->GetOwnerWindow()->OnWindowSizeChangedDelegate.UnBindObject(this, &FMap::OnWindowSizeChanged);
+
 	ClearData();
 
 	if (EntityManager != nullptr)
@@ -81,6 +85,10 @@ void FMap::Save()
 
 	// Save data from FMapAsset to file on disk
 	MapAsset->SaveMapData();
+}
+
+void FMap::OnWindowSizeChanged(FVector2D<int32> WindowSize)
+{
 }
 
 FEntityManager* FMap::GetEntityManager() const

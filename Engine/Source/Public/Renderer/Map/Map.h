@@ -21,7 +21,6 @@ public:
 	virtual void DeInitialize();
 
 	virtual void Tick(float DeltaTime);
-
 	virtual void Render();
 
 	/** Function used for loading a map */
@@ -32,6 +31,9 @@ public:
 
 	/** Function used for saving a map */
 	virtual void Save();
+
+	/** Called when window size changed */
+	virtual void OnWindowSizeChanged(FVector2D<int32> WindowSize);
 
 	FEntityManager* GetEntityManager() const;
 

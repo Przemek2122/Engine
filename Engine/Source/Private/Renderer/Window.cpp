@@ -175,6 +175,8 @@ void FWindow::SetWindowSize(const int X, const int Y, const bool bUpdateSDL)
 		Widget->OnWindowChanged();
 	}
 
+	OnWindowSizeChangedDelegate.Execute(Size);
+
 	WidgetManager->RequestWidgetRebuild();
 }
 
@@ -225,6 +227,7 @@ void FWindow::OnWindowMadeInvisible()
 
 void FWindow::OnWindowCloseRequested()
 {
+	OnWindowCloseRequestedDelegate.Execute();
 }
 
 void FWindow::OnWindowSizeChanged(const Sint32 X, const Sint32 Y)

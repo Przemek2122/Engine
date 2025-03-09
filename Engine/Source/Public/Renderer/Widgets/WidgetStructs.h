@@ -12,7 +12,6 @@ struct ENGINE_API FWidgetGeometry
 /** Base class for padding and margin */
 struct ENGINE_API FBoxSpacing
 {
-protected:
 	/** Will set given padding to all 4 sides */
 	FBoxSpacing(const int32 Margin)
 		: Left(Margin)
@@ -30,7 +29,6 @@ protected:
 	{
 	}
 
-public:
 	/** Sets left and right by value with (InHorizontal / 2); */
 	void SetHorizontal(const int32 InHorizontal)
 	{

@@ -9,7 +9,7 @@
  * Thread safe
  */
 template<typename TType, typename TSizeType = int>
-class ENGINE_API CQueueSafe : public CDeque<TType, TSizeType>
+class CQueueSafe : public CDeque<TType, TSizeType>
 {
 public:
 	/* Add element at end. */
