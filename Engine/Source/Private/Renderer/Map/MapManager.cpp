@@ -175,7 +175,7 @@ FMapAsset* FMapManager::LoadMap(const std::string& Name)
 	FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 	if (AssetsManager != nullptr)
 	{
-		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name);
+		FMapAsset* MapAsset = AssetsManager->GetAsset<FMapAsset>(Name, EAssetType::AT_MAP);
 		if (MapAsset != nullptr)
 		{
 			if (!MapAsset->IsLoaded())

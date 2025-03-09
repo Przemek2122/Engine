@@ -131,7 +131,11 @@ protected:
 protected:
 	FMapManager* MapManager;
 
+	/** Tells us if map was loaded, even if load was called it will be false in case of fail */
 	bool bIsLoaded;
+
+	/** Tells us if there are any map assets */
+	bool bHasAssets;
 
 	/** Primary map file describing map look */
 	std::string MapNameFilePath;

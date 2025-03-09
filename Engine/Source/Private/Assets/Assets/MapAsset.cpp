@@ -59,8 +59,7 @@ void FMapAsset::LoadMap()
 
 		// Ensure all required files exists
 		if (	FFileSystem::File::Exists(MapNameFilePath) 
-			&&	FFileSystem::File::Exists(MapDataFilePath) 
-			&&	FFileSystem::Directory::Exists(MapAssetsDirPath))
+			&&	FFileSystem::File::Exists(MapDataFilePath) )
 		{
 			LOG_INFO("Loading map: " << AssetName);
 
@@ -71,7 +70,12 @@ void FMapAsset::LoadMap()
 			FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
 			SDL_Renderer* WindowRenderer = MapManager->GetOwnerWindow()->GetRenderer()->GetSDLRenderer();
 
-			LoadMapAssets(Parser, AssetsManager, WindowRenderer);
+			if (FFileSystem::Directory::Exists(MapAssetsDirPath))
+			{
+				LoadMapAssets(Parser, AssetsManager, WindowRenderer);
+
+				bHasAssets = true;
+			}
 
 			LoadMapTilesLocationInformation(Parser);
 
