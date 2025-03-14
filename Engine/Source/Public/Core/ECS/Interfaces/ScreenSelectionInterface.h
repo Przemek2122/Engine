@@ -7,7 +7,7 @@ class EScreenSelectionEntity;
 /**
  * Objects using this interface can be selected by screen selection
  */
-class IScreenSelectionInterface
+class ENGINE_API IScreenSelectionInterface
 {
 public:
 	IScreenSelectionInterface();
