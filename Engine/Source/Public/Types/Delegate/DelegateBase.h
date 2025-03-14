@@ -10,7 +10,7 @@
  * Call ExecuteByLambda to execute all bound functions.
  */
 template<typename TReturnType, typename TFunctorType, typename... TInParams>
-class ENGINE_API FDelegateBase
+class FDelegateBase
 {
 public:
 	typedef FFunctorBase<TReturnType, TInParams ...> Functor;

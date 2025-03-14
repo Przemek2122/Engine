@@ -9,7 +9,7 @@
  * Function on objects
  */
 template<class TClass, typename TReturnType, typename... TInParams>
-class ENGINE_API FFunctorObject : public FFunctorBase<TReturnType, TInParams...>
+class FFunctorObject : public FFunctorBase<TReturnType, TInParams...>
 {
 public:
 	typedef FFunctorObject<TClass, TReturnType, TInParams...> TSelfType;

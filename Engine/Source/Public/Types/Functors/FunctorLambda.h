@@ -10,7 +10,7 @@
  * Lambda
  */
 template<typename TReturnType, typename... TInParams> 
-class ENGINE_API FFunctorLambda : public FFunctorBase<TReturnType, TInParams...>
+class FFunctorLambda : public FFunctorBase<TReturnType, TInParams...>
 {
 public:
 	typedef FFunctorLambda<TReturnType, TInParams...> TSelfType;

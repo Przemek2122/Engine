@@ -15,7 +15,7 @@
  * @Note: All functions passed in are deleted at end of this object life.
  */
 template<typename TReturnType = void, typename... TInParams>
-class ENGINE_API FDelegateSafe : public FDelegateBase<TReturnType, std::shared_ptr<FFunctorBase<TReturnType, TInParams ...>>, TInParams...>
+class FDelegateSafe : public FDelegateBase<TReturnType, std::shared_ptr<FFunctorBase<TReturnType, TInParams ...>>, TInParams...>
 {
 public:
 	using FunctorType = FFunctorBase<TReturnType, TInParams ...>;
