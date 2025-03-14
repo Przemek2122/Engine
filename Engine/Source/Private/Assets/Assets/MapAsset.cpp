@@ -73,9 +73,12 @@ void FMapAsset::LoadMap()
 			{
 				CArray<std::string> MapAssetFiles = FFileSystem::GetFilesFromDirectory(MapAssetsDirPath);
 
-				LoadMapAssets(Parser, AssetsManager, WindowRenderer);
+				if (!MapAssetFiles.IsEmpty())
+				{
+					LoadMapAssets(Parser, AssetsManager, WindowRenderer);
 
-				bHasAssets = true;
+					bHasAssets = true;
+				}
 			}
 
 			LoadMapTilesLocationInformation(Parser);

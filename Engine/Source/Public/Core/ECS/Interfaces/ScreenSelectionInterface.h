@@ -26,7 +26,7 @@ public:
 
 	void NativeDeselect();
 
-	void NativeDoAction(const FVector2D<int>& ActionLocation);
+	void NativeDoAction(const FVector2D<int32>& ActionLocation);
 
 	/** Override to return location of selection */
 	virtual FVector2D<int32> GetLocation() = 0;
@@ -45,7 +45,10 @@ protected:
 	virtual void OnDeSelect() = 0;
 
 	/** Optional action - By default it will be called when selected and right clicked - Move / Attack */
-	virtual void OnDoAction(const FVector2D<int>& ActionLocation);
+	virtual void OnDoAction(const FVector2D<int32>& ActionLocation);
+
+	/** Used with drag */
+	virtual void OnDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& EndLocation);
 
 	virtual void RegisterToScreenSelectionInternal();
 

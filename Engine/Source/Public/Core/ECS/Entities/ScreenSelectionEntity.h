@@ -6,7 +6,19 @@
 enum class EInputState;
 class IScreenSelectionInterface;
 
-class EScreenSelectionEntity : public EEntity
+/** Defines how we select objects */
+enum class ESelectionType
+{
+	/** Default, allows selection of single (click) or many objects (click and drag) and moving them with another button */
+	SelectMultipleObject,
+	/** Used when there is a need of moving and object */
+	DragAndDrop
+};
+
+/**
+ * Entity for managing selectable objects
+ */
+class ENGINE_API EScreenSelectionEntity : public EEntity
 {
 public:
 	EScreenSelectionEntity(FEntityManager* InEntityManager);
@@ -15,6 +27,8 @@ public:
 	/** Begin EEntity */
 	void EndPlay() override;
 	/** End EEntity */
+
+	virtual void SetSelectionType(ESelectionType InSelectionType);
 
 	virtual void RegisterScreenSelectable(IScreenSelectionInterface* InScreenSelectable);
 	virtual void UnRegisterScreenSelectable(IScreenSelectionInterface* InScreenSelectable);
@@ -30,7 +44,7 @@ public:
 	virtual void OnEndSelecting();
 
 	/** Called when should select but it was in place - click */
-	virtual void OnClickInsteadOfSelection(const FVector2D<int>& InMousePositionConverted);
+	virtual void OnClickInsteadOfSelection(const FVector2D<int32>& InMousePositionConverted);
 
 	const CArray<IScreenSelectionInterface*>& GetCurrentlySelectedObjects() const;
 
@@ -43,12 +57,12 @@ protected:
 	void UnRegisterInput(FEventHandler* InputHandler) override;
 	/** End EEntity */
 
-	void CheckScreenSelection(const FVector2D<int>& InMousePositionConverted);
+	void CheckScreenSelection(const FVector2D<int32>& InMousePositionConverted);
 
 	virtual void AddToCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable);
 	virtual void RemoveFromCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable);
 
-	FVector2D<int> ConvertLocationFromScreenSpace(const FVector2D<int>& InLocation) const;
+	FVector2D<int32> ConvertLocationFromScreenSpace(const FVector2D<int32>& InLocation) const;
 
 protected:
 	/** Array with screen selectable items */
@@ -61,9 +75,12 @@ protected:
 	bool bIsSelecting;
 
 	/** Defines how far can it be from click to release to be click instead of selection */
-	int ClickInsteadOfSelectionTolerance;
+	int32 ClickInsteadOfSelectionTolerance;
 
 	/** Start of the selection */
-	FVector2D<int> SelectionStart;
+	FVector2D<int32> SelectionStart;
+
+	/** How should we select objects */
+	ESelectionType SelectionType;
 
 };

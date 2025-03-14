@@ -74,7 +74,7 @@ void IScreenSelectionInterface::NativeDeselect()
 	}
 }
 
-void IScreenSelectionInterface::NativeDoAction(const FVector2D<int>& ActionLocation)
+void IScreenSelectionInterface::NativeDoAction(const FVector2D<int32>& ActionLocation)
 {
 	if (bIsSelected)
 	{
@@ -82,7 +82,11 @@ void IScreenSelectionInterface::NativeDoAction(const FVector2D<int>& ActionLocat
 	}
 }
 
-void IScreenSelectionInterface::OnDoAction(const FVector2D<int>& ActionLocation)
+void IScreenSelectionInterface::OnDoAction(const FVector2D<int32>& ActionLocation)
+{
+}
+
+void IScreenSelectionInterface::OnDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& EndLocation)
 {
 }
 
