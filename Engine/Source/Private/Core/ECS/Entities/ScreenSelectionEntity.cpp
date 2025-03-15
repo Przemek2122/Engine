@@ -36,7 +36,7 @@ void EScreenSelectionEntity::UnRegisterScreenSelectable(IScreenSelectionInterfac
 	ScreenSelectableObjects.Remove(InScreenSelectable);
 }
 
-bool EScreenSelectionEntity::OnMouseMove(FVector2D<int> InMousePosition, EInputState InputState)
+bool EScreenSelectionEntity::OnMouseMove(FVector2D<int32> InMousePosition, EInputState InputState)
 {
 	bool bWasInputConsumed = false;
 
@@ -44,7 +44,7 @@ bool EScreenSelectionEntity::OnMouseMove(FVector2D<int> InMousePosition, EInputS
 	{
 		case ESelectionType::SelectMultipleObject:
 		{
-			const FVector2D<int> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
+			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
 
 			if (bIsSelecting)
 			{
@@ -55,6 +55,31 @@ bool EScreenSelectionEntity::OnMouseMove(FVector2D<int> InMousePosition, EInputS
 		}
 		case ESelectionType::DragAndDrop:
 		{
+			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
+
+			switch (ScreenDragState)
+			{
+				case EScreenDragState::Start:
+				{
+					StartScreenDrag(InMousePositionConverted);
+
+					break;
+				}
+				case EScreenDragState::Updating:
+				{
+					ContinueScreenDrag(InMousePositionConverted);
+
+					break;
+				}
+				case EScreenDragState::End:
+				{
+					EndScreenDrag(InMousePositionConverted);
+
+					ScreenDragState = EScreenDragState::None;
+
+					break;
+				}
+			}
 
 			break;
 		}
@@ -63,7 +88,7 @@ bool EScreenSelectionEntity::OnMouseMove(FVector2D<int> InMousePosition, EInputS
 	return bWasInputConsumed;
 }
 
-bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int> InMousePosition, EInputState InputState)
+bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, EInputState InputState)
 {
 	bool bWasInputConsumed = false;
 
@@ -71,7 +96,7 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int> InMousePosition, EI
 	{
 		case ESelectionType::SelectMultipleObject:
 		{
-			const FVector2D<int> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
+			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
 
 			switch (InputState)
 			{
@@ -110,22 +135,36 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int> InMousePosition, EI
 		}
 		case ESelectionType::DragAndDrop:
 		{
+			switch (InputState)
+			{
+				case EInputState::PRESS:
+				{
+					ScreenDragState = EScreenDragState::Start;
 
-			break;
+					break;
+				}
+
+				case EInputState::RELEASE:
+				{
+					ScreenDragState = EScreenDragState::End;
+
+					break;
+				}
+			}
 		}
 	}
 
 	return bWasInputConsumed;
 }
 
-bool EScreenSelectionEntity::OnMouseRightClick(FVector2D<int> InMousePosition, EInputState InputState)
+bool EScreenSelectionEntity::OnMouseRightClick(FVector2D<int32> InMousePosition, EInputState InputState)
 {
 	bool bWasInputConsumed = false;
 	switch (SelectionType)
 	{
 		case ESelectionType::SelectMultipleObject:
 		{
-			const FVector2D<int> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
+			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
 
 			switch (InputState)
 			{
@@ -176,6 +215,23 @@ void EScreenSelectionEntity::OnClickInsteadOfSelection(const FVector2D<int32>& I
 	CheckScreenSelection(InMousePositionConverted);
 }
 
+bool EScreenSelectionEntity::IsInSelectionArea(const FVector2D<int32>& InSelectionTargetStart, const FVector2D<int32>& InSelectionTargetSize, const FVector2D<int32>& InSelectionStart, const FVector2D<int32>& InSelectionEnd)
+{
+	const bool bIsSelectedHorizontalToRight = InSelectionStart.X >= InSelectionTargetStart.X &&
+		InSelectionEnd.X <= InSelectionTargetStart.X + InSelectionTargetSize.X;
+
+	const bool bIsSelectedHorizontalToLeft = InSelectionEnd.X >= InSelectionTargetStart.X &&
+		InSelectionStart.X <= InSelectionTargetStart.X + InSelectionTargetSize.X;
+
+	const bool bIsSelectedVerticalToDown = InSelectionEnd.Y >= InSelectionTargetStart.Y &&
+		InSelectionStart.Y <= InSelectionTargetStart.Y + InSelectionTargetSize.Y;
+
+	const bool bIsSelectedVerticalToUp = InSelectionStart.Y >= InSelectionTargetStart.Y &&
+		InSelectionEnd.Y <= InSelectionTargetStart.Y + InSelectionTargetSize.Y;
+
+	return (bIsSelectedHorizontalToRight || bIsSelectedHorizontalToLeft) && (bIsSelectedVerticalToDown || bIsSelectedVerticalToUp);
+}
+
 const CArray<IScreenSelectionInterface*>& EScreenSelectionEntity::GetCurrentlySelectedObjects() const
 {
 	return CurrentlySelectedObjects;
@@ -214,21 +270,7 @@ void EScreenSelectionEntity::CheckScreenSelection(const FVector2D<int32>& InMous
 		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetLocation();
 		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetSize();
 
-		const bool bIsSelectedHorizontalToRight = SelectionStart.X >= ScreenSelectableLocation.X &&
-			SelectionEnd.X <= ScreenSelectableLocation.X + ScreenSelectableSize.X;
-
-		const bool bIsSelectedHorizontalToLeft = SelectionEnd.X >= ScreenSelectableLocation.X &&
-			SelectionStart.X <= ScreenSelectableLocation.X + ScreenSelectableSize.X;
-
-		const bool bIsSelectedVerticalToDown = SelectionEnd.Y >= ScreenSelectableLocation.Y &&
-			SelectionStart.Y <= ScreenSelectableLocation.Y + ScreenSelectableSize.Y;
-
-		const bool bIsSelectedVerticalToUp = SelectionStart.Y >= ScreenSelectableLocation.Y &&
-			SelectionEnd.Y <= ScreenSelectableLocation.Y + ScreenSelectableSize.Y;
-
-		if (ScreenSelectable->NativeCanBeSelected() 
-			&& (bIsSelectedHorizontalToRight	|| bIsSelectedHorizontalToLeft) 
-			&& (bIsSelectedVerticalToDown		|| bIsSelectedVerticalToUp))
+		if (ScreenSelectable->NativeCanBeSelected() && IsInSelectionArea(ScreenSelectableLocation, ScreenSelectableSize, SelectionStart, SelectionEnd))
 		{
 			ScreenSelectable->NativeSelect();
 
@@ -241,6 +283,33 @@ void EScreenSelectionEntity::CheckScreenSelection(const FVector2D<int32>& InMous
 			RemoveFromCurrentlySelectedObjects(ScreenSelectable);
 		}
 	}
+}
+
+void EScreenSelectionEntity::StartScreenDrag(const FVector2D<int32>& InMousePositionConverted)
+{
+	CurrentlySelectedObjects.Clear();
+
+	for (ContainerInt i = 0; i < ScreenSelectableObjects.Size(); i++)
+	{
+		IScreenSelectionInterface* ScreenSelectable = ScreenSelectableObjects[i];
+
+		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetLocation();
+		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetSize();
+
+		if (ScreenSelectable->NativeCanBeSelected() && IsInSelectionArea(ScreenSelectableLocation, ScreenSelectableSize, InMousePositionConverted, InMousePositionConverted))
+		{
+			CurrentlySelectedObjects.Push(ScreenSelectable);
+		}
+	}
+}
+
+void EScreenSelectionEntity::ContinueScreenDrag(const FVector2D<int32>& InMousePositionConverted)
+{
+	
+}
+
+void EScreenSelectionEntity::EndScreenDrag(const FVector2D<int32>& InMousePositionConverted)
+{
 }
 
 void EScreenSelectionEntity::AddToCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable)

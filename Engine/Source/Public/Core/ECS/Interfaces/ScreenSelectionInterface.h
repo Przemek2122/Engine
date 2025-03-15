@@ -6,6 +6,7 @@ class EScreenSelectionEntity;
 
 /**
  * Objects using this interface can be selected by screen selection
+ * @requires EScreenSelectionEntity, @see this entity for more info.
  */
 class ENGINE_API IScreenSelectionInterface
 {
@@ -28,6 +29,9 @@ public:
 
 	void NativeDoAction(const FVector2D<int32>& ActionLocation);
 
+	void NativeUpdateDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& CurrentLocation);
+	void NativeEndDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& FinalLocation);
+
 	/** Override to return location of selection */
 	virtual FVector2D<int32> GetLocation() = 0;
 
@@ -47,8 +51,11 @@ protected:
 	/** Optional action - By default it will be called when selected and right clicked - Move / Attack */
 	virtual void OnDoAction(const FVector2D<int32>& ActionLocation);
 
-	/** Used with drag */
-	virtual void OnDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& EndLocation);
+	/** Used with drag - called each frame with new location */
+	virtual void OnUpdateDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& CurrentLocation);
+
+	/** Used with drag, called once when dragging is finished */
+	virtual void OnEndDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& FinalLocation);
 
 	virtual void RegisterToScreenSelectionInternal();
 

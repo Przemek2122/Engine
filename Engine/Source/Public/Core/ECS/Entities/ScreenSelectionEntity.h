@@ -15,6 +15,19 @@ enum class ESelectionType
 	DragAndDrop
 };
 
+/** Defines current drag and drop operation state */
+enum class EScreenDragState
+{
+	None,
+
+	/** Used when starting drag */
+	Start,
+	/** Used after initial Start of drag */
+	Updating,
+	/** Used at end of drag */
+	End
+};
+
 /**
  * Entity for managing selectable objects
  */
@@ -33,9 +46,9 @@ public:
 	virtual void RegisterScreenSelectable(IScreenSelectionInterface* InScreenSelectable);
 	virtual void UnRegisterScreenSelectable(IScreenSelectionInterface* InScreenSelectable);
 
-	virtual bool OnMouseMove(FVector2D<int> InMousePosition, EInputState InputState);
-	virtual bool OnMouseLeftClick(FVector2D<int> InMousePosition, EInputState InputState);
-	virtual bool OnMouseRightClick(FVector2D<int> InMousePosition, EInputState InputState);
+	virtual bool OnMouseMove(FVector2D<int32> InMousePosition, EInputState InputState);
+	virtual bool OnMouseLeftClick(FVector2D<int32> InMousePosition, EInputState InputState);
+	virtual bool OnMouseRightClick(FVector2D<int32> InMousePosition, EInputState InputState);
 
 	/** Called when selection is started */
 	virtual void OnStartSelecting();
@@ -45,6 +58,9 @@ public:
 
 	/** Called when should select but it was in place - click */
 	virtual void OnClickInsteadOfSelection(const FVector2D<int32>& InMousePositionConverted);
+
+	/** Returns true if area between Selection Start and End is covering SelectionTarget (does not need to fully cover it) */
+	static bool IsInSelectionArea(const FVector2D<int32>& InSelectionTargetStart, const FVector2D<int32>& InSelectionTargetSize, const FVector2D<int32>& InSelectionStart, const FVector2D<int32>& InSelectionEnd);
 
 	const CArray<IScreenSelectionInterface*>& GetCurrentlySelectedObjects() const;
 
@@ -58,6 +74,9 @@ protected:
 	/** End EEntity */
 
 	void CheckScreenSelection(const FVector2D<int32>& InMousePositionConverted);
+	void StartScreenDrag(const FVector2D<int32>& InMousePositionConverted);
+	void ContinueScreenDrag(const FVector2D<int32>& InMousePositionConverted);
+	void EndScreenDrag(const FVector2D<int32>& InMousePositionConverted);
 
 	virtual void AddToCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable);
 	virtual void RemoveFromCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable);
@@ -82,5 +101,8 @@ protected:
 
 	/** How should we select objects */
 	ESelectionType SelectionType;
+
+	/** What is current state of drag and drop operation? */
+	EScreenDragState ScreenDragState;
 
 };
