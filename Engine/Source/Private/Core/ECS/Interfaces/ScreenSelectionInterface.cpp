@@ -82,6 +82,11 @@ void IScreenSelectionInterface::NativeDoAction(const FVector2D<int32>& ActionLoc
 	}
 }
 
+void IScreenSelectionInterface::NativeStartDragAction(const FVector2D<int32>& StartLocation)
+{
+	OnStartDragAction(StartLocation);
+}
+
 void IScreenSelectionInterface::NativeUpdateDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& CurrentLocation)
 {
 	OnUpdateDragAction(StartLocation, CurrentLocation);
@@ -93,6 +98,10 @@ void IScreenSelectionInterface::NativeEndDragAction(const FVector2D<int32>& Star
 }
 
 void IScreenSelectionInterface::OnDoAction(const FVector2D<int32>& ActionLocation)
+{
+}
+
+void IScreenSelectionInterface::OnStartDragAction(const FVector2D<int32>& StartLocation)
 {
 }
 

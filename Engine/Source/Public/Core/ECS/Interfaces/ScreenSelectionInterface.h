@@ -29,6 +29,7 @@ public:
 
 	void NativeDoAction(const FVector2D<int32>& ActionLocation);
 
+	void NativeStartDragAction(const FVector2D<int32>& StartLocation);
 	void NativeUpdateDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& CurrentLocation);
 	void NativeEndDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& FinalLocation);
 
@@ -50,6 +51,9 @@ protected:
 
 	/** Optional action - By default it will be called when selected and right clicked - Move / Attack */
 	virtual void OnDoAction(const FVector2D<int32>& ActionLocation);
+
+	/**  */
+	virtual void OnStartDragAction(const FVector2D<int32>& StartLocation);
 
 	/** Used with drag - called each frame with new location */
 	virtual void OnUpdateDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& CurrentLocation);

@@ -57,28 +57,9 @@ bool EScreenSelectionEntity::OnMouseMove(FVector2D<int32> InMousePosition, EInpu
 		{
 			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
 
-			switch (ScreenDragState)
+			if (ScreenDragState == EScreenDragState::Updating)
 			{
-				case EScreenDragState::Start:
-				{
-					StartScreenDrag(InMousePositionConverted);
-
-					break;
-				}
-				case EScreenDragState::Updating:
-				{
-					ContinueScreenDrag(InMousePositionConverted);
-
-					break;
-				}
-				case EScreenDragState::End:
-				{
-					EndScreenDrag(InMousePositionConverted);
-
-					ScreenDragState = EScreenDragState::None;
-
-					break;
-				}
+				ContinueScreenDrag(InMousePositionConverted);
 			}
 
 			break;
@@ -135,11 +116,15 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, 
 		}
 		case ESelectionType::DragAndDrop:
 		{
+			const FVector2D<int32> InMousePositionConverted = ConvertLocationFromScreenSpace(InMousePosition);
+
 			switch (InputState)
 			{
 				case EInputState::PRESS:
 				{
 					ScreenDragState = EScreenDragState::Start;
+
+					StartScreenDrag(InMousePositionConverted);
 
 					break;
 				}
@@ -147,6 +132,8 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, 
 				case EInputState::RELEASE:
 				{
 					ScreenDragState = EScreenDragState::End;
+
+					EndScreenDrag(InMousePositionConverted);
 
 					break;
 				}
@@ -289,6 +276,8 @@ void EScreenSelectionEntity::StartScreenDrag(const FVector2D<int32>& InMousePosi
 {
 	CurrentlySelectedObjects.Clear();
 
+	SelectionStart = InMousePositionConverted;
+
 	for (ContainerInt i = 0; i < ScreenSelectableObjects.Size(); i++)
 	{
 		IScreenSelectionInterface* ScreenSelectable = ScreenSelectableObjects[i];
@@ -299,17 +288,32 @@ void EScreenSelectionEntity::StartScreenDrag(const FVector2D<int32>& InMousePosi
 		if (ScreenSelectable->NativeCanBeSelected() && IsInSelectionArea(ScreenSelectableLocation, ScreenSelectableSize, InMousePositionConverted, InMousePositionConverted))
 		{
 			CurrentlySelectedObjects.Push(ScreenSelectable);
+
+			ScreenSelectable->NativeUpdateDragAction(SelectionStart, InMousePositionConverted);
 		}
 	}
+
+	ScreenDragState = EScreenDragState::Updating;
 }
 
 void EScreenSelectionEntity::ContinueScreenDrag(const FVector2D<int32>& InMousePositionConverted)
 {
-	
+	for (IScreenSelectionInterface* ScreenSelectable : CurrentlySelectedObjects)
+	{
+		ScreenSelectable->NativeUpdateDragAction(SelectionStart, InMousePositionConverted);
+	}
 }
 
 void EScreenSelectionEntity::EndScreenDrag(const FVector2D<int32>& InMousePositionConverted)
 {
+	for (IScreenSelectionInterface* ScreenSelectable : CurrentlySelectedObjects)
+	{
+		ScreenSelectable->NativeEndDragAction(SelectionStart, InMousePositionConverted);
+	}
+
+	CurrentlySelectedObjects.Clear();
+
+	ScreenDragState = EScreenDragState::None;
 }
 
 void EScreenSelectionEntity::AddToCurrentlySelectedObjects(IScreenSelectionInterface* InScreenSelectable)
