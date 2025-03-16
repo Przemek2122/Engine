@@ -179,6 +179,7 @@ CArray<std::string> FFileSystem::GetDirectories(const std::string& Path, const b
 {
     CArray<std::string> Directories;
 
+#if PLATFORM_DESKTOP
     for (const std::filesystem::directory_entry& Entry : fs::directory_iterator(Path))
     {
 	    if (Entry.is_directory())
@@ -196,6 +197,23 @@ CArray<std::string> FFileSystem::GetDirectories(const std::string& Path, const b
             Directories.Push(PathEntry.string());
 	    }
     }
+#else
+	auto ListDirectories = [](void* userdata, const char* dirname, const char* fname) -> SDL_EnumerationResult
+	{
+		CArray<std::string>* DirectoriesPtr = static_cast<CArray<std::string>*>(userdata);
+
+        DirectoriesPtr->Push(fname);
+
+        return SDL_ENUM_CONTINUE;
+	};
+
+    void* Data = &Directories;
+
+    if (!SDL_EnumerateDirectory(Path.c_str(), ListDirectories, Data))
+    {
+        LOG_ERROR("Failed to enumerate directory: " <<  SDL_GetError());
+    }
+#endif
 
     return Directories;
 }
