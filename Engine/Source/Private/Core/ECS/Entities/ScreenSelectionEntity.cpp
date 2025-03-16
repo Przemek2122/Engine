@@ -9,6 +9,7 @@ EScreenSelectionEntity::EScreenSelectionEntity(FEntityManager* InEntityManager)
 	, bIsSelecting(false)
 	, ClickInsteadOfSelectionTolerance(2)
 	, SelectionType(ESelectionType::SelectMultipleObject)
+	, ScreenDragState(EScreenDragState::None)
 {
 }
 
@@ -17,6 +18,20 @@ void EScreenSelectionEntity::EndPlay()
 	OnEndPlay.Execute();
 
 	EEntity::EndPlay();
+}
+
+void EScreenSelectionEntity::Render()
+{
+	EEntity::Render();
+
+#if ENGINE_ALLOW_ENTITY_SCREEN_SELECTION_DEBUG
+	FRenderer* Renderer = GetWindow()->GetRenderer();
+
+	for (IScreenSelectionInterface* ScreenSelectable : ScreenSelectableObjects)
+	{
+		Renderer->DrawRectangleOutline(ScreenSelectable->GetScreenSelectionLocation(), ScreenSelectable->GetScreenSelectionSize(), FColorRGBA::ColorDodgerBlue());
+	}
+#endif
 }
 
 void EScreenSelectionEntity::SetSelectionType(ESelectionType InSelectionType)
@@ -126,6 +141,8 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, 
 
 					StartScreenDrag(InMousePositionConverted);
 
+					bWasInputConsumed = true;
+
 					break;
 				}
 
@@ -134,6 +151,8 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, 
 					ScreenDragState = EScreenDragState::End;
 
 					EndScreenDrag(InMousePositionConverted);
+
+					bWasInputConsumed = true;
 
 					break;
 				}
@@ -254,8 +273,8 @@ void EScreenSelectionEntity::CheckScreenSelection(const FVector2D<int32>& InMous
 	{
 		IScreenSelectionInterface* ScreenSelectable = ScreenSelectableObjects[i];
 
-		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetLocation();
-		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetSize();
+		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetScreenSelectionLocation();
+		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetScreenSelectionSize();
 
 		if (ScreenSelectable->NativeCanBeSelected() && IsInSelectionArea(ScreenSelectableLocation, ScreenSelectableSize, SelectionStart, SelectionEnd))
 		{
@@ -282,8 +301,8 @@ void EScreenSelectionEntity::StartScreenDrag(const FVector2D<int32>& InMousePosi
 	{
 		IScreenSelectionInterface* ScreenSelectable = ScreenSelectableObjects[i];
 
-		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetLocation();
-		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetSize();
+		const FVector2D<int32> ScreenSelectableLocation = ScreenSelectable->GetScreenSelectionLocation();
+		const FVector2D<int32> ScreenSelectableSize = ScreenSelectable->GetScreenSelectionSize();
 
 		if (ScreenSelectable->NativeCanBeSelected() && IsInSelectionArea(ScreenSelectableLocation, ScreenSelectableSize, InMousePositionConverted, InMousePositionConverted))
 		{

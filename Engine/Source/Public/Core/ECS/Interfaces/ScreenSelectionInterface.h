@@ -34,10 +34,10 @@ public:
 	void NativeEndDragAction(const FVector2D<int32>& StartLocation, const FVector2D<int32>& FinalLocation);
 
 	/** Override to return location of selection */
-	virtual FVector2D<int32> GetLocation() = 0;
+	virtual FVector2D<int32> GetScreenSelectionLocation() = 0;
 
 	/** Override to return size of selection */
-	virtual FVector2D<int32> GetSize() = 0;
+	virtual FVector2D<int32> GetScreenSelectionSize() = 0;
 
 protected:
 	/** Use to determine if object can be selected */

@@ -3,6 +3,10 @@
 #include "CoreMinimal.h"
 #include "ECS/Entity.h"
 
+#if DEBUG
+#define ENGINE_ALLOW_ENTITY_SCREEN_SELECTION_DEBUG 1
+#endif
+
 enum class EInputState;
 class IScreenSelectionInterface;
 
@@ -39,6 +43,7 @@ public:
 
 	/** Begin EEntity */
 	void EndPlay() override;
+	void Render() override;
 	/** End EEntity */
 
 	virtual void SetSelectionType(ESelectionType InSelectionType);
