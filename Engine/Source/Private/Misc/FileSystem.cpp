@@ -179,6 +179,7 @@ CArray<std::string> FFileSystem::GetDirectories(const std::string& Path, const b
 {
     CArray<std::string> Directories;
 
+    // @TODO Test if std filesystem is worth keeping
 #if PLATFORM_DESKTOP
     for (const std::filesystem::directory_entry& Entry : fs::directory_iterator(Path))
     {
