@@ -80,6 +80,7 @@ public:
 		ASSERT_IS_BASE_OF(FComponentAnimation, TComponentAnimationClass, "Class mismatch, CreateComponentAnimation requries class to inherit from CreateComponentAnimation.");
 
 		std::shared_ptr<TComponentAnimationClass> ComponentAnimationPtr = std::make_shared<TComponentAnimationClass>(InAnimatedComponent);
+		ComponentAnimationPtr->Init(this);
 
 		ComponentAnimationArray.Push(ComponentAnimationPtr);
 
@@ -179,10 +180,10 @@ private:
 	/** EntityAttachment's root component cache */
 	UParentComponent* EntityAttachmentRootComponent;
 
-	/** Used to define relative location to attached actor */
+	/** Used to define relative location to attached entity */
 	FVector2D<int32> AttachmentRelativeLocation;
 
-	/** Used to define relative rotation to attached actor */
+	/** Used to define relative rotation to attached entity */
 	int32 AttachmentRelativeRotation;
 
 };
