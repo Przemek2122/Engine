@@ -3,8 +3,16 @@
 
 FComponentAnimation::FComponentAnimation(UComponent* InComponentToAnimate)
 	: ComponentToAnimate(InComponentToAnimate)
+	, Entity(nullptr)
 	, bIsAnimationRunning(false)
 {
+}
+
+void FComponentAnimation::Init(EEntity* InEntity)
+{
+	LOG_ERROR("Entity should be owner of component it is animating.");
+
+	Entity = InEntity;
 }
 
 void FComponentAnimation::Begin()

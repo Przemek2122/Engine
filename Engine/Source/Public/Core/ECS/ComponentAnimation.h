@@ -10,6 +10,8 @@ class ENGINE_API FComponentAnimation
 public:
 	FComponentAnimation(UComponent* InComponentToAnimate);
 
+	void Init(EEntity* InEntity);
+
 	void Begin();
 	void Tick(const float DeltaTime);
 	void End();
@@ -46,7 +48,13 @@ protected:
 	virtual void OnRestoreState();
 
 private:
+	/** Component which we animate */
 	UComponent* ComponentToAnimate;
+
+	/** Entity owning component and this animation */
+	EEntity* Entity;
+
+	/** True if running, false if not OR paused. */
 	bool bIsAnimationRunning;
 
 };
