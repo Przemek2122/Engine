@@ -122,7 +122,7 @@ public:
 	void UnBindObject(TClass* InClassObject, TReturnType(TClass::* InFunctionPointer)(TInParams...))
 	{
 		ContainerInt Index;
-		const bool bIsFound = DelegateBase::Functors.FindByLambda([&](FFunctorBase<TReturnType, TInParams...>* Object)
+		const bool bIsFound = DelegateBase::Functors.FindIndexByPredicate([&](FFunctorBase<TReturnType, TInParams...>* Object)
 		{
 			if (FFunctorObject<TClass, TReturnType, TInParams...>* FunctorObject = dynamic_cast<FFunctorObject<TClass, TReturnType, TInParams...>*>(Object))
 			{

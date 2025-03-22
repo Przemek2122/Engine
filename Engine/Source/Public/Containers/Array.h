@@ -5,9 +5,6 @@
 #include "ContainerBase.h"
 #include "Types/Functors/FunctorLambda.h"
 #include "Includes/EngineMacros.h"
-
-#include <vector>
-
 #include "Misc/Math.h"
 
 /**
@@ -128,6 +125,28 @@ public:
 	void InsertAt(TSizeType Index, TTypeAuto Value)
 	{
 		Vector.insert(Vector.begin() + Index, Value); 
+	}
+
+	/** Iterate and remove object or objects every time lambda returns true. */
+	void RemoveByPredicate(FFunctorLambda<bool, TType&> Function, const bool bRemoveOnlyOneInstance = false)
+	{
+		for (auto i = 0; i < Vector.size(); )
+		{
+			if (Function(Vector[i]))
+			{
+				RemoveAt(i);
+
+				if (bRemoveOnlyOneInstance)
+				{
+					break;
+				}
+			}
+			else
+			{
+				// Increment only if not removed
+				++i;
+			}
+		}
 	}
 	
 	bool RemoveAt(const TSizeType Index)
@@ -270,26 +289,12 @@ public:
 		return -1;
 	}
 
-	/** @returns true if found @note do not use index if function returns false as it might be unitialised */
-	bool FindByLambdaByComparingObjects(TType& Object, FFunctorLambda<bool, TType&, TType&> Function, TSizeType& Index)
-	{
-		for (auto i = 0; i < Vector.size(); i++)
-		{
-			if (Function(Vector[i], Object))
-			{
-				Index = i;
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-
-	/** @returns true if found @note do not use index if function returns false as it might be uninitialised */
-	template<typename TAutoType>
-	bool FindByLambda(TAutoType Function, TSizeType& Index)
+	/**
+	 * Search for index, will return index when @Function returns true.
+	 * @note do not use index if function returns false as it might be uninitialised
+	 * @returns true if found, false otherwise
+	 */
+	bool FindIndexByPredicate(FFunctorLambda<bool, TType&> Function, TSizeType& Index)
 	{
 		for (auto i = 0; i < Vector.size(); i++)
 		{

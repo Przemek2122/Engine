@@ -20,7 +20,7 @@ void FAITree::RemoveAction(const FAIActionBase* AiAction)
 {
 	ContainerInt Index;
 
-	const bool bIsIndexFound = AllAIActionsArray.FindByLambda([&](const std::shared_ptr<FAIActionBase>& Item)
+	const bool bIsIndexFound = AllAIActionsArray.FindIndexByPredicate([&](const std::shared_ptr<FAIActionBase>& Item)
 	{
 		bool bIsItemEqual = false;
 
