@@ -133,8 +133,12 @@ inline bool Inline_ENSURE_VALID_Lambda(auto Condition)
 #define TEXT_CHAR(Text) (const_cast<char*>(Text))
 #define STRING(Text) std::string(Text)
 
-/** Macro to check if CurrentClass inherits from BaseClass at compile time. FailMessage will be shown in log in case of missing class */
-#define ASSERT_IS_BASE_OF(BaseClass, CurrentClass, FailMessage) static_assert(std::is_base_of_v<BaseClass, CurrentClass>, FailMessage);
+/**
+ * Macro to check if CurrentClass inherits from BaseClass or both are the same at compile time.
+ * FailMessage will be shown in log in case of missing class
+ */
+#define ASSERT_IS_BASE_OF(BaseClass, CurrentClass, FailMessage) \
+	 static_assert(std::is_base_of_v<std::remove_pointer_t<BaseClass>, std::remove_pointer_t<CurrentClass>>, #FailMessage)
 
 #define THREAD_WAIT_MS(TimeInMS)			std::this_thread::sleep_for(std::chrono::milliseconds(TimeInMS))
 #define THREAD_WAIT_NS(TimeInNS)			std::this_thread::sleep_for(std::chrono::nanoseconds(TimeInNS))
