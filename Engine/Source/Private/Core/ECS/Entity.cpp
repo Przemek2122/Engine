@@ -38,11 +38,16 @@ void EEntity::EndPlay()
 	UnRegisterInputInternal();
 }
 
-void EEntity::Tick(float DeltaTime)
+void EEntity::Tick(const float DeltaTime)
 {
 	for (const std::shared_ptr<FAITree>& TreeArray : AiTreeArray)
 	{
 		TreeArray->TickInternal();
+	}
+
+	for (const std::shared_ptr<FComponentAnimation>& ComponentAnimation : ComponentAnimationArray)
+	{
+		ComponentAnimation->Tick(DeltaTime);
 	}
 }
 
@@ -213,6 +218,14 @@ FWindowAdvanced* EEntity::GetWindowAdvanced() const
 FMap* EEntity::GetCurrentMap() const
 {
 	return GetWindow()->GetMapManager()->GetCurrentMap();
+}
+
+void EEntity::DestroyComponentAnimation(FComponentAnimation* InComponentAnimation)
+{
+	ComponentAnimationArray.RemoveByPredicate([&](std::shared_ptr<FComponentAnimation> InComponentAnimationPtr) -> bool
+	{
+		return (InComponentAnimation == InComponentAnimationPtr.get());
+	}, true);
 }
 
 FGameModeManager* EEntity::GetGameModeManager() const

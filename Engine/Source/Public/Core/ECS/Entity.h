@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AI/AITree.h"
 #include "ECS/BaseComponent.h"
+#include "ECS/ComponentAnimation.h"
+#include "AI/AITree.h"
 
 class FGameModeBase;
 class FWindowAdvanced;
@@ -71,6 +72,22 @@ public:
 	FGameModeManager* GetGameModeManager() const;
 	FGameModeBase* GetGameMode() const;
 	FMap* GetCurrentMap() const;
+
+	/** Create component animation */
+	template<typename TComponentAnimationClass>
+	TComponentAnimationClass* CreateComponentAnimation(UComponent* InAnimatedComponent)
+	{
+		ASSERT_IS_BASE_OF(FComponentAnimation, TComponentAnimationClass, "Class mismatch, CreateComponentAnimation requries class to inherit from CreateComponentAnimation.");
+
+		std::shared_ptr<TComponentAnimationClass> ComponentAnimationPtr = std::make_shared<TComponentAnimationClass>(InAnimatedComponent);
+
+		ComponentAnimationArray.Push(ComponentAnimationPtr);
+
+		return ComponentAnimationPtr.get();
+	}
+
+	/** Destroy component animation */
+	void DestroyComponentAnimation(FComponentAnimation* InComponentAnimation);
 
 	const CArray<std::shared_ptr<FAIMemorySet>>& GetAIMemorySetArray() const { return AIMemorySetArray; }
 
@@ -149,6 +166,9 @@ private:
 
 	/** Ai tree array */
 	CArray<std::shared_ptr<FAITree>> AiTreeArray;
+
+	/** Array with component animations */
+	CArray<std::shared_ptr<FComponentAnimation>> ComponentAnimationArray;
 
 	/** Used to avoid double calling BeginPlay */
 	bool bWasBeginPlayCalled;
