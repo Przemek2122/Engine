@@ -56,6 +56,23 @@ bool IComponentManagerInterface::DestroyComponentByInstance(const UBaseComponent
 	return false;
 }
 
+bool IComponentManagerInterface::HasComponent(UBaseComponent* InBaseComponent, bool bCheckSubComponents)
+{
+	bool bHasComponent = false;
+
+	for (std::pair<const std::string, std::shared_ptr<UBaseComponent>>& ComponentPair : ComponentsMap)
+	{
+		if (ComponentPair.second.get() == InBaseComponent || (bCheckSubComponents && HasComponent(ComponentPair.second.get(), bCheckSubComponents)))
+		{
+			bHasComponent = true;
+
+			break;
+		}
+	}
+
+	return bHasComponent;
+}
+
 void IComponentManagerInterface::OnComponentCreated(const std::string& ComponentName, UBaseComponent* NewComponent)
 {
 }

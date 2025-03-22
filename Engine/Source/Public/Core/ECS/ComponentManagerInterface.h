@@ -83,6 +83,9 @@ public:
 		return nullptr;
 	}
 
+	/** Iterate all components to check if this manager has given component */
+	bool HasComponent(UBaseComponent* InBaseComponent, bool bCheckSubComponents = true);
+
 	/** Called when new component is created. */
 	virtual void OnComponentCreated(const std::string& ComponentName, UBaseComponent* NewComponent);
 
