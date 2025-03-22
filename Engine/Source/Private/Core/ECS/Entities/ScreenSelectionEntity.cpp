@@ -308,7 +308,7 @@ void EScreenSelectionEntity::StartScreenDrag(const FVector2D<int32>& InMousePosi
 		{
 			CurrentlySelectedObjects.Push(ScreenSelectable);
 
-			ScreenSelectable->NativeUpdateDragAction(SelectionStart, InMousePositionConverted);
+			ScreenSelectable->NativeStartDragAction(SelectionStart);
 		}
 	}
 

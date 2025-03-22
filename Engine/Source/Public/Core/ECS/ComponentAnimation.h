@@ -14,6 +14,7 @@ public:
 
 	void Begin();
 	void Tick(const float DeltaTime);
+	void TickManual();
 	void End();
 
 	/** Pause animation */
@@ -24,6 +25,15 @@ public:
 
 	/** Cancel and restore state */
 	void Abort();
+
+	/** Should tick be called every frame when it's active or should tick be called manually */
+	void SetAutoUpdate(const bool bInAutoUpdate);
+
+	/** If true animation instance will be removed after end */
+	void SetAutoDelete(const bool bInAutoDelete);
+
+	/** Called when animation ends */
+	FDelegate<void> OnAnimationFinished;
 
 	UComponent* GetComponentToAnimate() const { return ComponentToAnimate; }
 	bool IsAnimationRunning() const { return bIsAnimationRunning; }
@@ -57,6 +67,12 @@ private:
 	/** True if running, false if not OR paused. */
 	bool bIsAnimationRunning;
 
+	/** True if should call TickAnimation from entity */
+	bool bAutoUpdate;
+
+	/** If true the animation will be auto deleted */
+	bool bAutoDelete;
+
 };
 
 /**
@@ -65,6 +81,9 @@ private:
  */
 class ENGINE_API FComponentAnimationInline : public FComponentAnimation
 {
+public:
+	FComponentAnimationInline(UComponent* InComponentToAnimate);
+
 protected:
 	void BeginAnimation() override;
 	void TickAnimation(float DeltaTime) override;

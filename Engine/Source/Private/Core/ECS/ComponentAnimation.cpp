@@ -5,12 +5,25 @@ FComponentAnimation::FComponentAnimation(UComponent* InComponentToAnimate)
 	: ComponentToAnimate(InComponentToAnimate)
 	, Entity(nullptr)
 	, bIsAnimationRunning(false)
+	, bAutoUpdate(true)
+	, bAutoDelete(true)
 {
+#if DEBUG
+	if (ComponentToAnimate == nullptr)
+	{
+		LOG_ERROR("ComponentToAnimate == nullptr");
+	}
+#endif
 }
 
 void FComponentAnimation::Init(EEntity* InEntity)
 {
-	LOG_ERROR("Entity should be owner of component it is animating.");
+#if DEBUG
+	if (!InEntity->HasComponent(ComponentToAnimate))
+	{
+		LOG_ERROR("Entity should be owner of component it is animating.");
+	}
+#endif
 
 	Entity = InEntity;
 }
@@ -27,9 +40,17 @@ void FComponentAnimation::Begin()
 
 void FComponentAnimation::Tick(const float DeltaTime)
 {
-	if (bIsAnimationRunning)
+	if (bIsAnimationRunning && bAutoUpdate)
 	{
 		TickAnimation(DeltaTime);
+	}
+}
+
+void FComponentAnimation::TickManual()
+{
+	if (bIsAnimationRunning)
+	{
+		Tick(FGlobalDefines::GEngine->GetDeltaTime());
 	}
 }
 
@@ -40,6 +61,20 @@ void FComponentAnimation::End()
 		bIsAnimationRunning = false;
 
 		EndAnimation();
+
+		OnAnimationFinished.Execute();
+
+		if (bAutoDelete)
+		{
+			if (Entity != nullptr)
+			{
+				Entity->DestroyComponentAnimation(this);
+			}
+			else
+			{
+				LOG_ERROR("Unable to auto delete, Entity is missing.");
+			}
+		}
 	}
 }
 
@@ -75,6 +110,16 @@ void FComponentAnimation::Abort()
 	}
 }
 
+void FComponentAnimation::SetAutoUpdate(const bool bInAutoUpdate)
+{
+	bAutoUpdate = bInAutoUpdate;
+}
+
+void FComponentAnimation::SetAutoDelete(const bool bInAutoDelete)
+{
+	bAutoDelete = bInAutoDelete;
+}
+
 void FComponentAnimation::OnPauseAnimation()
 {
 }
@@ -84,6 +129,11 @@ void FComponentAnimation::OnResumeAnimation()
 }
 
 void FComponentAnimation::OnRestoreState()
+{
+}
+
+FComponentAnimationInline::FComponentAnimationInline(UComponent* InComponentToAnimate)
+	: FComponentAnimation(InComponentToAnimate)
 {
 }
 

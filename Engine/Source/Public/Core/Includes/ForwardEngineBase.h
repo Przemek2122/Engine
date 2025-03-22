@@ -1,8 +1,8 @@
-// Created by Przemys³aw Wiewióra 2020 - 2022
+// Created by Przemys³aw Wiewióra 2020 - 2025
 
 #pragma once
 
-// FGlobalDefines::GEngine base classes forward declarations
+class FGlobalDefines;
 
 class FEngineMain;
 class FEngine;

@@ -2,7 +2,6 @@
 
 #pragma once
 
-// FGlobalDefines::GEngine
 #include "Misc/Util.h"
 
 #include "Assets/Assets/AssetBase.h"
