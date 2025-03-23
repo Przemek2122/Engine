@@ -13,7 +13,7 @@ public:
 	void Init(EEntity* InEntity);
 
 	void Begin();
-	void Tick(const float DeltaTime);
+	void Tick(float DeltaTime);
 	void TickManual();
 	void End();
 
@@ -27,10 +27,10 @@ public:
 	void Abort();
 
 	/** Should tick be called every frame when it's active or should tick be called manually */
-	void SetAutoUpdate(const bool bInAutoUpdate);
+	void SetAutoUpdate(bool bInAutoUpdate);
 
 	/** If true animation instance will be removed after end */
-	void SetAutoDelete(const bool bInAutoDelete);
+	void SetAutoDelete(bool bInAutoDelete);
 
 	/** Called when animation ends */
 	FDelegate<void> OnAnimationFinished;
@@ -43,7 +43,7 @@ protected:
 	virtual void BeginAnimation() = 0;
 
 	/** Called every frame during animation */
-	virtual void TickAnimation(const float DeltaTime) = 0;
+	virtual void TickAnimation(float DeltaTime) = 0;
 
 	/** Called on end of animation */
 	virtual void EndAnimation() = 0;

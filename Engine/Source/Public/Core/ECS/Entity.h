@@ -1,11 +1,11 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ECS/BaseComponent.h"
-#include "ECS/ComponentAnimation.h"
-#include "AI/AITree.h"
+#include "Core/ECS/BaseComponent.h"
+#include "Core/ECS/ComponentAnimation.h"
+#include "Core/ECS/AI/AITree.h"
 
 class FGameModeBase;
 class FWindowAdvanced;

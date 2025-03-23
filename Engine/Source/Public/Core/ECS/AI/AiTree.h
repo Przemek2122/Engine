@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "AIActionBase.h"
 #include "CoreMinimal.h"
+#include "AIActionBase.h"
 
 class FAIMemorySet;
 class FAIActionBase;

@@ -86,7 +86,7 @@ typedef Uint64 uint64;
 typedef int32_t int32;
 typedef int64_t int64;
 
-inline bool Inline_ENSURE_VALID_Lambda(auto Condition)
+SDL_FORCE_INLINE bool Inline_ENSURE_VALID_Lambda(auto Condition)
 {
 	if (Condition)
 	{

@@ -1,7 +1,7 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
-#include "ECS/Entity.h"
+#include "Core/ECS/Entity.h"
 
 #include "Engine/Logic/GameModeManager.h"
 #include "Renderer/WindowAdvanced.h"
