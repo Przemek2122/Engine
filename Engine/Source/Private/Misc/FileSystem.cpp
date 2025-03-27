@@ -38,7 +38,7 @@ bool FFileSystem::Directory::Create(const std::string& InPath)
 {
 #if PLATFORM_ANDROID
     /** Android internal memory can not be modified, external storage needs to be used */
-    LOG_ERROR("FFileSystem::Directory::Create is missing");
+    LOG_ERROR("FFileSystem::Directory::Create is missing implementation.");
 #endif
 
 	return fs::create_directory(InPath);
@@ -48,7 +48,7 @@ bool FFileSystem::Directory::Delete(const std::string& InPath, const bool bRecur
 {
 #if PLATFORM_ANDROID
     /** Android internal memory can not be modified, external storage needs to be used */
-    ENSURE_VALID(false);
+    LOG_ERROR("FFileSystem::Directory::Delete is missing implementation.");
 #endif
 
     if (bRecursive)
@@ -84,7 +84,7 @@ bool FFileSystem::File::Create(const std::string& InPath)
 {
 #if PLATFORM_ANDROID
     /** Android internal memory can not be modified, external storage needs to be used */
-    LOG_ERROR("FFileSystem::File::Create is missing");
+    LOG_ERROR("FFileSystem::File::Create is missing implementation.");
 #endif
 
 	const std::ofstream File(InPath.c_str());
@@ -96,7 +96,7 @@ bool FFileSystem::File::Delete(const std::string& InPath)
 {
 #if PLATFORM_ANDROID
     /** Android internal memory can not be modified, external storage needs to be used */
-    ENSURE_VALID(false);
+    LOG_ERROR("FFileSystem::File::Delete is missing implementation.");
 #endif
 
 	return fs::remove(InPath);
@@ -106,7 +106,7 @@ void FFileSystem::File::Clear(const std::string& InPath)
 {
 #if PLATFORM_ANDROID
     /** Android internal memory can not be modified, external storage needs to be used */
-    ENSURE_VALID(false);
+    LOG_ERROR("FFileSystem::File::Clear is missing implementation.");
 #endif
 
     std::ifstream File;
@@ -187,15 +187,24 @@ void FFileSystem::File::GetFileContentLineByLine(FDelegateSafe<void, const std::
 
 void FFileSystem::File::AddFileContentLine(const std::string& Line, const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    LOG_ERROR("FFileSystem::File::AddFileContentLine is missing implementation.");
+#else
     std::ofstream MyFile(InPath);
 
     MyFile << Line;
 
     MyFile.close();
+#endif
 }
 
 void FFileSystem::File::AddFileContentLines(const CArray<std::string>& Lines, const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    LOG_ERROR("FFileSystem::File::AddFileContentLine is missing implementation.");
+#else
     std::ofstream MyFile(InPath);
 
     for (const std::string& Line : Lines)
@@ -204,15 +213,29 @@ void FFileSystem::File::AddFileContentLines(const CArray<std::string>& Lines, co
     }
 
     MyFile.close();
+#endif
 }
 
 bool FFileSystem::IsDirectory(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    LOG_ERROR("FFileSystem::IsDirectory is missing implementation.");
+#else
 	return fs::is_directory(InPath);
+#endif
 }
 
 CArray<std::string> FFileSystem::GetFilesFromDirectory(const std::string& Path, const bool bRecursive)
 {
+#if PLATFORM_ANDROID
+    /**
+     * Android internal memory can not be modified, external storage needs to be used
+     *
+     * This one will actually be very easy to implement, just iterate android manifest file
+     */
+    LOG_ERROR("FFileSystem::GetFilesFromDirectory is missing implementation.");
+#else
     CArray<std::string> Files;
 
     for (const std::filesystem::directory_entry& Entry : fs::directory_iterator(Path))
@@ -221,6 +244,7 @@ CArray<std::string> FFileSystem::GetFilesFromDirectory(const std::string& Path, 
     }
 
     return Files;
+#endif
 }
 
 CArray<std::string> FFileSystem::GetDirectories(const std::string& Path)
