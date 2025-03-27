@@ -11,6 +11,8 @@ struct FIterateDirectoryData
 	{
 	}
 
+	bool IsValid() const { return (!Path.empty() || !Files.IsEmpty() || !Directories.IsEmpty()); }
+
 	std::string Path;
 
 	CArray<std::string> Files;
@@ -47,9 +49,10 @@ public:
 
 		static void AddFileContentLine(const std::string& Line, const std::string& InPath);
 		static void AddFileContentLines(const CArray<std::string>& Lines, const std::string& InPath);
-	};
 
-	static bool ReadLine(SDL_IOStream* IOStream, std::string& CurrentLine);
+	private:
+		static bool ReadLine(SDL_IOStream* IOStream, std::string& CurrentLine);
+	};
 
 	/** Determine if file is directory */
 	static bool IsDirectory(const std::string& InPath);
@@ -63,7 +66,10 @@ public:
 	/** @returns slash for current filesystem */
 	static char GetPlatformSlash();
 
-	/** @returns newline specific to platform */
+	/**
+	 * @returns newline specific to platform. \n
+	 * Prefer GetNewLineChars if possible
+	 */
 	static char GetNewLineChar();
 
 	/** @returns newline char array */
@@ -76,6 +82,7 @@ public:
 	static CArray<std::string> GetAllAssetsFromManifest();
 	static std::shared_ptr<FIterateDirectoryData> GetAllAssetsFromManifestGrouped(const CArray<std::string>& RawData);
 	static void IterativelyAddDirectoriesWithTheirData(std::shared_ptr<FIterateDirectoryData> InData, CArray<std::string>& PathStringParts, int32 SubStrDirectoryIndex);
+	static  std::shared_ptr<FIterateDirectoryData> GetDirectoryByPath(std::shared_ptr<FIterateDirectoryData>& DirectoryEntry, const std::string& SplitPart);
 #endif
 
 private:

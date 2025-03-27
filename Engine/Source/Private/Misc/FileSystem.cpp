@@ -7,16 +7,50 @@ namespace fs = std::filesystem;
 
 bool FFileSystem::Directory::Exists(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    FAssetsManager* AssetsManager = FGlobalDefines::GEngine->GetAssetsManager();
+    std::shared_ptr<FIterateDirectoryData> IterateDirectoryData = AssetsManager->GetAndroidIterateDirectoryData();
+
+    bool bExists = IterateDirectoryData->IsValid();
+    CArray<std::string> PathSplitArray = FStringHelpers::SplitString(InPath, FFileSystem::GetPlatformSlash());
+
+    // Check every part of path to make sure it exist
+    for (std::string& SplitPart : PathSplitArray)
+    {
+        IterateDirectoryData = GetDirectoryByPath(IterateDirectoryData, SplitPart);
+
+        // Check if returned value was correct
+        if (IterateDirectoryData == nullptr || !IterateDirectoryData->IsValid())
+        {
+            bExists = false;
+
+            break;
+        }
+    }
+
+    return bExists;
+#else
     return (std::filesystem::is_directory(InPath));
+#endif
 }
 
 bool FFileSystem::Directory::Create(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    LOG_ERROR("FFileSystem::Directory::Create is missing");
+#endif
+
 	return fs::create_directory(InPath);
 }
 
 bool FFileSystem::Directory::Delete(const std::string& InPath, const bool bRecursive)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    ENSURE_VALID(false);
+#endif
+
     if (bRecursive)
     {
         return fs::remove_all(InPath);
@@ -48,6 +82,11 @@ bool FFileSystem::File::Exists(const std::string& InPath)
 
 bool FFileSystem::File::Create(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    LOG_ERROR("FFileSystem::File::Create is missing");
+#endif
+
 	const std::ofstream File(InPath.c_str());
 
 	return File.good();
@@ -55,11 +94,21 @@ bool FFileSystem::File::Create(const std::string& InPath)
 
 bool FFileSystem::File::Delete(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    ENSURE_VALID(false);
+#endif
+
 	return fs::remove(InPath);
 }
 
 void FFileSystem::File::Clear(const std::string& InPath)
 {
+#if PLATFORM_ANDROID
+    /** Android internal memory can not be modified, external storage needs to be used */
+    ENSURE_VALID(false);
+#endif
+
     std::ifstream File;
 
     File.open(InPath.c_str(), std::ifstream::out | std::ifstream::trunc);
@@ -73,7 +122,7 @@ void FFileSystem::File::Clear(const std::string& InPath)
     File.close();
 }
 
-bool FFileSystem::ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
+bool FFileSystem::File::ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
 {
     CurrentLine = "";
 
@@ -386,10 +435,33 @@ void FFileSystem::IterativelyAddDirectoriesWithTheirData(std::shared_ptr<FIterat
         }
     }
 }
+std::shared_ptr<FIterateDirectoryData> FFileSystem::GetDirectoryByPath(std::shared_ptr<FIterateDirectoryData>& DirectoryEntry, const std::string& SplitPart)
+{
+    std::shared_ptr<FIterateDirectoryData> Out;
+
+    for (std::shared_ptr<FIterateDirectoryData>& SubDirectoryEntry : DirectoryEntry->Directories)
+    {
+        if (SubDirectoryEntry->Path == SplitPart)
+        {
+            Out = SubDirectoryEntry;
+
+            break;
+        }
+    }
+
+    return Out;
+}
 #endif
 
 void FFileSystem::GetFilesFromDirectoryRecursive(CArray<std::string>& Container, const std::filesystem::directory_entry& Entry, const bool bRecursive)
 {
+#if PLATFORM_ANDROID
+    /**
+     * Android implementation is very easy to do,
+     * just use manifest file to iterate directories
+     */
+    ENSURE_VALID(false);
+#else
     if (Entry.is_directory() && bRecursive)
     {
         for (const std::filesystem::directory_entry& CurrentEntry : fs::directory_iterator(Entry.path()))
@@ -401,4 +473,5 @@ void FFileSystem::GetFilesFromDirectoryRecursive(CArray<std::string>& Container,
     {
         Container.Push(Entry.path().relative_path().string());
     }
+#endif
 }
