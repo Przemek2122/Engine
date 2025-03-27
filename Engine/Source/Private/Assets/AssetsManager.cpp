@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #include "CoreEngine.h"
 #include "Assets/AssetsManager.h"
@@ -27,6 +27,14 @@ FAssetsManager::~FAssetsManager()
 FIniManager* FAssetsManager::GetIniManager() const
 {
 	return IniManager;
+}
+
+void FAssetsManager::Initialize()
+{
+#if PLATFORM_ANDROID
+	AndroidManifestFilesRaw = FFileSystem::GetAllAssetsFromManifest();
+	AndroidIterateDirectoryData = FFileSystem::GetAllAssetsFromManifestGrouped(AndroidManifestFilesRaw);
+#endif
 }
 
 void FAssetsManager::RemoveAsset(const std::string& InAssetName, const EAssetType OptionalAssetType)
@@ -69,9 +77,9 @@ std::shared_ptr<FAssetBase> FAssetsManager::GetAsset(const std::string& InAssetN
 	return nullptr;
 }
 
-CArray<std::string> FAssetsManager::GetFilesFromDirectory(const std::string& Directory) const
+CArray<std::string> FAssetsManager::GetDirectoriesFromRelativePath(const std::string& InDirectoryRelativePath) const
 {
-	return FFileSystem::GetDirectories(ConvertRelativeToFullPath(Directory), true);
+	return FFileSystem::GetDirectories(ConvertRelativeToFullPath(InDirectoryRelativePath));
 }
 
 std::string FAssetsManager::GetProjectLocation() const
@@ -102,11 +110,6 @@ std::string FAssetsManager::GetConfigPathRelative() const
 std::string FAssetsManager::GetMapsPathRelative() const
 {
 	return MapsDirName;
-}
-
-std::string FAssetsManager::GetFontsPathRelative() const
-{
-	return GetAssetsPathRelative() + FontsDirName;
 }
 
 std::string FAssetsManager::ConvertRelativeToFullPath(const std::string& InPathRelative) const

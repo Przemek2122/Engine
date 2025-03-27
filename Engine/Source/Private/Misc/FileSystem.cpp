@@ -2,7 +2,6 @@
 
 #include "CoreEngine.h"
 #include "Misc/FileSystem.h"
-#include "Assets/AssetsGlobals.h"
 
 namespace fs = std::filesystem;
 
@@ -175,7 +174,7 @@ CArray<std::string> FFileSystem::GetFilesFromDirectory(const std::string& Path, 
     return Files;
 }
 
-CArray<std::string> FFileSystem::GetDirectories(const std::string& Path, const bool bCovertToJustFolders)
+CArray<std::string> FFileSystem::GetDirectories(const std::string& Path)
 {
     CArray<std::string> Directories;
 
@@ -185,34 +184,37 @@ CArray<std::string> FFileSystem::GetDirectories(const std::string& Path, const b
     {
 	    if (Entry.is_directory())
 	    {
-            auto PathEntry = Entry.path();
+		    std::filesystem::path PathEntry = Entry.path();
 
-            if (bCovertToJustFolders)
+            if (PathEntry.has_filename())
             {
-	            if (PathEntry.has_filename())
-	            {
-                    PathEntry = PathEntry.filename();
-	            }
+                PathEntry = PathEntry.filename();
             }
 
             Directories.Push(PathEntry.string());
 	    }
     }
 #else
-	auto ListDirectories = [](void* userdata, const char* dirname, const char* fname) -> SDL_EnumerationResult
+    const std::shared_ptr<FIterateDirectoryData> IterateDirectoryData = FGlobalDefines::GEngine->GetAssetsManager()->GetAndroidIterateDirectoryData();
+    CArray<std::string> DirectoriesArray = FStringHelpers::SplitString(Path, FFileSystem::GetPlatformSlash());
+    int32 DirectoriesArrayDepth = 0;
+    int32 Index = INDEX_NONE;
+
+    std::shared_ptr<FIterateDirectoryData> CurrentIterateDirectoryData = IterateDirectoryData;
+	while (CurrentIterateDirectoryData->Directories.FindIndexByPredicate([&](const std::shared_ptr<FIterateDirectoryData>& Data)
+        {
+            return (Data->Path == DirectoriesArray[DirectoriesArrayDepth]);
+        }, Index))
 	{
-		CArray<std::string>* DirectoriesPtr = static_cast<CArray<std::string>*>(userdata);
+		CurrentIterateDirectoryData = CurrentIterateDirectoryData->Directories[Index];
+	}
 
-        DirectoriesPtr->Push(fname);
-
-        return SDL_ENUM_CONTINUE;
-	};
-
-    void* Data = &Directories;
-
-    if (!SDL_EnumerateDirectory(Path.c_str(), ListDirectories, Data))
+    if (CurrentIterateDirectoryData != nullptr)
     {
-        LOG_ERROR("Failed to enumerate directory: " <<  SDL_GetError());
+        for (const std::shared_ptr<FIterateDirectoryData>& Data : CurrentIterateDirectoryData->Directories)
+        {
+            Directories.Push(Data->Path);
+        }
     }
 #endif
 
@@ -251,6 +253,140 @@ std::string FFileSystem::GetBasePathCached()
 {
     return FGlobalDefines::GEngine->GetLaunchFullPath();
 }
+
+#if PLATFORM_ANDROID
+CArray<std::string> FFileSystem::GetAllAssetsFromManifest()
+{
+	static const std::string ManifestPath = "asset_manifest.txt";
+
+	CArray<std::string> Files;
+
+	// Open the manifest file
+    std::string OpenForReading = FAssetsGlobals::GetAssetReadType(EAssetReadMethod::OpenForReading);
+	SDL_IOStream* ManifestIO = SDL_IOFromFile(ManifestPath.c_str(), OpenForReading.c_str());
+	if (ManifestIO != nullptr)
+	{
+        // Get the size of the manifest file
+        Sint64 ReturnedSize = SDL_GetIOSize(ManifestIO);
+        if (ReturnedSize > 0) 
+        {
+            // Read the entire manifest into memory
+            std::vector<char> ManifestBuffer(static_cast<size_t>(ReturnedSize) + 1);
+            const Sint64 LoadedSize = SDL_ReadIO(ManifestIO, ManifestBuffer.data(), ReturnedSize);
+            if (LoadedSize == ReturnedSize)
+            {
+                ManifestBuffer[ReturnedSize] = '\0';
+
+                // Parse the file paths
+                std::string content(ManifestBuffer.data());
+                size_t pos = 0;
+                std::string line;
+
+                while ((pos = content.find('\n')) != std::string::npos || !content.empty())
+                {
+                    if (pos != std::string::npos)
+                    {
+                        line = content.substr(0, pos);
+                        content.erase(0, pos + 1);
+                    }
+                    else
+                    {
+                        line = content;
+                        content.clear();
+                    }
+
+                    if (!line.empty()) {
+                        Files.Push(line);
+                    }
+                }
+            }
+            else
+            {
+                LOG_ERROR("Failed to read manifest file");
+            }
+        }
+        else
+        {
+			LOG_ERROR("Failed to get size of asset manifest: " << SDL_GetError());
+        }
+	}
+	else
+	{
+		LOG_ERROR("Failed to open asset manifest: " << SDL_GetError());
+	}
+
+	return Files;
+}
+
+std::shared_ptr<FIterateDirectoryData> FFileSystem::GetAllAssetsFromManifestGrouped(const CArray<std::string>& RawData)
+{
+    std::shared_ptr<FIterateDirectoryData> OutData = std::make_shared<FIterateDirectoryData>("");
+
+    for (const std::string& CurrentPath : RawData)
+    {
+		// Check if line is not empty
+		if (!CurrentPath.empty())
+		{
+			CArray<std::string> PathStringParts = FStringHelpers::SplitString(CurrentPath, FFileSystem::GetPlatformSlash());
+
+            IterativelyAddDirectoriesWithTheirData(OutData, PathStringParts, 0);
+		}
+        else
+        {
+			LOG_WARN("Empty line in manifest file.");
+        }
+    }
+
+    return OutData;
+}
+
+void FFileSystem::IterativelyAddDirectoriesWithTheirData(std::shared_ptr<FIterateDirectoryData> InData, CArray<std::string>& PathStringParts, int32 SubStrDirectoryIndex)
+{
+    if (!PathStringParts.IsEmpty())
+    {
+        // Is last element
+		if (PathStringParts.IsLastIndex(SubStrDirectoryIndex))
+		{
+			const std::string& Value = PathStringParts[PathStringParts.GetLastIndex()];
+			const bool bIsFile = FStringHelpers::ContainsChar(Value, '.');
+            if (bIsFile)
+            {
+				InData->Files.Push(Value);
+			}
+			else
+			{
+				InData->Directories.Push(std::make_shared<FIterateDirectoryData>(Value));
+            }
+		}
+        else
+        {
+	        int32 Index = INDEX_NONE;
+
+	        const bool bContainsPath = InData->Directories.FindIndexByPredicate([&](const std::shared_ptr<FIterateDirectoryData>& IterateDirectoryData) -> bool
+	        {
+	            return (IterateDirectoryData->Path == PathStringParts[SubStrDirectoryIndex]);
+	        }, Index);
+
+	        if (bContainsPath)
+	        {
+	            // Get path
+	            std::shared_ptr<FIterateDirectoryData> FoundData = InData->Directories[Index];
+
+				IterativelyAddDirectoriesWithTheirData(FoundData, PathStringParts, ++SubStrDirectoryIndex);
+	        }
+	        else
+	        {
+	            // Add new path
+	            std::shared_ptr<FIterateDirectoryData> NewData = std::make_shared<FIterateDirectoryData>(PathStringParts[SubStrDirectoryIndex]);
+
+	            IterativelyAddDirectoriesWithTheirData(NewData, PathStringParts, ++SubStrDirectoryIndex);
+
+	            InData->Directories.Push(NewData);
+	        }
+        }
+    }
+}
+#endif
 
 void FFileSystem::GetFilesFromDirectoryRecursive(CArray<std::string>& Container, const std::filesystem::directory_entry& Entry, const bool bRecursive)
 {

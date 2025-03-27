@@ -135,7 +135,7 @@ void FMapManager::CacheAvailableMaps()
 	{
 		AvailableMaps.Clear();
 
-		CArray<std::string> DirectoriesFound = AssetsManager->GetFilesFromDirectory(AssetsManager->GetMapsPathRelative());
+		CArray<std::string> DirectoriesFound = AssetsManager->GetDirectoriesFromRelativePath(AssetsManager->GetMapsPathRelative());
 
 		const char Slash = AssetsManager->GetPlatformSlash();
 

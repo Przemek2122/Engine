@@ -4,6 +4,19 @@
 
 #include "CoreMinimal.h"
 
+struct FIterateDirectoryData
+{
+	FIterateDirectoryData(const std::string& InPath = "")
+		: Path(InPath)
+	{
+	}
+
+	std::string Path;
+
+	CArray<std::string> Files;
+	CArray<std::shared_ptr<FIterateDirectoryData>> Directories;
+};
+
 class ENGINE_API FFileSystem
 {
 public:
@@ -45,7 +58,7 @@ public:
 	static CArray<std::string> GetFilesFromDirectory(const std::string& Path, const bool bRecursive = false);
 
 	/** @returns directory names from given location */
-	static CArray<std::string> GetDirectories(const std::string& Path, const bool bCovertToJustFolders = false);
+	static CArray<std::string> GetDirectories(const std::string& Path);
 	
 	/** @returns slash for current filesystem */
 	static char GetPlatformSlash();
@@ -57,6 +70,13 @@ public:
 	static CArray<char> GetNewLineChars();
 
 	static std::string GetBasePathCached();
+
+#if PLATFORM_ANDROID
+	/** Generates android files array using manifest, depending on number of files may be slow */
+	static CArray<std::string> GetAllAssetsFromManifest();
+	static std::shared_ptr<FIterateDirectoryData> GetAllAssetsFromManifestGrouped(const CArray<std::string>& RawData);
+	static void IterativelyAddDirectoriesWithTheirData(std::shared_ptr<FIterateDirectoryData> InData, CArray<std::string>& PathStringParts, int32 SubStrDirectoryIndex);
+#endif
 
 private:
 	static void GetFilesFromDirectoryRecursive(CArray<std::string>& Container, const std::filesystem::directory_entry& Entry, const bool bRecursive);

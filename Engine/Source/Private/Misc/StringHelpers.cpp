@@ -13,6 +13,23 @@ bool FStringHelpers::CompareCharsCaseInsensitive(const char A, const char B)
     return ( std::tolower(static_cast<unsigned char>(A)) == std::tolower(static_cast<unsigned char>(B)) );
 }
 
+bool FStringHelpers::ContainsChar(const std::string& String, const char SearchFor)
+{
+	bool bContainsChar = false;
+
+    for (const char& Char : String)
+    {
+        if (Char == SearchFor)
+        {
+			bContainsChar = true;
+
+			break;
+        }
+    }
+
+    return bContainsChar;
+}
+
 bool FStringHelpers::ToBoolValue(const std::string& String)
 {
     static std::string BoolTrueStringValue = "true";
@@ -83,4 +100,30 @@ std::string FStringHelpers::RemoveCharsInString(const std::string& BaseString, c
     }
 
     return Out;
+}
+
+CArray<std::string> FStringHelpers::SplitString(const std::string& BaseString, const char Delimiter)
+{
+	CArray<std::string> OutArray;
+	std::string CurrentString;
+
+	for (const char& Char : BaseString)
+	{
+		if (Char == Delimiter)
+		{
+			OutArray.Push(CurrentString);
+			CurrentString.clear();
+		}
+		else
+		{
+			CurrentString += Char;
+		}
+	}
+
+	if (!CurrentString.empty())
+	{
+		OutArray.Push(CurrentString);
+	}
+
+	return OutArray;
 }

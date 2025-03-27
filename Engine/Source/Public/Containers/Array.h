@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemysï¿½aw Wiewiï¿½ra 2020
 
 #pragma once
 
@@ -29,6 +29,16 @@ public:
 	{
 		return (Index >= 0 && Index < Size());
 	}
+
+	bool IsLastIndex(const TSizeType Index) const
+	{
+		return (Index == Size() - 1);
+	}
+
+    TSizeType GetLastIndex() const
+    {
+        return (Size() - 1);
+    }
 
 	void Resize(const TSizeType Number)
 	{
@@ -270,6 +280,23 @@ public:
 	bool Contains(const TType& Value) const
 	{
 		return (std::find(Vector.begin(), Vector.end(), Value) != Vector.end());
+	}
+
+	bool ContainsByPredicate(FFunctorLambda<bool, TType&> Function) const
+	{
+		bool bContains = false;
+
+		for (TType Value : Vector)
+		{
+			if (Function(Value))
+			{
+				bContains = true;
+
+				break;
+			}
+		}
+
+		return bContains;
 	}
 
 	/** @return Index or -1 if not found */

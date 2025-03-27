@@ -140,6 +140,7 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	EngineRender = CreateEngineRenderer();
 	EventHandler = CreateEventHandler();
 	AssetsManager = CreateAssetsManager();
+	AssetsManager->Initialize();
 	EngineTickingManager = CreateEngineTickingManager();
 	EngineRenderingManager = CreateEngineRenderingManager();
 	ThreadsManager = CreateThreadsManager();

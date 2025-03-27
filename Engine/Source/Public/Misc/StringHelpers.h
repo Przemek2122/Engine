@@ -10,6 +10,8 @@ public:
 	static bool CompareStringCaseInsensitive(const std::string& A, const std::string& B);
 	static bool CompareCharsCaseInsensitive(char A, char B);
 
+	static bool ContainsChar(const std::string& String, const char SearchFor);
+
 	static bool ToBoolValue(const std::string& String);
 
 	static std::string ReplaceCharInString(const std::string& BaseString, const char ReplaceFrom, const char ReplaceTo);
@@ -17,5 +19,7 @@ public:
 
 	static std::string RemoveCharInString(const std::string& BaseString, const char RemovedChar);
 	static std::string RemoveCharsInString(const std::string& BaseString, const CArray<char>& ReplaceFrom);
+
+	static CArray<std::string> SplitString(const std::string& BaseString, const char Delimiter);
 
 };

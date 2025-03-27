@@ -34,6 +34,8 @@ protected:
 public:
 	FIniManager* GetIniManager() const;
 
+	void Initialize();
+
 	/** Create asset by template type. */
 	template<class TAssetType>
 	std::shared_ptr<TAssetType> CreateAssetFromAbsolutePath(const std::string& InAssetName, const std::string& InAssetPath)
@@ -165,7 +167,7 @@ public:
 		return false;
 	}
 
-	CArray<std::string> GetFilesFromDirectory(const std::string& Directory) const;
+	CArray<std::string> GetDirectoriesFromRelativePath(const std::string& InDirectoryRelativePath) const;
 
 	/** @returns launch runtime project location */
 	std::string GetProjectLocation() const;
@@ -179,11 +181,15 @@ public:
 	/** @returns 'Assets/Config' directory */
 	std::string GetConfigPathRelative() const;
 	std::string GetMapsPathRelative() const;
-	std::string GetFontsPathRelative() const;
 
 	std::string ConvertRelativeToFullPath(const std::string& InPathRelative) const;
 
-protected:
+#if PLATFORM_ANDROID
+	const CArray<std::string>& GetAndroidManifestFiles() const { return AndroidManifestFilesRaw; }
+	const std::shared_ptr<FIterateDirectoryData> GetAndroidIterateDirectoryData() const { return AndroidIterateDirectoryData; }
+#endif
+
+private:
 	/** All types of assets sorted by type */
 	CMap<EAssetType, FAssetsStructure> AssetsByType;
 
@@ -201,5 +207,11 @@ protected:
 
 	/** Fonts directory */
 	std::string FontsDirName;
+
+	/** List of manifest files for android */
+	CArray<std::string> AndroidManifestFilesRaw;
+
+	/** List of manifest files for android but grouped into directories */
+	std::shared_ptr<FIterateDirectoryData> AndroidIterateDirectoryData;
 
 };
