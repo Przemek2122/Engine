@@ -13,16 +13,17 @@ protected:
 
 	/**
 	 * Relative path to asset
-	 * Sample: 'Textures\UI\Squares\Red.jpg'
+	 * (USE '/' to FORWARD SLASH)
+	 * Sample: 'Textures/UI/Squares/Red.jpg'
 	 * @Note: Do not add Assets dir
 	 */
-	std::string AssetPath;
+	std::filesystem::path AssetPath;
 
 public:
 	FAssetCollectionItem() = default;
-	FAssetCollectionItem(std::string InAssetName, std::string InAssetPath);
+	FAssetCollectionItem(std::string InAssetName, const std::string& InAssetPath);
 
 	const std::string& GetAssetName() const;
-	const std::string& GetAssetPath() const;
+	std::string GetAssetPath() const;
 
 };

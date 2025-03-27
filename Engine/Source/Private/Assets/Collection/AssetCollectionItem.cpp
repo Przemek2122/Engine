@@ -3,9 +3,9 @@
 #include "CoreEngine.h"
 #include "Assets/Collection/AssetCollectionItem.h"
 
-FAssetCollectionItem::FAssetCollectionItem(std::string InAssetName, std::string InAssetPath)
+FAssetCollectionItem::FAssetCollectionItem(std::string InAssetName, const std::string& InAssetPath)
 	: AssetName(std::move(InAssetName))
-	, AssetPath(std::move(InAssetPath))
+	, AssetPath(InAssetPath)
 {
 }
 
@@ -14,7 +14,7 @@ const std::string& FAssetCollectionItem::GetAssetName() const
 	return AssetName;
 }
 
-const std::string& FAssetCollectionItem::GetAssetPath() const
+std::string FAssetCollectionItem::GetAssetPath() const
 {
-	return AssetPath;
+	return AssetPath.string();
 }
