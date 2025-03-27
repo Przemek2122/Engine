@@ -75,7 +75,7 @@ public:
 
 	/** Create component animation */
 	template<typename TComponentAnimationClass>
-	TComponentAnimationClass* CreateComponentAnimation(UComponent* InAnimatedComponent)
+	std::shared_ptr<TComponentAnimationClass> CreateComponentAnimation(UComponent* InAnimatedComponent)
 	{
 		ASSERT_IS_BASE_OF(FComponentAnimation, TComponentAnimationClass, "Class mismatch, CreateComponentAnimation requries class to inherit from CreateComponentAnimation.");
 
@@ -84,7 +84,7 @@ public:
 
 		ComponentAnimationArray.Push(ComponentAnimationPtr);
 
-		return ComponentAnimationPtr.get();
+		return ComponentAnimationPtr;
 	}
 
 	/** Destroy component animation */

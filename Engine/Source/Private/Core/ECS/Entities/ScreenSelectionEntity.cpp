@@ -1,11 +1,13 @@
 #include "CoreEngine.h"
 #include "ECS/Entities/ScreenSelectionEntity.h"
 #include "ECS/Interfaces/ScreenSelectionInterface.h"
+#include "Input/EventHandler.h"
 #include "Input/WindowInputManager.h"
 #include "Renderer/Map/Map.h"
 
 EScreenSelectionEntity::EScreenSelectionEntity(FEntityManager* InEntityManager)
 	: EEntity(InEntityManager)
+	, bForcedEndInteraction(false)
 	, bIsSelecting(false)
 	, ClickInsteadOfSelectionTolerance(2)
 	, SelectionType(ESelectionType::SelectMultipleObject)
@@ -20,6 +22,38 @@ void EScreenSelectionEntity::EndPlay()
 	EEntity::EndPlay();
 }
 
+void EScreenSelectionEntity::Tick(float DeltaTime)
+{
+	EEntity::Tick(DeltaTime);
+
+	if (bForcedEndInteraction)
+	{
+		switch (SelectionType)
+		{
+			case ESelectionType::SelectMultipleObject:
+			{
+				// Not implemented
+				ENSURE_VALID(false);
+
+				break;
+			}
+			case ESelectionType::DragAndDrop:
+			{
+				if (ScreenDragState == EScreenDragState::Updating)
+				{
+					ScreenDragState = EScreenDragState::End;
+
+					EndScreenDrag(FGlobalDefines::GEngine->GetEventHandler()->GetMouseLocationCurrent());
+				}
+
+				break;
+			}
+		}
+
+		bForcedEndInteraction = false;
+	}
+}
+
 void EScreenSelectionEntity::Render()
 {
 	EEntity::Render();
@@ -32,6 +66,11 @@ void EScreenSelectionEntity::Render()
 		Renderer->DrawRectangleOutline(ScreenSelectable->GetScreenSelectionLocation(), ScreenSelectable->GetScreenSelectionSize(), FColorRGBA::ColorDodgerBlue());
 	}
 #endif
+}
+
+void EScreenSelectionEntity::ForceEndInteraction()
+{
+	bForcedEndInteraction = true;
 }
 
 void EScreenSelectionEntity::SetSelectionType(ESelectionType InSelectionType)
@@ -148,11 +187,14 @@ bool EScreenSelectionEntity::OnMouseLeftClick(FVector2D<int32> InMousePosition, 
 
 				case EInputState::RELEASE:
 				{
-					ScreenDragState = EScreenDragState::End;
+					if (ScreenDragState == EScreenDragState::Updating)
+					{
+						ScreenDragState = EScreenDragState::End;
 
-					EndScreenDrag(InMousePositionConverted);
+						EndScreenDrag(InMousePositionConverted);
 
-					bWasInputConsumed = true;
+						bWasInputConsumed = true;
+					}
 
 					break;
 				}

@@ -43,8 +43,11 @@ public:
 
 	/** Begin EEntity */
 	void EndPlay() override;
+	void Tick(float DeltaTime) override;
 	void Render() override;
 	/** End EEntity */
+
+	void ForceEndInteraction();
 
 	virtual void SetSelectionType(ESelectionType InSelectionType);
 
@@ -94,6 +97,9 @@ protected:
 
 	/** Currently selected objects list */
 	CArray<IScreenSelectionInterface*> CurrentlySelectedObjects;
+
+	/** True if user requested end of interaction */
+	bool bForcedEndInteraction;
 
 	/** Selecting when left mouse button is pressed */
 	bool bIsSelecting;

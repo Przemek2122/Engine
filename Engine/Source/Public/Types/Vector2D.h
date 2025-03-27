@@ -7,7 +7,7 @@
 
 /* Two dimensional vector. */
 template<class TType>
-class ENGINE_API FVector2D
+class FVector2D
 {
 public:
 	FVector2D() : X(TType(0)), Y(TType(0)) {}
@@ -179,12 +179,12 @@ public:
 	}
 
 	/** Calculate distance from this vector to 'OtherVector' */
-	TType DistanceTo(const FVector2D& OtherVector) const
+	double DistanceTo(const FVector2D& OtherVector) const
 	{
-		const float DiffXSquared = static_cast<float>(FMath::Power(OtherVector.X - X));
-		const float DiffYSquared = static_cast<float>(FMath::Power(OtherVector.Y - Y));
+		const double DiffXSquared = static_cast<double>(FMath::Power(OtherVector.X - X));
+		const double DiffYSquared = static_cast<double>(FMath::Power(OtherVector.Y - Y));
 
-		return static_cast<TType>(FMath::Sqrt(DiffXSquared + DiffYSquared));
+		return FMath::Sqrt<double>(DiffXSquared + DiffYSquared);
 	}
 
 	/** Return copy of rotated vector */
@@ -209,6 +209,11 @@ public:
 		return RetVector;
 	}
 
+	/** Multiplies vector by -1 to get reversed value */
+	FVector2D<TType> GetReversed() const
+	{
+		return FVector2D<TType>(X * -1, Y * -1);
+	}
 
 	/**
 	 * Function that calculates point which is returned,

@@ -50,7 +50,7 @@ void FComponentAnimation::TickManual()
 {
 	if (bIsAnimationRunning)
 	{
-		Tick(FGlobalDefines::GEngine->GetDeltaTime());
+		TickAnimation(FGlobalDefines::GEngine->GetDeltaTime());
 	}
 }
 
