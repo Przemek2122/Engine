@@ -1,4 +1,4 @@
-// Created by Przemys�aw Wiewi�ra 2020
+// Created by Przemysław Wiewióra 2025
 
 #pragma once
 
