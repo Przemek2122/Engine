@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/Subsystems/EngineSubsystemManagerInterface.h"
 #include "Includes/EngineErrorCodes.h"
 #include "Includes/EngineLaunchParameterCollection.h"
 
@@ -12,7 +13,7 @@ class FEngineRenderingManager;
 class FEngineTickingManager;
 class ITickInterface;
 
-class ENGINE_API FEngine
+class ENGINE_API FEngine : public IEngineSubsystemManagerInterface
 {
 friend FEngineManager;
 	
