@@ -209,10 +209,29 @@ public:
 		return RetVector;
 	}
 
+	/** Use to easily cast to other type */
+	template <typename TNewType>
+	static FVector2D<TNewType> Cast(const FVector2D<TType>& In)
+	{
+		return FVector2D<TNewType>(static_cast<TNewType>(In.X), static_cast<TNewType>(In.Y));
+	}
+
+	/** Use to easily cast to other type */
+	template <typename TNewType>
+	FVector2D<TNewType> Cast()
+	{
+		return FVector2D<TNewType>(static_cast<TNewType>(X), static_cast<TNewType>(Y));
+	}
+
 	/** Multiplies vector by -1 to get reversed value */
 	FVector2D<TType> GetReversed() const
 	{
 		return FVector2D<TType>(X * -1, Y * -1);
+	}
+
+	static FVector2D<TType> ChooseSmallerValueForBothOutputs(const FVector2D<TType> In)
+	{
+		return FVector2D<TType>(FMath::Min(In.X, In.Y));
 	}
 
 	/**
