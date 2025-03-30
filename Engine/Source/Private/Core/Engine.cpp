@@ -21,6 +21,7 @@
 #include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
 #include "Engine/EngineTickingManager.h"
+#include "Engine/Subsystems/EngineSubsystemInterface.h"
 #include "Input/EventHandler.h"
 #include "Includes/EngineLaunchParameterCollection.h"
 #include "Threads/RenderThread.h"
@@ -535,6 +536,29 @@ const std::string& FEngine::GetLaunchRelativePath() const
 void FEngine::AddLambdaToCallOnStartOfNextTick(const FFunctorLambda<void>& Function)
 {
 	FunctionsToCallOnStartOfNextTick.BindLambda(Function);
+}
+
+void FEngine::DeInitializeEngineSubsystems()
+{
+	for (const std::shared_ptr<IEngineSubsystemInterface>& EngineSubsystemPtr : ManagedEngineSubsystems)
+	{
+		EngineSubsystemPtr->DeInitialize();
+	}
+}
+
+void FEngine::TickEngineSubsystems()
+{
+	for (const std::shared_ptr<IEngineSubsystemInterface>& EngineSubsystemPtr : ManagedEngineSubsystems)
+	{
+		EngineSubsystemPtr->Tick();
+	}
+}
+
+void FEngine::DestroyEngineSubsystem(const std::shared_ptr<IEngineSubsystemInterface>& InEngineSubsystem)
+{
+	InEngineSubsystem->DeInitialize();
+
+	ManagedEngineSubsystems.Remove(InEngineSubsystem);
 }
 
 FDelegate<void>& FEngine::GetFunctionsToCallOnStartOfNextTick()
