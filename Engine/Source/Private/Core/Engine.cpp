@@ -21,7 +21,7 @@
 #include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
 #include "Engine/EngineTickingManager.h"
-#include "Engine/Subsystems/EngineSubsystemInterface.h"
+#include "Engine/EngineSubsystemInterface.h"
 #include "Input/EventHandler.h"
 #include "Includes/EngineLaunchParameterCollection.h"
 #include "Threads/RenderThread.h"

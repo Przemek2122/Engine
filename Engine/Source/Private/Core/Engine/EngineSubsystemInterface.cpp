@@ -1,7 +1,7 @@
 // Created by Przemys³aw Wiewióra 2025
 
 #include "CoreEngine.h"
-#include "Engine/Subsystems/EngineSubsystemInterface.h"
+#include "Engine/EngineSubsystemInterface.h"
 
 IEngineSubsystemInterface::IEngineSubsystemInterface()
 {
