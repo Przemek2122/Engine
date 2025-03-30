@@ -59,7 +59,8 @@ protected:
 	/** It will tick until FThreadInputData has bThreadAlive set to false */
 	virtual void TickThread();
 
-	virtual void ThreadManagerFunction();
+	void ThreadManagerFunction();
+	virtual void OnFinishThread();
 
 	FThreadInputData* GetThreadInputData() const { return ThreadInputData; }
 	FThreadData* GetThreadData() const { return ThreadData; }
@@ -91,6 +92,6 @@ protected:
 	~FThreadWorker() override;
 
 	void TickThread() override;
-	void ThreadManagerFunction() override;
+	void OnFinishThread() override;
 
 };

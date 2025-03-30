@@ -7,6 +7,7 @@
 #include "Includes/EngineErrorCodes.h"
 #include "Includes/EngineLaunchParameterCollection.h"
 
+class FIniObject;
 enum class EEngineErrorCode;
 class FNetworkManager;
 class FEngineRenderingManager;
@@ -19,11 +20,14 @@ friend FEngineManager;
 	
 public:
 	FEngine();
-	virtual ~FEngine();
+	~FEngine() override;
 
 private:
 	/** Called before tick. Once. */
 	void EngineInit(int Argc, char* Argv[]);
+
+	/** Called once after EngineInit on other thread */
+	void EngineInitAsync();
 
 	/** Is inside of loop. Runs until Exit() is called. */
 	void EngineTick();
@@ -40,6 +44,12 @@ public:
 
 	/** Third init function. */
 	virtual void PostInit();
+
+	/**
+	 * Called once after EngineInit on other thread
+	 * Not everything can be async, so when you are not sure when to use it, use Init() instead.
+	 */
+	virtual void InitAsync();
 
 	/** To be sub-project overriden. Called each frame */
 	virtual void Tick();
@@ -195,6 +205,8 @@ protected:
 
 	FDelegate<> FunctionsToCallOnStartOfNextTick;
 	FDelegate<void, float> TickingObjectsDelegate;
+
+	std::shared_ptr<FIniObject> ProjectIni;
 
 #if ENGINE_NETWORK_LIB_ENABLED
 	FNetworkManager* NetworkManager;

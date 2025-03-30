@@ -58,7 +58,6 @@ public:
 	~FRenderThread() override;
 
 	void StartThread() override;
-	void StopThread() override;
 
 	FRenderCommandsWithScopeLock GetRenderCommands();
 

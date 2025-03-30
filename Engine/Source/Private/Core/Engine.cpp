@@ -18,6 +18,7 @@
 #endif
 
 #include "Assets/Assets/FontAsset.h"
+#include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
 #include "Engine/EngineTickingManager.h"
 #include "Includes/EngineLaunchParameterCollection.h"
@@ -150,8 +151,8 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	ThreadsManager->Initialize();
 
 	// Add render thread
-	RenderThreadData = ThreadsManager->CreateThread<FRenderThread, FThreadData>("RenderThreadData");
-	RenderThread = dynamic_cast<FRenderThread*>(RenderThreadData->GetThread());
+	//RenderThreadData = ThreadsManager->CreateThread<FRenderThread, FThreadData>("RenderThreadData");
+	//RenderThread = dynamic_cast<FRenderThread*>(RenderThreadData->GetThread());
 
 #if ENGINE_NETWORK_LIB_ENABLED
 	const FEngineLaunchParameter& IsServerEngineLaunchParameter = GetLaunchParameter(FEngineLaunchParameterCollection::IsServer);
@@ -183,9 +184,59 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 
 	UpdateFrameTime();
 
+	ProjectIni = AssetsManager->IniManager->GetIniObject("ProjectSettings");
+
+	// Enqueue EngineInitAsync for async work
+	FDelegateSafe<void> DelegateEngineInitAsync;
+	DelegateEngineInitAsync.BindObject(this, &FEngine::EngineInitAsync);
+	ThreadsManager->AddAsyncDelegate(DelegateEngineInitAsync);
+
 	LOG_INFO("GEngine init End");
 
 	bIsEngineInitialized = true;
+}
+
+void FEngine::EngineInitAsync()
+{
+	if (ProjectIni != nullptr && ProjectIni->DoesIniExist())
+	{
+		auto SetMetaDataPropertySafe = [&](const char* PropertyName, const FIniField& IniField)
+		{
+			if (IniField.IsValid())
+			{
+				const std::string Value = IniField.GetValueAsString();
+				if (!Value.empty())
+				{
+					SDL_SetAppMetadataProperty(PropertyName, Value.c_str());
+				}
+			}
+		};
+
+		FIniField AppNameIniField = ProjectIni->FindFieldByName("AppName");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_NAME_STRING, AppNameIniField);
+
+		FIniField AppVersionIniField = ProjectIni->FindFieldByName("AppVersion");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_VERSION_STRING, AppVersionIniField);
+
+		FIniField AppIdentifierIniField = ProjectIni->FindFieldByName("AppIdentifier");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_IDENTIFIER_STRING, AppIdentifierIniField);
+
+		FIniField AppCreatorIniField = ProjectIni->FindFieldByName("AppCreator");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_CREATOR_STRING, AppCreatorIniField);
+
+		FIniField AppLicenseIniField = ProjectIni->FindFieldByName("AppLicense");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_COPYRIGHT_STRING, AppLicenseIniField);
+
+		FIniField AppURLIniField = ProjectIni->FindFieldByName("AppURL");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_URL_STRING, AppURLIniField);
+
+		FIniField AppTypeIniField = ProjectIni->FindFieldByName("AppType");
+		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_TYPE_STRING, AppTypeIniField);
+	}
+	else
+	{
+		LOG_ERROR("ProjectIni is nullptr or does not exist.");
+	}
 }
 
 void FEngine::EngineTick()
@@ -247,6 +298,10 @@ void FEngine::PostInit()
 {
 }
 
+void FEngine::InitAsync()
+{
+}
+
 void FEngine::Tick()
 {
 
@@ -292,14 +347,7 @@ void FEngine::PreExit()
 
 void FEngine::Clean()
 {
-	if (RenderThread != nullptr)
-	{
-		RenderThread->StopThread();
-	}
-	else
-	{
-		LOG_ERROR("Render thread does not exist before cleaning");
-	}
+	ThreadsManager->DeInitialize();
 
 	delete EngineRender;
 	delete EventHandler;

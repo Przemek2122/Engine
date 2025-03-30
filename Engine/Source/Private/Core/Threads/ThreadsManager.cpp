@@ -11,31 +11,12 @@ FThreadsManager::FThreadsManager()
 
 FThreadsManager::~FThreadsManager()
 {
-	// Stop created threads
-	for (int i = 0; i < GetNumberOfWorkerThreads(); i++)
-	{
-		StopThread();
-	}
-
-	LOG_INFO("Number of threads to stop: " << WorkerThreadsArray.Size());
-
-	COUNTER_START(StopThreadsCoutnerStart);
-
-	// Wait for all threads to finish
-	while (WorkerThreadsArray.Size())
-	{
-		THREAD_WAIT_SHORT_TIME;
-	}
-
-	COUNTER_END(StopThreadsCoutnerStart, StopThreadsCoutnerEnd);
-
-	LOG_INFO("Stopping threads took: " << COUNTER_GET_MS(StopThreadsCoutnerEnd) << " ms");
 }
 
 void FThreadsManager::Initialize()
 {
 	// Calculate number of cores
-	int NumberOfCores = SDL_GetNumLogicalCPUCores();
+	int32 NumberOfCores = SDL_GetNumLogicalCPUCores();
 
 	// Ensure we always have at least one thread.
 	if (NumberOfCores <= 0)
@@ -44,16 +25,45 @@ void FThreadsManager::Initialize()
 	}
 
 	// Create available slots for threads
-	for (int ThreadIndex = 0; ThreadIndex < NumberOfCores; ThreadIndex++)
+	for (int32 ThreadIndex = 0; ThreadIndex < NumberOfCores; ThreadIndex++)
 	{
 		AvailableThreadsNumbers.Push(ThreadIndex);
 	}
 
 	// Create default number of threads
-	for (int i = 0; i < StartingNumberOfThreads; i++)
+	for (int32 i = 0; i < StartingNumberOfThreads; i++)
 	{
 		StartNewThread();
 	}
+}
+
+void FThreadsManager::DeInitialize()
+{
+	// Stop created threads
+	for (FThreadData* ThreadWorkerData : AllThreadsArray)
+	{
+		if (ThreadWorkerData->ThreadInputData->IsThreadAlive())
+		{
+			ThreadWorkerData->Thread->StopThread();
+		}
+	}
+
+	LOG_INFO("Number of threads to stop: " << AllThreadsArray.Size());
+
+	COUNTER_START(StopThreadsCoutnerStart);
+
+	// Wait for all threads to finish
+	while (AllThreadsArray.Size())
+	{
+		THREAD_WAIT_SHORT_TIME;
+	}
+
+	ENSURE_VALID(AllThreadsArray.Size() == 0);
+	ENSURE_VALID(WorkerThreadsArray.Size() == 0);
+
+	COUNTER_END(StopThreadsCoutnerStart, StopThreadsCoutnerEnd);
+
+	LOG_INFO("Stopping threads took: " << COUNTER_GET_MS(StopThreadsCoutnerEnd) << " ms");
 }
 
 void FThreadsManager::TickThreadCallbacks()
@@ -141,7 +151,7 @@ void FThreadsManager::StartNewThread()
 	{
 		FMutexScopeLock MutexScopeLock(WorkerThreadsArrayMutex);
 
-		const int NewThreadIndex = AvailableThreadsNumbers[0];
+		const int32 NewThreadIndex = AvailableThreadsNumbers[0];
 		AvailableThreadsNumbers.RemoveAt(0);
 
 		const std::string NewThreadName = DefaultThreadName + std::to_string(NewThreadIndex + 1);
@@ -155,7 +165,7 @@ void FThreadsManager::StartNewThread()
 
 void FThreadsManager::StopThread()
 {
-	int ThreadIndex = WorkerThreadsArray.Size() - 1;
+	int32 ThreadIndex = WorkerThreadsArray.Size() - 1;
 
 	FThreadWorkerData* LastAliveThread = WorkerThreadsArray[ThreadIndex];
 
@@ -180,12 +190,12 @@ void FThreadsManager::StopThread()
 	}
 }
 
-int FThreadsManager::GetNumberOfWorkerThreads() const
+int32 FThreadsManager::GetNumberOfWorkerThreads() const
 {
 	return WorkerThreadsArray.Size();
 }
 
-int FThreadsManager::GetNumberOfCores()
+int32 FThreadsManager::GetNumberOfCores()
 {
 	return SDL_GetNumLogicalCPUCores();
 }
@@ -239,6 +249,27 @@ bool FThreadsManager::InternalRemoveWorkerThread(const FThread* InThread)
 	{
 		// Remove thread data from array
 		WorkerThreadsArray.Remove(InThread->GetThreadData());
+
+		WorkerThreadsArrayMutex.Unlock();
+
+		bWasRemoved = true;
+	}
+
+	return bWasRemoved;
+}
+
+bool FThreadsManager::InternalRemoveThread(const FThread* InThread)
+{
+	bool bWasRemoved;
+
+	if (!WorkerThreadsArrayMutex.TryLock())
+	{
+		bWasRemoved = false;
+	}
+	else
+	{
+		// Remove thread data from array
+		AllThreadsArray.Remove(InThread->GetThreadData());
 
 		WorkerThreadsArrayMutex.Unlock();
 

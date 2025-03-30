@@ -23,6 +23,8 @@ public:
 	/** Should be called when class is set up to setup available threads */
 	virtual void Initialize();
 
+	virtual void DeInitialize();
+
 	/** Runs callbacks on main thread */
 	void TickThreadCallbacks();
 
@@ -43,6 +45,8 @@ public:
 		TThreadDataClass* ThreadData = new TThreadDataClass(this, NewThreadName);
 
 		ThreadData->template Create<TThreadClass>();
+
+		AllThreadsArray.Push(dynamic_cast<FThreadData*>(ThreadData));
 
 		// Start thread
 		ThreadData->Thread->StartThread();
@@ -67,10 +71,10 @@ protected:
 	void StopThread();
 
 	/** Returns number of threads managed by this class */
-	int GetNumberOfWorkerThreads() const;
+	int32 GetNumberOfWorkerThreads() const;
 
 	/** @returuns number of system available cores */
-	static int GetNumberOfCores();
+	static int32 GetNumberOfCores();
 
 	/** Used by threads to actually do the job */
 	FAsyncWorkStructure GetFirstAvailableJob();
@@ -95,9 +99,13 @@ protected:
 
 private:
 	bool InternalRemoveWorkerThread(const FThread* InThread);
+	bool InternalRemoveThread(const FThread* InThread);
 
-	/** Array with created threads */
+	/** Array with worker only threads */
 	CArray<FThreadWorkerData*> WorkerThreadsArray;
+
+	/** Array with ALL threads created */
+	CArray<FThreadData*> AllThreadsArray;
 
 	/** Mutex for param WorkerThreadsArray */
 	FMutex WorkerThreadsArrayMutex;

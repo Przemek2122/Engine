@@ -45,11 +45,6 @@ void FNetworkClassBase::Initialize()
 
 void FNetworkClassBase::DeInitialize()
 {
-	FThreadsManager* ThreadManager = FGlobalDefines::GEngine->GetThreadsManager();
-	if (ThreadManager != nullptr && NetworkThreadData != nullptr)
-	{
-		ThreadManager->TryStopThread(NetworkThreadData);
-	}
 }
 
 #endif

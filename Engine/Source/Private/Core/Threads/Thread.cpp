@@ -42,7 +42,7 @@ FThread::~FThread()
 
 void FThread::StartThread()
 {
-	SDL_CreateThread(FThread::ThreadFunction, ThreadInputData->GetThreadName().c_str(), ThreadInputData);
+	SDLThread = SDL_CreateThread(FThread::ThreadFunction, ThreadInputData->GetThreadName().c_str(), ThreadInputData);
 }
 
 void FThread::StopThread()
@@ -61,6 +61,20 @@ void FThread::ThreadManagerFunction()
 	{
 		TickThread();
 	}
+
+	// Wait for deletion
+	while (!GetThreadInputData()->GetThreadsManager()->InternalRemoveThread(this))
+	{
+		THREAD_WAIT_SHORT_TIME;
+	}
+
+	OnFinishThread();
+
+	delete this;
+}
+
+void FThread::OnFinishThread()
+{
 }
 
 int FThread::ThreadFunction(void* InputData)
@@ -108,15 +122,13 @@ void FThreadWorker::TickThread()
 	FThread::TickThread();
 }
 
-void FThreadWorker::ThreadManagerFunction()
+void FThreadWorker::OnFinishThread()
 {
-	FThread::ThreadManagerFunction();
+	FThread::OnFinishThread();
 
 	// Wait for deletion
 	while (!GetThreadInputData()->GetThreadsManager()->InternalRemoveWorkerThread(this))
 	{
 		THREAD_WAIT_SHORT_TIME;
 	}
-
-	delete this;
 }

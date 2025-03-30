@@ -42,11 +42,6 @@ void FRenderThread::StartThread()
 	FThread::StartThread();
 }
 
-void FRenderThread::StopThread()
-{
-	FThread::StopThread();
-}
-
 FRenderCommandsWithScopeLock FRenderThread::GetRenderCommands()
 {
 	return FRenderCommandsWithScopeLock(this);
