@@ -355,7 +355,6 @@ void FEngine::Clean()
 
 	DeInitializeEngineSubsystems();
 
-	delete ThreadsManager;
 	delete EngineRender;
 	delete EventHandler;
 	delete AssetsManager;
@@ -370,6 +369,9 @@ void FEngine::Clean()
 #if ENGINE_TESTS_ALLOW_ANY
 	delete TestManager;
 #endif
+
+	// Destroy last as it may be used by other managers
+	delete ThreadsManager;
 
 	LOG_INFO("Cleaning engine.");
 
