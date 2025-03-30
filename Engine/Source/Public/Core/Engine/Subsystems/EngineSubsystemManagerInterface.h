@@ -7,7 +7,7 @@
 class IEngineSubsystemInterface;
 
 /** Class for managing engine subsystems */
-class IEngineSubsystemManagerInterface
+class ENGINE_API IEngineSubsystemManagerInterface
 {
 public:
 	void DeInitializeSubsystems();
