@@ -10,9 +10,9 @@ class IEngineSubsystemInterface;
 class ENGINE_API IEngineSubsystemManagerInterface
 {
 public:
-	void DeInitializeSubsystems();
+	void DeInitializeEngineSubsystems();
 
-	void TickSubsystems();
+	void TickEngineSubsystems();
 
 	/** Create new Engine subsystem from given class */
 	template<class TEngineSubsystemInterfaceClass>

@@ -259,6 +259,8 @@ void FEngine::EngineTick()
 		FunctionsToCallOnStartOfNextTick.UnBindAll();
 	}
 
+	TickEngineSubsystems();
+
 	// Tick objects registered with TickInterface
 	TickingObjectsDelegate.Execute(DeltaTimeFloat);
 
@@ -349,7 +351,8 @@ void FEngine::PreExit()
 void FEngine::Clean()
 {
 	ThreadsManager->DeInitialize();
-	DeInitializeSubsystems();
+
+	DeInitializeEngineSubsystems();
 
 	delete ThreadsManager;
 	delete EngineRender;

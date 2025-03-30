@@ -4,7 +4,7 @@
 #include "Engine/Subsystems/EngineSubsystemManagerInterface.h"
 #include "Engine/Subsystems/EngineSubsystemInterface.h"
 
-void IEngineSubsystemManagerInterface::DeInitializeSubsystems()
+void IEngineSubsystemManagerInterface::DeInitializeEngineSubsystems()
 {
 	for (const std::shared_ptr<IEngineSubsystemInterface>& EngineSubsystemPtr : ManagedEngineSubsystems)
 	{
@@ -12,7 +12,7 @@ void IEngineSubsystemManagerInterface::DeInitializeSubsystems()
 	}
 }
 
-void IEngineSubsystemManagerInterface::TickSubsystems()
+void IEngineSubsystemManagerInterface::TickEngineSubsystems()
 {
 	for (const std::shared_ptr<IEngineSubsystemInterface>& EngineSubsystemPtr : ManagedEngineSubsystems)
 	{
