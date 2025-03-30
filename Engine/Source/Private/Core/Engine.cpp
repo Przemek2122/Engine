@@ -1,7 +1,7 @@
 // Created by Przemys�aw Wiewi�ra 2020-2024 https://github.com/Przemek2122/GameEngine
 
 #include "CoreEngine.h"
-#include "Engine.h"
+#include "Core/Engine.h"
 
 #if ENGINE_TESTS_ALLOW_ANY
 #include "Test/TestManager.h"
