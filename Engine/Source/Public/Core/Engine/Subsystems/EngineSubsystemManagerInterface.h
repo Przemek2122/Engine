@@ -10,7 +10,7 @@ class IEngineSubsystemInterface;
 class IEngineSubsystemManagerInterface
 {
 public:
-	virtual ~IEngineSubsystemManagerInterface();
+	void DeInitializeSubsystems();
 
 	void TickSubsystems();
 

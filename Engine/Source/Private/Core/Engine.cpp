@@ -1,7 +1,7 @@
 // Created by Przemys�aw Wiewi�ra 2020-2024 https://github.com/Przemek2122/GameEngine
 
 #include "CoreEngine.h"
-#include "Input/EventHandler.h"
+#include "Engine.h"
 
 #if ENGINE_TESTS_ALLOW_ANY
 #include "Test/TestManager.h"
@@ -21,6 +21,7 @@
 #include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
 #include "Engine/EngineTickingManager.h"
+#include "Input/EventHandler.h"
 #include "Includes/EngineLaunchParameterCollection.h"
 #include "Threads/RenderThread.h"
 #include "Threads/ThreadsManager.h"
@@ -271,12 +272,12 @@ void FEngine::EngineTick()
 
 	// Wait for Render thread.
 	// We need to do this to avoid changing data when render is not finished
-	while (!RenderThread->IsRenderingFrameFinished())
-	{
-		THREAD_WAIT_SHORT_TIME;
-	}
+	//while (!RenderThread->IsRenderingFrameFinished())
+	//{
+	//	THREAD_WAIT_SHORT_TIME;
+	//}
 
-	RenderThread->AllowRenderNextFrame();
+	//RenderThread->AllowRenderNextFrame();
 }
 
 void FEngine::EnginePostSecondTick()
@@ -348,13 +349,14 @@ void FEngine::PreExit()
 void FEngine::Clean()
 {
 	ThreadsManager->DeInitialize();
+	DeInitializeSubsystems();
 
+	delete ThreadsManager;
 	delete EngineRender;
 	delete EventHandler;
 	delete AssetsManager;
 	delete EngineTickingManager;
 	delete EngineRenderingManager;
-	delete ThreadsManager;
 
 #if ENGINE_NETWORK_LIB_ENABLED
 	NetworkManager->DeInitialize();

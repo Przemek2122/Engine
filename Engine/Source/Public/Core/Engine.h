@@ -20,7 +20,7 @@ friend FEngineManager;
 	
 public:
 	FEngine();
-	~FEngine() override;
+	virtual ~FEngine();
 
 private:
 	/** Called before tick. Once. */

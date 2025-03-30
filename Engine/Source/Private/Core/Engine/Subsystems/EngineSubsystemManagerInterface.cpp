@@ -4,7 +4,7 @@
 #include "Engine/Subsystems/EngineSubsystemManagerInterface.h"
 #include "Engine/Subsystems/EngineSubsystemInterface.h"
 
-IEngineSubsystemManagerInterface::~IEngineSubsystemManagerInterface()
+void IEngineSubsystemManagerInterface::DeInitializeSubsystems()
 {
 	for (const std::shared_ptr<IEngineSubsystemInterface>& EngineSubsystemPtr : ManagedEngineSubsystems)
 	{
