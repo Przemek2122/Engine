@@ -25,15 +25,29 @@ namespace FMath
 	int CeilToInt(const float Value);
 	int CeilToInt(const double Value);
 
-	/** NOT THREAD SAFE. @return random float value in given range */
-	float RandRange(const float Min, const float Max);
-	int RandRange(const int Min, const int Max);
-
 	double RadiansToDegrees(double Value);
 	double RadiansToDegreesDouble(double Value);
 
 	double DegreesToRadians(double Value);
 	double DegreesToRadiansDouble(double Value);
+
+	/** @returns random float value in given range */
+	template<typename TType>
+	TType RandRange(const TType Min, const TType Max)
+	{
+		static thread_local std::mt19937 generator(std::random_device{}());
+
+		if constexpr (std::is_integral_v<TType>)
+		{
+			std::uniform_int_distribution<TType> distribution(Min, Max);
+			return distribution(generator);
+		}
+		else
+		{
+			std::uniform_real_distribution<TType> distribution(Min, Max);
+			return distribution(generator);
+		}
+	}
 
 	template<typename TType>
 	TType Clamp(const TType Value, const TType Min,  const TType Max)
