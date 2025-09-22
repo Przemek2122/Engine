@@ -13,10 +13,6 @@
 #include "Test/Samples/TestTimers.h"
 #endif
 
-#if ENGINE_NETWORK_LIB_ENABLED
-#include "Network/NetworkManager.h"
-#endif
-
 #include "Assets/Assets/FontAsset.h"
 #include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
@@ -164,9 +160,6 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	{
 		bIsServer = IsServerEngineLaunchParameter.AsBool();
 	}
-
-	NetworkManager = new FNetworkManager(this, bIsServer);
-	NetworkManager->Initialize();
 #endif
 
 #if ENGINE_TESTS_ALLOW_ANY
@@ -360,11 +353,6 @@ void FEngine::Clean()
 	delete AssetsManager;
 	delete EngineTickingManager;
 	delete EngineRenderingManager;
-
-#if ENGINE_NETWORK_LIB_ENABLED
-	NetworkManager->DeInitialize();
-	delete NetworkManager;
-#endif
 
 #if ENGINE_TESTS_ALLOW_ANY
 	delete TestManager;
@@ -596,13 +584,6 @@ FThreadsManager* FEngine::GetThreadsManager() const
 {
 	return ThreadsManager;
 }
-
-#if ENGINE_NETWORK_LIB_ENABLED
-FNetworkManager* FEngine::GetNetworkManager() const
-{
-	return NetworkManager;
-}
-#endif
 
 #if ENGINE_TESTS_ALLOW_ANY
 FTestManager* FEngine::CreateTestManager() const

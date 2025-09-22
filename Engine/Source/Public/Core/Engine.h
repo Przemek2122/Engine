@@ -9,7 +9,6 @@
 class IEngineSubsystemInterface;
 class FIniObject;
 enum class EEngineErrorCode;
-class FNetworkManager;
 class FEngineRenderingManager;
 class FEngineTickingManager;
 class ITickInterface;
@@ -174,9 +173,6 @@ public:
 	NO_DISCARD FEngineTickingManager* GetEngineTickingManager() const;
 	NO_DISCARD FEngineRenderingManager* GetEngineRenderingManager() const;
 	NO_DISCARD FThreadsManager* GetThreadsManager() const;
-#if ENGINE_NETWORK_LIB_ENABLED
-	NO_DISCARD FNetworkManager* GetNetworkManager() const;
-#endif
 
 protected:
 	void UpdateFrameRateCounter();
@@ -247,10 +243,6 @@ protected:
 	CArray<std::shared_ptr<IEngineSubsystemInterface>> ManagedEngineSubsystems;
 
 	std::shared_ptr<FIniObject> ProjectIni;
-
-#if ENGINE_NETWORK_LIB_ENABLED
-	FNetworkManager* NetworkManager;
-#endif
 
 #if ENGINE_TESTS_ALLOW_ANY
 	class FTestManager* TestManager;
