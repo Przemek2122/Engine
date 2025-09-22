@@ -12,6 +12,9 @@ option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable
 option(ENGINE_COPY_ASSETS "Copy asssets to target" ON)
 option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
 
+option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
+option(USE_LIBRARY_CROW "Should we use crow library?" ON)
+
 set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 set(ENGINE_SOURCE_PRIVATE_DIR "${ENGINE_SOURCE_DIR}/Private")
 set(ENGINE_SOURCE_PUBLIC_DIR "${ENGINE_SOURCE_DIR}/Public")
@@ -87,7 +90,6 @@ target_precompile_headers(Engine PUBLIC "${ENGINE_SOURCE_PUBLIC_DIR}/Core/CoreEn
 # Add directories with code
 target_include_directories(Engine
     PUBLIC ${ENGINE_SOURCE_THIRD_PARTY_DIR}
-    PUBLIC ${ENGINE_SOURCE_THIRD_PARTY_DIR}/libuv
 
     PUBLIC ${ENGINE_SOURCE_PRIVATE_DIR}
     PUBLIC ${ENGINE_SOURCE_PRIVATE_DIR}/Core
@@ -112,6 +114,8 @@ source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Source" FILES ${ENGINE_SOURCE_FIL
 if(WIN32)
     message(STATUS "Configuring for Windows...")
     
+	set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
+	
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -230,8 +234,21 @@ message(STATUS "Adding SDL...")
     
 if(ENGINE_VENDORED)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL")
+		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+			message("Building in Debug mode - disable compiler optimizations")
+			
+			# Disable all CPU optimizations:
+			set(SDL_ASSEMBLY OFF CACHE BOOL "" FORCE)
+			set(SDL_SSE OFF CACHE BOOL "" FORCE)
+			set(SDL_AVX OFF CACHE BOOL "" FORCE)
+			
+			set(WEBP_ENABLE_SIMD OFF CACHE BOOL "" FORCE)
+		endif()
+		
         set(SDL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL")
         set(SDL_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_build")
+
+		set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 
         # This assumes you have added SDL as a submodule in vendored/SDL
         add_subdirectory(${SDL_PATH} ${SDL_BUILD_PATH})
@@ -351,60 +368,49 @@ else()
     find_package(SDL3_image REQUIRED)
 endif()
 
-# Add libuv
-message(STATUS "Adding libuv...")
+if(USE_LIBRARY_ASIO)
+	message(STATUS "Adding ASIO...")
 
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/libuv")
-        set(LIBUV_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/libuv")
-        set(LIBUV_BUILD_PATH "${CMAKE_BINARY_DIR}/libuv_build")
-    
-        add_subdirectory(${LIBUV_PATH} ${LIBUV_BUILD_PATH})
-
-        target_link_directories(Engine PUBLIC ${LIBUV_BUILD_PATH})
-
-        # After build copy includes
-        set(INCLUDES_LIBVW_DIR ${LIBUV_PATH}/include/uv)
-        set(INCLUDES_LIBUV_H ${LIBUV_PATH}/include/uv.h)
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR}/libuv)
-        
-        file(COPY ${INCLUDES_LIBVW_DIR} DESTINATION ${DESTINATION_DIR})
-        file(COPY ${INCLUDES_LIBUV_H} DESTINATION ${DESTINATION_DIR})
-    else()
-        message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
+	add_compile_definitions(USE_LIBRARY_ASIO=TRUE)
+	
+	set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/asio/include")
+	target_include_directories(Engine PUBLIC ${ASIO_INCLUDE_DIR})
+	target_compile_definitions(Engine PUBLIC ASIO_STANDALONE)
 else()
-    # Not tested
-    find_package(uv REQUIRED)
+	add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
 endif()
+	
+if(USE_LIBRARY_CROW)
+	message(STATUS "Adding CROW...")
+	
+	add_compile_definitions(USE_LIBRARY_CROW=TRUE)
+	
+	if(ENGINE_VENDORED)
+		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
+			set(CROW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
+			set(CROW_BUILD_PATH "${CMAKE_BINARY_DIR}/crow_build")
+		
+			add_subdirectory(${CROW_PATH} ${CROW_BUILD_PATH})
 
-# Add uvw
-message(STATUS "Adding uvw...")
+			target_link_directories(Engine PUBLIC ${CROW_BUILD_PATH})
 
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/uvw")
-        set(UVW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/uvw")
-        set(UVW_BUILD_PATH "${CMAKE_BINARY_DIR}/uvw_build")
-    
-        add_subdirectory(${UVW_PATH} ${UVW_BUILD_PATH})
-
-        target_link_directories(Engine PUBLIC ${UVW_BUILD_PATH})
-
-        # After build copy includes
-        set(INCLUDES_UVW_DIR ${UVW_PATH}/src/uvw)
-        set(INCLUDES_UVW_HEADER ${UVW_PATH}/src/uvw.hpp)
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-        
-        file(COPY ${INCLUDES_UVW_DIR} DESTINATION ${DESTINATION_DIR})
-        file(COPY ${INCLUDES_UVW_HEADER} DESTINATION ${DESTINATION_DIR})
-    else()
-        message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
+			# After build copy includes
+			set(INCLUDES_CROW_DIR ${CROW_PATH}/include/crow)
+			set(INCLUDES_CROW_HEADER ${CROW_PATH}/include/crow.h)
+			set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+			
+			file(COPY ${INCLUDES_CROW_DIR} DESTINATION ${DESTINATION_DIR})
+			file(COPY ${INCLUDES_CROW_HEADER} DESTINATION ${DESTINATION_DIR})
+		else()
+			message(FATAL_ERROR "Crow directory not found. Please check the path.")
+			message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+		endif()
+	else()
+		# Not tested
+		find_package(Crow REQUIRED)
+	endif()
 else()
-    # Not tested
-    find_package(uvw REQUIRED)
+	add_compile_definitions(USE_LIBRARY_CROW=FALSE)
 endif()
 
 if(ANDROID)
@@ -423,10 +429,74 @@ else()
 	)
 endif()
 
-# Link
 target_link_libraries(Engine PUBLIC
-	uv
-	uvw
 	SDL3::SDL3
 )
+
+# Enable testing
+enable_testing()
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG v1.15.2  # Use the latest stable release
+)
+
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# Target for build all (To use from config script)
+add_custom_target(BuildAllEngine ALL
+    DEPENDS Engine SDL3::SDL3 SDL3_image SDL3_mixer SDL3_ttf
+)
+
+function(set_property_if_not_alias target_name folder_name)
+    get_property(aliased_target TARGET "${target_name}" PROPERTY ALIASED_TARGET)
+    if("${aliased_target}" STREQUAL "")
+        # Not an alias - set property on this target
+        set_property(TARGET ${target_name} PROPERTY FOLDER ${folder_name})
+    else()
+        # Is an alias - set property on the real target
+        set_property(TARGET ${aliased_target} PROPERTY FOLDER ${folder_name})
+    endif()
+endfunction()
+
+# Target grouping
+function(group_targets folder_name)
+    foreach(target ${ARGN})
+        if(TARGET ${target})
+            set_property_if_not_alias(${target} ${folder_name})
+        endif()
+    endforeach()
+endfunction()
+
+# Function to group any uncategorized targets
+function(group_remaining_targets folder_name)
+    get_property(_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(_target ${_targets})
+        if(TARGET ${_target})
+            get_property(_folder TARGET ${_target} PROPERTY FOLDER)
+            # If no folder is set, put it in "Other"
+            if(NOT _folder)
+				set_property_if_not_alias(${_target} ${folder_name})
+            endif()
+        endif()
+    endforeach()
+endfunction()
+
+set_property(TARGET Engine PROPERTY FOLDER "Core")
+group_targets("Core" Engine)
+group_targets("ThirdParty/SDL3" SDL3::SDL3 SDL3-shared SDL3_mixer-shared SDL3_ttf-shared)
+
+if(USE_LIBRARY_ASIO)
+	if(USE_LIBRARY_CROW)
+		# Link
+		target_link_libraries(Engine PUBLIC
+			Crow::Crow
+		)
+		
+		group_targets("ThirdParty/Network" Crow::Crow)
+	endif()
+endif()
 

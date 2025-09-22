@@ -16,3 +16,9 @@
 [submodule "ThirdParty/uvw"]
 	path = ThirdParty/uvw
 	url = https://github.com/Przemek2122/uvw
+[submodule "ThirdParty/Crow"]
+	path = ThirdParty/Crow
+	url = https://github.com/CrowCpp/Crow
+[submodule "ThirdParty/asio"]
+	path = ThirdParty/asio
+	url = https://github.com/chriskohlhoff/asio
