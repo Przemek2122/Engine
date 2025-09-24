@@ -43,6 +43,10 @@ FIniObject::FIniObject(FIniManager* InIniManager, std::string InIniPath, std::st
 {
 	// IniManager must not be nullptr
 	ENSURE_VALID(InIniManager != nullptr);
+
+#if DEBUG
+	bIsLoaded = false;
+#endif
 }
 
 FIniObject::~FIniObject()
@@ -63,6 +67,10 @@ bool FIniObject::DoesIniExist() const
 
 void FIniObject::LoadIni()
 {
+#if DEBUG
+	bIsLoaded = true;
+#endif
+
 	// Load disk data
 	IniAssetSharedPtr->Load(IniManager->GetIniParser());
 
@@ -107,11 +115,25 @@ void FIniObject::SaveIni()
 
 bool FIniObject::ContainsFieldByName(const std::string& FieldName) const
 {
+#if DEBUG
+	if (!bIsLoaded)
+	{
+		LOG_ERROR("Accessing ContainsFieldByName before ini is loaded, ini name: " << IniName);
+	}
+#endif
+
 	return FieldsMap.ContainsKey(FieldName);
 }
 
 bool FIniObject::ContainsFieldByValue(const std::string& FieldValue) const
 {
+#if DEBUG
+	if (!bIsLoaded)
+	{
+		LOG_ERROR("Accessing ContainsFieldByValue before ini is loaded, ini name: " << IniName);
+	}
+#endif
+
 	const FFunctorLambda<bool, std::string, std::shared_ptr<FIniField>> SearchFunction = [&](std::string Key, std::shared_ptr<FIniField> Field)
 	{
 		if (FieldValue == Field->GetValueAsString())
@@ -129,6 +151,13 @@ bool FIniObject::ContainsFieldByValue(const std::string& FieldValue) const
 
 FIniField FIniObject::FindFieldByName(const std::string& FieldName)
 {
+#if DEBUG
+	if (!bIsLoaded)
+	{
+		LOG_ERROR("Accessing FindFieldByName before ini is loaded, ini name: " << IniName);
+	}
+#endif
+
 	FIniField Value;
 
 	for (const std::pair<const std::string, std::shared_ptr<FIniField>>& Field : FieldsMap)
@@ -146,6 +175,13 @@ FIniField FIniObject::FindFieldByName(const std::string& FieldName)
 
 FIniField FIniObject::FindFieldByValue(const std::string& FieldValue)
 {
+#if DEBUG
+	if (!bIsLoaded)
+	{
+		LOG_ERROR("Accessing FindFieldByValue before ini is loaded, ini name: " << IniName);
+	}
+#endif
+
 	FIniField Value;
 
 	for (const std::pair<const std::string, std::shared_ptr<FIniField>>& Field : FieldsMap)

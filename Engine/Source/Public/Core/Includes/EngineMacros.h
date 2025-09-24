@@ -81,6 +81,7 @@
 #define ENGINE_API EXPORT_API
 
 typedef Uint8 uint8;
+typedef Uint16 uint16;
 typedef Uint32 uint32;
 typedef Uint64 uint64;
 typedef int32_t int32;

@@ -78,4 +78,9 @@ protected:
 
 	/** Ini name only */
 	std::string IniName;
+
+
+#if DEBUG
+	bool bIsLoaded;
+#endif
 };

@@ -11,7 +11,7 @@
 /**
  * Class for managing threads using SDL2.
  */
-class FThreadsManager
+class ENGINE_API FThreadsManager
 {
 	friend FThread;
 	friend FThreadWorker;

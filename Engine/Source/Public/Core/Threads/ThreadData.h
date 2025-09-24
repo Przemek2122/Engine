@@ -11,7 +11,7 @@ struct FThreadInputData;
 /**
  * Basic thread data
  */
-class FThreadData
+class ENGINE_API FThreadData
 {
 	friend FThreadsManager;
 
@@ -42,7 +42,7 @@ protected:
 
 };
 
-class FThreadWorkerData : public FThreadData
+class ENGINE_API FThreadWorkerData : public FThreadData
 {
 	friend FThreadsManager;
 

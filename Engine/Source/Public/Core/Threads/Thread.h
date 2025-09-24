@@ -41,7 +41,7 @@ private:
 /**
  * Note: this thread by defaut does not remove itself
  */
-class FThread
+class ENGINE_API FThread
 {
 	friend FThreadsManager;
 	friend FThreadData;
@@ -82,16 +82,36 @@ private:
  * Takes and executes jobs from ThreadManager
  * This thread class removes itself on stop
  */
-class FThreadWorker : public FThread
+class ENGINE_API FThreadWorker : public FThread
 {
 	friend FThreadData;
 	friend FThreadWorkerData;
 
 protected:
 	FThreadWorker(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
-	~FThreadWorker() override;
 
 	void TickThread() override;
 	void OnFinishThread() override;
 
+};
+
+/**
+ * Generic thread with task of your choice,
+ * simply bind your code to GenericThreadTask (Your task will be removed when done).
+ */
+class ENGINE_API FGenericThread : public FThread
+{
+	friend FThreadData;
+
+public:
+	void AddTask(const FFunctorLambda<void>& Task);
+
+protected:
+	FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
+
+	void TickThread() override;
+
+	/** Queue which is removed after execution */
+	CQueueSafe<FFunctorLambda<void>> GenericThreadTaskQueue;
+	
 };

@@ -207,6 +207,8 @@ void FEngine::EngineInitAsync()
 			}
 		};
 
+		ProjectIni->LoadIni();
+
 		FIniField AppNameIniField = ProjectIni->FindFieldByName("AppName");
 		SetMetaDataPropertySafe(SDL_PROP_APP_METADATA_NAME_STRING, AppNameIniField);
 

@@ -92,10 +92,6 @@ FThreadWorker::FThreadWorker(FThreadInputData* InThreadInputData, FThreadData* I
 {
 }
 
-FThreadWorker::~FThreadWorker()
-{
-}
-
 void FThreadWorker::TickThread()
 {
 	FThreadsManager* ThreadsManager = GetThreadInputData()->GetThreadsManager();
@@ -130,5 +126,32 @@ void FThreadWorker::OnFinishThread()
 	while (!GetThreadInputData()->GetThreadsManager()->InternalRemoveWorkerThread(this))
 	{
 		THREAD_WAIT_SHORT_TIME;
+	}
+}
+
+void FGenericThread::AddTask(const FFunctorLambda<void>& Task)
+{
+	GenericThreadTaskQueue.PushBackSafe(Task);
+}
+
+FGenericThread::FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData)
+	: FThread(InThreadInputData, InThreadData)
+{
+}
+
+void FGenericThread::TickThread()
+{
+	if (GenericThreadTaskQueue.IsEmpty())
+	{
+		// Default wait if nothing to do
+		THREAD_WAIT_SHORT_TIME;
+	}
+	else
+	{
+		FFunctorLambda<void>& Task = GenericThreadTaskQueue.PeekFirst();
+		Task.operator()();
+
+		// Remove 
+		GenericThreadTaskQueue.DequeFrontSafe();
 	}
 }

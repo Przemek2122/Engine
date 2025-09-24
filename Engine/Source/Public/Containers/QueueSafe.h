@@ -17,7 +17,7 @@ public:
 	{
 		while (!Mutex.try_lock())
 		{
-			SDL_Delay(1);
+			THREAD_WAIT_SHORT_TIME;
 		}
 
 		CDeque<TType>::PushFront(Value);
@@ -28,7 +28,7 @@ public:
 	{
 		while (!Mutex.try_lock())
 		{
-			SDL_Delay(1);
+			THREAD_WAIT_SHORT_TIME;
 		}
 
 		CDeque<TType>::PushBack(Value);
@@ -41,7 +41,7 @@ public:
 	{
 		while (!Mutex.try_lock())
 		{
-			SDL_Delay(1);
+			THREAD_WAIT_SHORT_TIME;
 		}
 
 		CDeque<TType>::DequeFront();
@@ -53,7 +53,7 @@ public:
 	{
 		while (!Mutex.try_lock())
 		{
-			SDL_Delay(1);
+			THREAD_WAIT_SHORT_TIME;
 		}
 
 		CDeque<TType>::DequeBack();
