@@ -113,8 +113,6 @@ source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Source" FILES ${ENGINE_SOURCE_FIL
 # Platform flags
 if(WIN32)
     message(STATUS "Configuring for Windows...")
-    
-	set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
 	
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
     
@@ -370,12 +368,18 @@ endif()
 
 if(USE_LIBRARY_ASIO)
 	message(STATUS "Adding ASIO...")
-
-	add_compile_definitions(USE_LIBRARY_ASIO=TRUE)
 	
-	set(ASIO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/asio/include")
-	target_include_directories(Engine PUBLIC ${ASIO_INCLUDE_DIR})
-	target_compile_definitions(Engine PUBLIC ASIO_STANDALONE)
+	set(ASIO_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/asio")
+	set(ASIO_INCLUDE_DIR "${ASIO_BASE_DIR}/asio/include")
+	
+	if(EXISTS ASIO_INCLUDE_DIR)
+		target_include_directories(Engine PUBLIC ${ASIO_INCLUDE_DIR})
+		target_compile_definitions(Engine PUBLIC ASIO_STANDALONE)
+
+		add_compile_definitions(USE_LIBRARY_ASIO=TRUE)
+	else()
+		add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
+	endif()
 else()
 	add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
 endif()
@@ -386,10 +390,10 @@ if(USE_LIBRARY_CROW)
 	add_compile_definitions(USE_LIBRARY_CROW=TRUE)
 	
 	if(ENGINE_VENDORED)
-		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
-			set(CROW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
-			set(CROW_BUILD_PATH "${CMAKE_BINARY_DIR}/crow_build")
-		
+		set(CROW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
+		set(CROW_BUILD_PATH "${CMAKE_BINARY_DIR}/crow_build")
+			
+		if(EXISTS "${CROW_PATH}")
 			add_subdirectory(${CROW_PATH} ${CROW_BUILD_PATH})
 
 			target_link_directories(Engine PUBLIC ${CROW_BUILD_PATH})
