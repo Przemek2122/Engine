@@ -417,6 +417,88 @@ else()
 	add_compile_definitions(USE_LIBRARY_CROW=FALSE)
 endif()
 
+if(ENGINE_VENDORED)
+    set(ARGON2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/phc-winner-argon2")
+    set(ARGON2_BUILD_PATH "${CMAKE_BINARY_DIR}/argon2_build")
+        
+    if(EXISTS "${ARGON2_PATH}")
+        # Create Argon2 static library from source files
+        add_library(argon2_vendored STATIC
+            ${ARGON2_PATH}/src/argon2.c
+            ${ARGON2_PATH}/src/core.c
+            ${ARGON2_PATH}/src/blake2/blake2b.c
+            ${ARGON2_PATH}/src/thread.c
+            ${ARGON2_PATH}/src/encoding.c
+            ${ARGON2_PATH}/src/opt.c
+        )
+        
+        # Set include directories for argon2
+        target_include_directories(argon2_vendored PUBLIC
+            ${ARGON2_PATH}/include
+            ${ARGON2_PATH}/src
+        )
+        
+        # Platform-specific settings
+        if(WIN32)
+            target_compile_definitions(argon2_vendored PRIVATE 
+				A2_VISCTL=1
+				ARGON2_NO_THREADS=1
+				# Fix attribute issues
+				__attribute__=
+				visibility=
+			)
+			
+			# Also add C++ compilation for .c files
+			set_source_files_properties(
+				${ARGON2_PATH}/src/argon2.c
+				${ARGON2_PATH}/src/core.c
+				${ARGON2_PATH}/src/blake2/blake2b.c
+				${ARGON2_PATH}/src/thread.c
+				${ARGON2_PATH}/src/encoding.c
+				${ARGON2_PATH}/src/opt.c
+				PROPERTIES LANGUAGE CXX
+			)
+        endif()
+        
+        # Link threading library
+        find_package(Threads REQUIRED)
+        target_link_libraries(argon2_vendored Threads::Threads)
+        
+        # Link argon2 to Engine
+        target_link_libraries(Engine PUBLIC argon2_vendored)
+        
+        # Copy includes to destination directory
+        set(INCLUDES_ARGON2_DIR ${ARGON2_PATH}/include)
+        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+        
+        # Copy all header files
+        file(COPY ${INCLUDES_ARGON2_DIR}/ DESTINATION ${DESTINATION_DIR}/argon2)
+        
+        # Optionally copy some source headers if needed
+        file(COPY ${ARGON2_PATH}/include/argon2.h DESTINATION ${DESTINATION_DIR}/argon2)
+        
+    else()
+        message(FATAL_ERROR "Argon2 directory not found. Please check the path.")
+        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+        message(FATAL_ERROR "Expected path: ${ARGON2_PATH}")
+        message(FATAL_ERROR "To add as submodule: git submodule add https://github.com/P-H-C/phc-winner-argon2.git ThirdParty/argon2")
+    endif()
+else()
+    # System-installed argon2
+    find_path(ARGON2_INCLUDE_DIR argon2.h)
+    find_library(ARGON2_LIBRARY argon2)
+    
+    if(ARGON2_INCLUDE_DIR AND ARGON2_LIBRARY)
+        add_library(argon2_system INTERFACE)
+        target_include_directories(argon2_system INTERFACE ${ARGON2_INCLUDE_DIR})
+        target_link_libraries(argon2_system INTERFACE ${ARGON2_LIBRARY})
+        target_link_libraries(Engine PUBLIC argon2_system)
+        message(STATUS "Found system Argon2: ${ARGON2_LIBRARY}")
+    else()
+        message(FATAL_ERROR "Argon2 not found on system. Install with: sudo apt-get install libargon2-dev")
+    endif()
+endif()
+
 if(ANDROID)
 	# Link shared on android
 	target_link_libraries(Engine PUBLIC
