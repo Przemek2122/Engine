@@ -10,15 +10,17 @@ enum class EPasswordEncryptionAlgorithm : Uint8;
 /**
  * Encryption manager
  *
- * To use, create instance and use. (Preferably create one instance per thread)
+ * Helper for using encryption
  */
-class FEncryptionManager
+class ENGINE_API FEncryptionManager
 {
 public:
-	std::string HashPassword(const std::string& InputString, const EPasswordEncryptionAlgorithm EncryptionAlgorithm);
-	bool VerifyPassword(const std::string& PasswordWithHash, const std::string& PasswordWithoutHash, const EPasswordEncryptionAlgorithm PasswordEncryptionAlgorithm);
+	/** Search for encryptor, creates if it does not exist */
+	template<typename TEncryptorClass>
+	static std::unique_ptr<TEncryptorClass> CreateEncryptorForPassword()
+	{
+		std::unique_ptr<TEncryptorClass> EncryptorUniquePtr = std::make_unique<TEncryptorClass>();
 
-protected:
-	std::vector<std::unique_ptr<FPasswordEncryptionBase>> EncryptorArray;
-
+		return EncryptorUniquePtr;
+	}
 };

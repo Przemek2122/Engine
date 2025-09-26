@@ -4,23 +4,16 @@
 
 #include "CoreMinimal.h"
 
-enum class EPasswordEncryptionAlgorithm : Uint8
+enum class ENGINE_API EPasswordEncryptionAlgorithm : Uint8
 {
 	Argon2
 };
 
 /** Each encryption type should inherit from this class */
-class FPasswordEncryptionBase
+class ENGINE_API FPasswordEncryptionBase
 {
 public:
-	FPasswordEncryptionBase(const EPasswordEncryptionAlgorithm InPasswordEncryptionAlgorithm);
-
-	virtual std::string HashPassword(const std::string& InputString) = 0;
-	virtual bool VerifyPassword(const std::string& StringWithHash, const std::string& StringWithoutHash) = 0;
-
-	EPasswordEncryptionAlgorithm GetPasswordEncryptionAlgorithm() const { return PasswordEncryptionAlgorithm; };
-
-protected:
-	EPasswordEncryptionAlgorithm PasswordEncryptionAlgorithm;
+	virtual std::string HashPassword(const std::string& InputString);
+	virtual bool VerifyPassword(const std::string& StringWithHash, const std::string& StringWithoutHash);
 
 };

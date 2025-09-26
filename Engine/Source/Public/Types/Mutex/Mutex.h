@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-class FMutex
+class ENGINE_API FMutex
 {
 public:
 	FMutex();

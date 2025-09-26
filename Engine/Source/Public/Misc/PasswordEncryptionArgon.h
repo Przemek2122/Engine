@@ -6,7 +6,7 @@
 #include "PasswordEncryptionBase.h"
 
 /** Argon encryption */
-class FPasswordEncryptionArgon : public FPasswordEncryptionBase
+class ENGINE_API FPasswordEncryptionArgon : public FPasswordEncryptionBase
 {
 public:
 	std::string HashPassword(const std::string& InputString) override;

@@ -3,7 +3,16 @@
 #include "CoreEngine.h"
 #include "Misc/PasswordEncryptionBase.h"
 
-FPasswordEncryptionBase::FPasswordEncryptionBase(const EPasswordEncryptionAlgorithm InPasswordEncryptionAlgorithm)
-	: PasswordEncryptionAlgorithm(InPasswordEncryptionAlgorithm)
+std::string FPasswordEncryptionBase::HashPassword(const std::string& InputString)
 {
+	LOG_ERROR("Empty implementation");
+
+	return std::string();
+}
+
+bool FPasswordEncryptionBase::VerifyPassword(const std::string& StringWithHash, const std::string& StringWithoutHash)
+{
+	LOG_ERROR("Empty implementation");
+
+	return false;
 }

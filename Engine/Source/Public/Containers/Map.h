@@ -14,7 +14,14 @@ template<typename TKey, typename TValue, typename TSizeType = ContainerInt>
 class CMap : public CContainerBase<TValue, TSizeType>
 {
 public:
+	/** Default constructor */
 	CMap()
+	{
+	}
+
+	/** Init list */
+	CMap(std::initializer_list<std::pair<const std::string, std::string>> init_list)
+		: Map(init_list)
 	{
 	}
 

@@ -6,7 +6,7 @@
 
 class FMutex;
 
-class FMutexScopeLock
+class ENGINE_API FMutexScopeLock
 {
 public:
 	FMutexScopeLock(FMutex& InMutex);

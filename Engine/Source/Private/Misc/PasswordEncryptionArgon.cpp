@@ -7,11 +7,11 @@
 std::string FPasswordEncryptionArgon::HashPassword(const std::string& InputString)
 {
 	// Argon settings
-	const uint32_t t_cost = 3;      // 3 iterations
-	const uint32_t m_cost = 65536;  // 64 MB
-	const uint32_t parallelism = 1;
-	const uint32_t hash_len = 32;
-	const uint32_t salt_len = 16;
+	constexpr uint32_t t_cost = 2;			// CPU Usage (Number of iterations)
+	constexpr uint32_t m_cost = 16 * 1024;	// Memory usage
+	constexpr uint32_t parallelism = 1;
+	constexpr uint32_t hash_len = 32;
+	constexpr uint32_t salt_len = 16;
 
 	std::string salt = GenerateSecureSalt(salt_len);
 
@@ -38,7 +38,7 @@ std::string FPasswordEncryptionArgon::GenerateSecureSalt(const size_t Length) co
 {
 	std::random_device rd;  // Hardware entropy
 	std::mt19937 gen(rd()); // Seed with hardware randomness
-	std::uniform_int_distribution<uint8_t> dis(0, UINT8_MAX);
+	std::uniform_int_distribution<int> dis(0, UINT8_MAX);
 
 	std::string salt(Length, '\0');
 	for (size_t i = 0; i < Length; ++i) {
