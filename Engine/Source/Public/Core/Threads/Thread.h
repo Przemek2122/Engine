@@ -106,6 +106,9 @@ class ENGINE_API FGenericThread : public FThread
 public:
 	void AddTask(const FFunctorLambda<void>& Task);
 
+	/** By default we remove done jobs, but we can remove it when we want to run it in loop */
+	void SetShouldRemoveDoneJobs(const bool bShouldRemove);
+
 protected:
 	FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
 
@@ -113,5 +116,8 @@ protected:
 
 	/** Queue which is removed after execution */
 	CQueueSafe<FFunctorLambda<void>> GenericThreadTaskQueue;
+
+	/** By default we remove done jobs, but we can remove it when we want to run it in loop */
+	bool bShouldRemoveDoneJobs;
 	
 };

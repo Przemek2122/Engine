@@ -134,8 +134,14 @@ void FGenericThread::AddTask(const FFunctorLambda<void>& Task)
 	GenericThreadTaskQueue.PushBackSafe(Task);
 }
 
+void FGenericThread::SetShouldRemoveDoneJobs(const bool bShouldRemove)
+{
+	bShouldRemoveDoneJobs = bShouldRemove;
+}
+
 FGenericThread::FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData)
 	: FThread(InThreadInputData, InThreadData)
+	, bShouldRemoveDoneJobs(true)
 {
 }
 
@@ -151,7 +157,9 @@ void FGenericThread::TickThread()
 		FFunctorLambda<void>& Task = GenericThreadTaskQueue.PeekFirst();
 		Task.operator()();
 
-		// Remove 
-		GenericThreadTaskQueue.DequeFrontSafe();
+		if (bShouldRemoveDoneJobs)
+		{
+			GenericThreadTaskQueue.DequeFrontSafe();
+		}
 	}
 }
