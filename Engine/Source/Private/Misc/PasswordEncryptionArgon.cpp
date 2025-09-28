@@ -4,7 +4,7 @@
 #include "Misc/PasswordEncryptionArgon.h"
 #include "argon2.h"
 
-std::string FPasswordEncryptionArgon::HashPassword(const std::string& InputString)
+std::string FPasswordEncryptionArgon::HashPasswordCustom(const std::string& InputString, const FArgonSettings& ArgonSettings)
 {
 	// Argon settings
 	constexpr uint32_t t_cost = 2;			// CPU Usage (Number of iterations)
@@ -13,7 +13,7 @@ std::string FPasswordEncryptionArgon::HashPassword(const std::string& InputStrin
 	constexpr uint32_t hash_len = 32;
 	constexpr uint32_t salt_len = 16;
 
-	std::string salt = GenerateSecureSalt(salt_len);
+	std::string salt = FUtil::GenerateSecureSalt(salt_len);
 
 	const size_t encoded_len = argon2_encodedlen(t_cost, m_cost, parallelism, salt_len, hash_len, Argon2_id);
 	std::string encoded(encoded_len, '\0');
@@ -26,24 +26,15 @@ std::string FPasswordEncryptionArgon::HashPassword(const std::string& InputStrin
 		encoded.data(), encoded_len
 	);
 
-	return ( (Result == ARGON2_OK) ? encoded : std::string() );
+	return ((Result == ARGON2_OK) ? encoded : std::string());
+}
+
+std::string FPasswordEncryptionArgon::HashPassword(const std::string& InputString)
+{
+	return HashPasswordCustom(InputString, FArgonSettings());
 }
 
 bool FPasswordEncryptionArgon::VerifyPassword(const std::string& StringWithHash, const std::string& StringWithoutHash)
 {
 	return ( argon2id_verify(StringWithHash.c_str(), StringWithoutHash.c_str(), StringWithoutHash.length()) == ARGON2_OK );
-}
-
-std::string FPasswordEncryptionArgon::GenerateSecureSalt(const size_t Length) const
-{
-	std::random_device rd;  // Hardware entropy
-	std::mt19937 gen(rd()); // Seed with hardware randomness
-	std::uniform_int_distribution<int> dis(0, UINT8_MAX);
-
-	std::string salt(Length, '\0');
-	for (size_t i = 0; i < Length; ++i) {
-		salt[i] = static_cast<char>(dis(gen));
-	}
-
-	return salt;
 }
