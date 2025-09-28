@@ -19,6 +19,34 @@ struct ENGINE_API FLogMessage
 	std::string Text;
 };
 
+// Different XOR masks for bit flipping
+static constexpr uint64_t ALTERNATING_1 = 0xAAAAAAAAAAAAAAAAULL; // 10101010...
+static constexpr uint64_t ALTERNATING_2 = 0x5555555555555555ULL; // 01010101...
+static constexpr uint64_t CHECKERBOARD = 0xA5A5A5A5A5A5A5A5ULL; // 10100101...
+static constexpr uint64_t INVERSE_CHECKER = 0x5A5A5A5A5A5A5AULL;   // 01011010...
+
+// Nibble-based patterns (4-bit groups)
+static constexpr uint64_t NIBBLE_FLIP = 0xF0F0F0F0F0F0F0F0ULL; // 11110000...
+static constexpr uint64_t NIBBLE_LOW = 0x0F0F0F0F0F0F0F0FULL; // 00001111...
+
+// Byte-based patterns
+static constexpr uint64_t BYTE_HIGH = 0xFF00FF00FF00FF00ULL; // High nibbles
+static constexpr uint64_t BYTE_LOW = 0x00FF00FF00FF00FFULL; // Low nibbles
+
+// Mathematical constants
+/** Best are hidden, make your own for safety */
+static constexpr uint64_t PI_BASED = 0x243F6A8885A308D3ULL; // Pi fractional part
+
+// Prime-based
+static constexpr uint64_t LARGE_PRIME = 0xFFFFFFFFFFFFFFC5ULL; // 2^64 - 59
+static constexpr uint64_t MERSENNE = 0x1FFFFFFFFFFFFFULL;   // 2^61 - 1
+
+// Sparse patterns
+static constexpr uint64_t EVERY_8TH = 0x0101010101010101ULL; // Bit 0,8,16,24...
+static constexpr uint64_t CORNERS = 0x8000000000000001ULL; // Just first and last
+
+static constexpr std::string_view CHARACTER_SET_BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 /**
  * Global utilities class, with:
  * - log (Info, Debug, Warn, Error)
@@ -110,6 +138,47 @@ public:
 	/* Returns current time in format 12:01:2019 12:37:23. */
 	INLINE_DEBUGABLE static std::string GetCurrentTimeString();
 
+	static std::string GenerateSecureSalt(const size_t Length);
+
+	/**
+	 * @brief Flips bits of a uint64_t using XOR with a fixed pattern
+	 *
+	 * Uses pattern 0xA5A5A5A5A5A5A5A5 (alternating 10100101 bits).
+	 * Deterministic and reversible - calling twice returns original value.
+	 *
+	 * @param InValue Input 64-bit value
+	 * @return Value with bits flipped according to pattern
+	 */
+	static Uint64 FlipBits(const Uint64 InValue, const Uint64 FlipMask);
+
+	/**
+	 * @brief Converts a number to any base using a custom character set
+	 *
+	 * @param InNumber The number to convert
+	 * @param InCharSet String containing characters to use (defines the base)
+	 * @return String representation in the specified base
+	 *
+	 * Examples:
+	 *   ToBaseN(255, "01") -> "11111111" (binary)
+	 *   ToBaseN(255, "01234567") -> "377" (octal)
+	 *   ToBaseN(255, "0123456789ABCDEF") -> "FF" (hex)
+	 *   ToBaseN(1234, "abc") -> "bbbacb" (base-3 with custom chars)
+	 */
+	static std::string ToBaseN(uint64_t InNumber, std::string_view InCharSet = CHARACTER_SET_BASE62);
+
+	/**
+	 * @brief Converts a string from any base back to a 64-bit unsigned integer
+	 *
+	 * @param InEncodedString The encoded string to decode
+	 * @param InCharSet String containing characters used for encoding (defines the base)
+	 * @return Optional containing the decoded number, or std::nullopt if invalid
+	 *
+	 * Examples:
+	 *   FromBaseN("11111111", "01") -> 255 (from binary)
+	 *   FromBaseN("377", "01234567") -> 255 (from octal)
+	 *   FromBaseN("FF", "0123456789ABCDEF") -> 255 (from hex)
+	 */
+	static std::optional<uint64_t> FromBaseN(std::string_view InEncodedString, std::string_view InCharSet = CHARACTER_SET_BASE62);
 
 	/** Logs (Info): with white(default) color. */
 	static void Info(std::string Message);

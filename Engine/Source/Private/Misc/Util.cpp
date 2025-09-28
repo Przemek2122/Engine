@@ -3,6 +3,7 @@
 #include "CoreEngine.h"
 #include "Misc/Util.h"
 #include "Misc/FileSystem.h"
+#include <numbers>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -265,6 +266,133 @@ std::string FUtil::GetCurrentTimeString()
 		+ std::to_string(TimeInfo.tm_hour) + ":" + std::to_string(TimeInfo.tm_min) + ":" + std::to_string(TimeInfo.tm_sec);
 
 	return ctm;
+}
+
+std::string FUtil::GenerateSecureSalt(const size_t Length)
+{
+	std::random_device rd;  // Hardware entropy
+	std::mt19937 gen(rd()); // Seed with hardware randomness
+	std::uniform_int_distribution<int> dis(0, UINT8_MAX);
+
+	std::string salt(Length, '\0');
+	for (size_t i = 0; i < Length; ++i) {
+		salt[i] = static_cast<char>(dis(gen));
+	}
+
+	return salt;
+}
+
+Uint64 FUtil::FlipBits(uint64_t InValue, const Uint64 FlipMask)
+{
+	// XOR mask: alternating bit pattern for reproducible flipping
+	return InValue ^ FlipMask;
+}
+
+std::string FUtil::ToBaseN(uint64_t InNumber, std::string_view InCharSet)
+{
+	// Validate input
+	if (InCharSet.empty())
+	{
+		return ""; // Can't convert without characters
+	}
+
+	const size_t BaseSize = InCharSet.size();
+
+	// Handle zero case explicitly
+	if (InNumber == 0)
+	{
+		return std::string(1, InCharSet[0]); // Return first character for zero
+	}
+
+	// Calculate max possible length for this base to reserve space
+	// Formula: ceil(log_base(2^64)) = ceil(64 * log(2) / log(base))
+	const size_t CalculatedMaxLength = static_cast<size_t>(
+		std::ceil(64.0 * std::numbers::ln2 / std::log(static_cast<double>(BaseSize))) + 1
+	);
+
+	std::string Result;
+	Result.reserve(CalculatedMaxLength);
+
+	// Convert number by repeatedly dividing by base
+	while (InNumber > 0)
+	{
+		Result += InCharSet[InNumber % BaseSize];  // Get remainder as next digit
+		InNumber /= BaseSize;                      // Move to next position
+	}
+
+	// Reverse to get correct digit order (most significant first)
+	std::ranges::reverse(Result);
+
+	return Result;
+}
+
+std::optional<uint64_t> FUtil::FromBaseN(std::string_view InEncodedString, std::string_view InCharSet)
+{
+	// Validate inputs
+	if (InCharSet.empty() || InEncodedString.empty())
+	{
+		return std::nullopt;
+	}
+
+	const size_t BaseSize = InCharSet.size();
+
+	// Create lookup table for character to digit conversion
+	std::unordered_map<char, size_t> CharToDigit;
+	CharToDigit.reserve(BaseSize);
+
+	for (size_t i = 0; i < BaseSize; ++i)
+	{
+		CharToDigit[InCharSet[i]] = i;
+	}
+
+	uint64_t Result = 0;
+	uint64_t Multiplier = 1;
+
+	// Process string from right to left (least significant digit first)
+	for (auto it = InEncodedString.rbegin(); it != InEncodedString.rend(); ++it)
+	{
+		char CurrentChar = *it;
+
+		// Check if character exists in character set
+		auto DigitIt = CharToDigit.find(CurrentChar);
+		if (DigitIt == CharToDigit.end())
+		{
+			return std::nullopt; // Invalid character found
+		}
+
+		size_t DigitValue = DigitIt->second;
+
+		// Check for overflow before multiplication
+		if (Multiplier > (UINT64_MAX - Result) / BaseSize)
+		{
+			return std::nullopt; // Would cause overflow
+		}
+
+		// Add digit contribution to result
+		uint64_t Addition = DigitValue * Multiplier;
+		if (Addition > UINT64_MAX - Result)
+		{
+			return std::nullopt; // Would cause overflow
+		}
+
+		Result += Addition;
+
+		// Update multiplier for next digit
+		if (Multiplier > UINT64_MAX / BaseSize)
+		{
+			// Check if we're at the last character to avoid false overflow detection
+			if (std::next(it) != InEncodedString.rend())
+			{
+				return std::nullopt; // Would cause overflow on next iteration
+			}
+		}
+		else
+		{
+			Multiplier *= BaseSize;
+		}
+	}
+
+	return Result;
 }
 
 void FUtil::Info(std::string Message)
