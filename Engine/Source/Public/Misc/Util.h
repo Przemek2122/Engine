@@ -45,7 +45,15 @@ static constexpr uint64_t MERSENNE = 0x1FFFFFFFFFFFFFULL;   // 2^61 - 1
 static constexpr uint64_t EVERY_8TH = 0x0101010101010101ULL; // Bit 0,8,16,24...
 static constexpr uint64_t CORNERS = 0x8000000000000001ULL; // Just first and last
 
-static constexpr std::string_view CHARACTER_SET_BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+/** Predefined character sets */
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_BINARY = "01";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_OCTAL = "01234567";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_DECIMAL = "0123456789";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_HEX_LOWER = "0123456789abcdef";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_HEX_UPPER = "0123456789ABCDEF";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_BASE36 = "0123456789abcdefghijklmnopqrstuvwxyz";
+inline constexpr std::string_view PREDEFINED_CHARACTERSET_BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static constexpr std::string_view PREDEFINED_CHARACTERSET_CHARACTER_SET_BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /**
  * Global utilities class, with:
@@ -164,7 +172,7 @@ public:
 	 *   ToBaseN(255, "0123456789ABCDEF") -> "FF" (hex)
 	 *   ToBaseN(1234, "abc") -> "bbbacb" (base-3 with custom chars)
 	 */
-	static std::string ToBaseN(uint64_t InNumber, std::string_view InCharSet = CHARACTER_SET_BASE62);
+	static std::string ToBaseN(uint64_t InNumber, std::string_view InCharSet = PREDEFINED_CHARACTERSET_CHARACTER_SET_BASE62);
 
 	/**
 	 * @brief Converts a string from any base back to a 64-bit unsigned integer
@@ -178,7 +186,25 @@ public:
 	 *   FromBaseN("377", "01234567") -> 255 (from octal)
 	 *   FromBaseN("FF", "0123456789ABCDEF") -> 255 (from hex)
 	 */
-	static std::optional<uint64_t> FromBaseN(std::string_view InEncodedString, std::string_view InCharSet = CHARACTER_SET_BASE62);
+	static std::optional<uint64_t> FromBaseN(std::string_view InEncodedString, std::string_view InCharSet = PREDEFINED_CHARACTERSET_CHARACTER_SET_BASE62);
+
+	/**
+	 * @brief Advanced encryption with input validation
+	 *
+	 * @param InString String to encrypt/decrypt
+	 * @param InCharSet Character set defining valid characters
+	 * @param InKey Encryption key
+	 *	*	MINIMUM:  8 characters  - Basic security (casual obfuscation)
+		**	GOOD:     16 characters - Moderate security (recommended minimum)
+		**	BETTER:   32 characters - Strong security
+		***	BEST:     64+ characters - Maximum security for this algorithm
+	 * 
+	 * @param bEncrypt True to encrypt, false to decrypt
+	 * @param bValidateInput If true, throws exception for invalid characters
+	 * @return Encrypted/decrypted string
+	 * @throws std::invalid_argument If input contains invalid characters (when validation enabled)
+	 */
+	static std::string EncryptCustomBaseValidated(std::string_view InString, std::string_view InCharSet, std::string_view InKey, bool bEncrypt = true, bool bValidateInput = false);
 
 	/** Logs (Info): with white(default) color. */
 	static void Info(std::string Message);

@@ -4,6 +4,7 @@
 #include "Misc/Util.h"
 #include "Misc/FileSystem.h"
 #include <numbers>
+#include <unordered_set>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -390,6 +391,69 @@ std::optional<uint64_t> FUtil::FromBaseN(std::string_view InEncodedString, std::
 		{
 			Multiplier *= BaseSize;
 		}
+	}
+
+	return Result;
+}
+
+std::string FUtil::EncryptCustomBaseValidated(const std::string_view InString, const std::string_view InCharSet, const std::string_view InKey, bool bEncrypt, bool bValidateInput)
+{
+	if (InString.empty() || InCharSet.empty() || InKey.empty())
+	{
+		return std::string(InString);
+	}
+
+	// Optional input validation
+	if (bValidateInput)
+	{
+		std::unordered_set<char> ValidChars(InCharSet.begin(), InCharSet.end());
+
+		for (char c : InString)
+		{
+			if (ValidChars.find(c) == ValidChars.end())
+			{
+				throw std::invalid_argument("Input string contains invalid character: '" +
+					std::string(1, c) + "'");
+			}
+		}
+	}
+
+	// Rest of the function is the same as EncryptCustomBase...
+	const size_t CharSetSize = InCharSet.size();
+
+	std::vector<char> ShuffledChars(InCharSet.begin(), InCharSet.end());
+
+	uint64_t Seed = 0;
+	for (char c : InKey)
+	{
+		Seed = Seed * 31 + static_cast<uint64_t>(c);
+	}
+
+	for (size_t i = CharSetSize - 1; i > 0; --i)
+	{
+		Seed = Seed * 1103515245 + 12345;
+		size_t j = Seed % (i + 1);
+		std::swap(ShuffledChars[i], ShuffledChars[j]);
+	}
+
+	std::unordered_map<char, char> EncryptMap;
+	std::unordered_map<char, char> DecryptMap;
+
+	for (size_t i = 0; i < CharSetSize; ++i)
+	{
+		EncryptMap[InCharSet[i]] = ShuffledChars[i];
+		DecryptMap[ShuffledChars[i]] = InCharSet[i];
+	}
+
+	std::string Result;
+	Result.reserve(InString.size());
+
+	const auto& UseMap = bEncrypt ? EncryptMap : DecryptMap;
+
+	for (char c : InString)
+	{
+		auto it = UseMap.find(c);
+		Result += (it != UseMap.end()) ? it->second : c;
 	}
 
 	return Result;
