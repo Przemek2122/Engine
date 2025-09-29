@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <numbers>
+
 #include "CoreMinimal.h"
 #include "Containers/QueueSafe.h"
 
@@ -159,10 +161,28 @@ public:
 	 */
 	static Uint64 FlipBits(const Uint64 InValue, const Uint64 FlipMask);
 
+	/** Reverse code for ToBaseN */
+	static std::string FromBaseN(std::string_view InEncoded, std::string_view InCharSet);
+
+	/** Reverse for ToBaseNNum */
+	static uintmax_t FromBaseNNum(std::string_view InEncoded, std::string_view InCharSet);
+
 	/**
 	 * @brief Converts a number to any base using a custom character set
 	 *
-	 * @param InNumber The number to convert
+	 * @param InData Put any memory, get expected Charset characters only but size may be different
+	 * @param InCharSet String containing characters to use (defines the base)
+	 * @return String representation in the specified base
+	 */
+	static std::string ToBaseN(std::string_view InData, std::string_view InCharSet);
+
+	/** Does not have leading zeros but also does not allow reverse */
+	static std::string ToBaseN_Irreversible(std::string_view InData, std::string_view InCharSet);
+
+	/**
+	 * @brief Converts a number to any base using a custom character set
+	 *
+	 * @param InNumber Put number
 	 * @param InCharSet String containing characters to use (defines the base)
 	 * @return String representation in the specified base
 	 *
@@ -172,21 +192,7 @@ public:
 	 *   ToBaseN(255, "0123456789ABCDEF") -> "FF" (hex)
 	 *   ToBaseN(1234, "abc") -> "bbbacb" (base-3 with custom chars)
 	 */
-	static std::string ToBaseN(uint64_t InNumber, std::string_view InCharSet = PREDEFINED_CHARACTERSET_CHARACTER_SET_BASE62);
-
-	/**
-	 * @brief Converts a string from any base back to a 64-bit unsigned integer
-	 *
-	 * @param InEncodedString The encoded string to decode
-	 * @param InCharSet String containing characters used for encoding (defines the base)
-	 * @return Optional containing the decoded number, or std::nullopt if invalid
-	 *
-	 * Examples:
-	 *   FromBaseN("11111111", "01") -> 255 (from binary)
-	 *   FromBaseN("377", "01234567") -> 255 (from octal)
-	 *   FromBaseN("FF", "0123456789ABCDEF") -> 255 (from hex)
-	 */
-	static std::optional<uint64_t> FromBaseN(std::string_view InEncodedString, std::string_view InCharSet = PREDEFINED_CHARACTERSET_CHARACTER_SET_BASE62);
+	static std::string ToBaseNNum(uintmax_t InNumber, std::string_view InCharSet);
 
 	/**
 	 * @brief Advanced encryption with input validation

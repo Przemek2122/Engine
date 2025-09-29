@@ -289,14 +289,194 @@ Uint64 FUtil::FlipBits(uint64_t InValue, const Uint64 FlipMask)
 	return InValue ^ FlipMask;
 }
 
-std::string FUtil::ToBaseN(uint64_t InNumber, std::string_view InCharSet)
+std::string FUtil::FromBaseN(std::string_view InEncoded, std::string_view InCharSet)
+{
+	// Validate input
+	if (InCharSet.empty() || InEncoded.empty())
+	{
+		return "";
+	}
+
+	const size_t BaseSize = InCharSet.size();
+
+	// Create a lookup map for character to digit value
+	std::unordered_map<char, size_t> CharToDigit;
+	for (size_t i = 0; i < BaseSize; ++i)
+	{
+		CharToDigit[InCharSet[i]] = i;
+	}
+
+	// Convert encoded string to digit array
+	std::vector<size_t> Digits;
+	Digits.reserve(InEncoded.size());
+	for (char c : InEncoded)
+	{
+		auto it = CharToDigit.find(c);
+		if (it == CharToDigit.end())
+		{
+			return ""; // Invalid character
+		}
+		Digits.push_back(it->second);
+	}
+
+	// Convert digits from target base to bytes (base 256)
+	std::vector<unsigned char> Bytes;
+
+	for (size_t digit : Digits)
+	{
+		// Multiply current bytes by BaseSize and add digit
+		size_t Carry = digit;
+		for (unsigned char& byte : Bytes)
+		{
+			size_t Temp = byte * BaseSize + Carry;
+			byte = static_cast<unsigned char>(Temp % 256);
+			Carry = Temp / 256;
+		}
+
+		// Add new bytes if needed
+		while (Carry > 0)
+		{
+			Bytes.push_back(static_cast<unsigned char>(Carry % 256));
+			Carry /= 256;
+		}
+	}
+
+	// Reverse bytes to get correct order
+	std::ranges::reverse(Bytes);
+
+	// Convert bytes to string
+	return std::string(reinterpret_cast<const char*>(Bytes.data()), Bytes.size());
+}
+
+std::string FUtil::ToBaseN(const std::string_view InData, const std::string_view InCharSet)
 {
 	// Validate input
 	if (InCharSet.empty())
 	{
 		return ""; // Can't convert without characters
 	}
+	const size_t BaseSize = InCharSet.size();
 
+	// Get raw bytes
+	const unsigned char* Bytes = reinterpret_cast<const unsigned char*>(InData.data());
+	const size_t ByteCount = InData.size();
+
+	// Handle empty input
+	if (ByteCount == 0)
+	{
+		return std::string(1, InCharSet[0]);
+	}
+
+	// Convert bytes to digits in target base
+	std::vector<size_t> Digits = { 0 };
+
+	for (size_t i = 0; i < ByteCount; ++i)
+	{
+		// Multiply current number by 256 and add next byte
+		size_t Carry = Bytes[i];
+		for (size_t& Digit : Digits)
+		{
+			size_t Temp = Digit * 256 + Carry;
+			Digit = Temp % BaseSize;
+			Carry = Temp / BaseSize;
+		}
+
+		// Add new digits if needed
+		while (Carry > 0)
+		{
+			Digits.push_back(Carry % BaseSize);
+			Carry /= BaseSize;
+		}
+	}
+
+	// Calculate minimum length to preserve all data
+	const size_t MinDigitsPerByte = static_cast<size_t>(
+		std::ceil(8.0 * std::numbers::ln2 / std::log(static_cast<double>(BaseSize)))
+	);
+	const size_t MinOutputLength = ByteCount * MinDigitsPerByte;
+
+	// Pad with leading zeros to ensure all data is represented
+	while (Digits.size() < MinOutputLength)
+	{
+		Digits.push_back(0);
+	}
+
+	// Build result string (digits are in reverse order)
+	std::string Result;
+	Result.reserve(Digits.size());
+	for (auto it = Digits.rbegin(); it != Digits.rend(); ++it)
+	{
+		Result += InCharSet[*it];
+	}
+
+	return Result;
+}
+
+std::string FUtil::ToBaseN_Irreversible(const std::string_view InData, const std::string_view InCharSet)
+{
+	// Validate input
+	if (InCharSet.empty())
+	{
+		return ""; // Can't convert without characters
+	}
+	const size_t BaseSize = InCharSet.size();
+
+	// Get raw bytes
+	const unsigned char* Bytes = reinterpret_cast<const unsigned char*>(InData.data());
+	const size_t ByteCount = InData.size();
+
+	// Handle empty input
+	if (ByteCount == 0)
+	{
+		return std::string(1, InCharSet[0]);
+	}
+
+	// Convert bytes to digits in target base
+	std::vector<size_t> Digits = { 0 };
+
+	for (size_t i = 0; i < ByteCount; ++i)
+	{
+		// Multiply current number by 256 and add next byte
+		size_t Carry = Bytes[i];
+		for (size_t& Digit : Digits)
+		{
+			size_t Temp = Digit * 256 + Carry;
+			Digit = Temp % BaseSize;
+			Carry = Temp / BaseSize;
+		}
+
+		// Add new digits if needed
+		while (Carry > 0)
+		{
+			Digits.push_back(Carry % BaseSize);
+			Carry /= BaseSize;
+		}
+	}
+
+	// Handle all-zero case
+	if (Digits.size() == 1 && Digits[0] == 0)
+	{
+		return std::string(1, InCharSet[0]);
+	}
+
+	// Build result string (digits are in reverse order)
+	std::string Result;
+	Result.reserve(Digits.size());
+	for (auto it = Digits.rbegin(); it != Digits.rend(); ++it)
+	{
+		Result += InCharSet[*it];
+	}
+
+	return Result;
+}
+
+std::string FUtil::ToBaseNNum(uintmax_t InNumber, const std::string_view InCharSet)
+{
+	// Validate input
+	if (InCharSet.empty())
+	{
+		return ""; // Can't convert without characters
+	}
 	const size_t BaseSize = InCharSet.size();
 
 	// Handle zero case explicitly
@@ -306,9 +486,9 @@ std::string FUtil::ToBaseN(uint64_t InNumber, std::string_view InCharSet)
 	}
 
 	// Calculate max possible length for this base to reserve space
-	// Formula: ceil(log_base(2^64)) = ceil(64 * log(2) / log(base))
+	// uintmax_t is at least 64 bits
 	const size_t CalculatedMaxLength = static_cast<size_t>(
-		std::ceil(64.0 * std::numbers::ln2 / std::log(static_cast<double>(BaseSize))) + 1
+		std::ceil(sizeof(uintmax_t) * 8.0 * std::numbers::ln2 / std::log(static_cast<double>(BaseSize))) + 1
 	);
 
 	std::string Result;
@@ -323,74 +503,39 @@ std::string FUtil::ToBaseN(uint64_t InNumber, std::string_view InCharSet)
 
 	// Reverse to get correct digit order (most significant first)
 	std::ranges::reverse(Result);
-
 	return Result;
 }
 
-std::optional<uint64_t> FUtil::FromBaseN(std::string_view InEncodedString, std::string_view InCharSet)
+uintmax_t FUtil::FromBaseNNum(const std::string_view InEncoded, const std::string_view InCharSet)
 {
-	// Validate inputs
-	if (InCharSet.empty() || InEncodedString.empty())
+	// Validate input
+	if (InCharSet.empty() || InEncoded.empty())
 	{
-		return std::nullopt;
+		return 0;
 	}
 
 	const size_t BaseSize = InCharSet.size();
 
-	// Create lookup table for character to digit conversion
+	// Create a lookup map for character to digit value
 	std::unordered_map<char, size_t> CharToDigit;
-	CharToDigit.reserve(BaseSize);
-
 	for (size_t i = 0; i < BaseSize; ++i)
 	{
 		CharToDigit[InCharSet[i]] = i;
 	}
 
-	uint64_t Result = 0;
-	uint64_t Multiplier = 1;
+	// Convert from base-N to number
+	uintmax_t Result = 0;
 
-	// Process string from right to left (least significant digit first)
-	for (auto it = InEncodedString.rbegin(); it != InEncodedString.rend(); ++it)
+	for (char c : InEncoded)
 	{
-		char CurrentChar = *it;
-
-		// Check if character exists in character set
-		auto DigitIt = CharToDigit.find(CurrentChar);
-		if (DigitIt == CharToDigit.end())
+		auto it = CharToDigit.find(c);
+		if (it == CharToDigit.end())
 		{
-			return std::nullopt; // Invalid character found
+			return 0; // Invalid character, return 0
 		}
 
-		size_t DigitValue = DigitIt->second;
-
-		// Check for overflow before multiplication
-		if (Multiplier > (UINT64_MAX - Result) / BaseSize)
-		{
-			return std::nullopt; // Would cause overflow
-		}
-
-		// Add digit contribution to result
-		uint64_t Addition = DigitValue * Multiplier;
-		if (Addition > UINT64_MAX - Result)
-		{
-			return std::nullopt; // Would cause overflow
-		}
-
-		Result += Addition;
-
-		// Update multiplier for next digit
-		if (Multiplier > UINT64_MAX / BaseSize)
-		{
-			// Check if we're at the last character to avoid false overflow detection
-			if (std::next(it) != InEncodedString.rend())
-			{
-				return std::nullopt; // Would cause overflow on next iteration
-			}
-		}
-		else
-		{
-			Multiplier *= BaseSize;
-		}
+		// Multiply by base and add digit
+		Result = Result * BaseSize + it->second;
 	}
 
 	return Result;
