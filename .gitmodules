@@ -19,3 +19,6 @@
 [submodule "ThirdParty/json"]
 	path = ThirdParty/json
 	url = https://github.com/nlohmann/json
+[submodule "ThirdParty/cpr"]
+	path = ThirdParty/cpr
+	url = https://github.com/libcpr/cpr
