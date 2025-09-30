@@ -3,6 +3,7 @@
 #include "CoreEngine.h"
 #include "Misc/PasswordEncryptionArgon.h"
 #include "argon2.h"
+#include "Misc/EncryptionUtil.h"
 
 std::string FPasswordEncryptionArgon::HashPasswordCustom(const std::string& InputString, const FArgonSettings& ArgonSettings)
 {
@@ -13,7 +14,7 @@ std::string FPasswordEncryptionArgon::HashPasswordCustom(const std::string& Inpu
 	constexpr uint32_t hash_len = 32;
 	constexpr uint32_t salt_len = 16;
 
-	std::string salt = FUtil::GenerateSecureSalt(salt_len);
+	std::string salt = FEncryptionUtil::GenerateSecureSalt(salt_len);
 
 	const size_t encoded_len = argon2_encodedlen(t_cost, m_cost, parallelism, salt_len, hash_len, Argon2_id);
 	std::string encoded(encoded_len, '\0');
