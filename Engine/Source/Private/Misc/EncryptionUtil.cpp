@@ -32,26 +32,33 @@ std::string FEncryptionUtil::EncryptDataCustom(const std::string& InData, const 
 	{
 		Out = ToBaseN(InData, PREDEFINED_CHARACTERSET_BASE62);
 
-		int32 Offset = 0;
-		for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(Out.size()); i++)
+		const std::vector<uint8_t> InputBytes = StringToBytes(Out);
+		const std::vector<uint8_t> EncryptionKeyBytes = StringToBytes(InEncryptionKey);
+		std::vector<uint8_t> OutBytes;
+		OutBytes.reserve(InputBytes.size());
+
+		// First base encryption
+		for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(InputBytes.size()); InputBytesIndex++)
 		{
-			char CurrentChar = Out[i];
-			const char& EncryptionChar = InEncryptionKey[i];
+			const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
 
-			const int32 Value = static_cast<int32>(CurrentChar) + static_cast<int32>(EncryptionChar);
-			const char NormalizedValue = NormalizeChar(Value);
-
-			ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
-
-			Out[i] = NormalizedValue;
-
-			if (i + 1 == static_cast<int32>(InEncryptionKey.size()))
+			int32 Result;
+			if (InputBytesIndex % 2)
 			{
-				Offset += static_cast<int32>(InEncryptionKey.size());
-
-				i = 0;
+				Result = static_cast<int32>(InputBytes[InputBytesIndex]) + static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
 			}
+			else
+			{
+				Result = static_cast<int32>(InputBytes[InputBytesIndex]) - static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+			}
+
+			OutBytes.push_back(NormalizeByte(Result));
 		}
+
+		// Let's do some shuffle
+		const std::vector<uint8_t> Shuffled = ShuffleWithKey(OutBytes, EncryptionKeyBytes);
+
+		Out = BytesToString(Shuffled);
 	}
 
 	return Out;
@@ -63,28 +70,35 @@ std::string FEncryptionUtil::DecryptDataCustom(const std::string& InData, const 
 
 	if (!InEncryptionKey.empty())
 	{
-		int32 Offset = 0;
-		for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(Out.size()); i++)
+		const std::vector<uint8_t> InputBytes = StringToBytes(Out);
+		const std::vector<uint8_t> EncryptionKeyBytes = StringToBytes(InEncryptionKey);
+		std::vector<uint8_t> OutBytes;
+		OutBytes.reserve(InputBytes.size());
+
+		// Let's undo shuffle
+		const std::vector<uint8_t> Unshuffled = UnshuffleWithKey(InputBytes, EncryptionKeyBytes);
+
+		// First base encryption
+		for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(Unshuffled.size()); InputBytesIndex++)
 		{
-			char CurrentChar = Out[i];
-			const char& EncryptionChar = InEncryptionKey[i];
+			const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
 
-			const int32 Value = static_cast<int32>(CurrentChar) - static_cast<int32>(EncryptionChar);
-			const char NormalizedValue = NormalizeChar(Value);
-
-			ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
-
-			Out[i] = NormalizedValue;
-
-			if (i + 1 == static_cast<int32>(InEncryptionKey.size()))
+			int32 Result;
+			if (InputBytesIndex % 2)
 			{
-				Offset += static_cast<int32>(InEncryptionKey.size());
-
-				i = 0;
+				Result = static_cast<int32>(Unshuffled[InputBytesIndex]) - static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
 			}
+			else
+			{
+				Result = static_cast<int32>(Unshuffled[InputBytesIndex]) + static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+			}
+
+			OutBytes.push_back(NormalizeByte(Result));
 		}
 
-		Out = FromBaseN(Out, PREDEFINED_CHARACTERSET_BASE62);
+		const std::string StringConverted = BytesToString(OutBytes);
+
+		Out = FromBaseN(StringConverted, PREDEFINED_CHARACTERSET_BASE62);
 	}
 
 	return Out;
@@ -417,55 +431,68 @@ std::string FEncryptionUtil::EncryptCustomBaseValidated(const std::string_view I
 	return Result;
 }
 
-std::string FEncryptionUtil::AddPKCS7Padding(const std::string& text)
+std::vector<uint8_t> FEncryptionUtil::ShuffleWithKey(const std::vector<uint8_t>& Input, const std::vector<uint8_t>& Key)
 {
-	const size_t Remaining = text.size() % 8;
-	const size_t PaddingSize = (Remaining == 0) ? 8 : (8 - Remaining);
+	std::vector<uint8_t> Output = Input;
 
-	std::string Padded = text;
-	Padded.append(PaddingSize, static_cast<char>(PaddingSize));
-	return Padded;
+	// Generate seed
+	uint64_t Seed = 0;
+	for (size_t i = 0; i < Key.size(); i++) {
+		Seed ^= static_cast<uint64_t>(Key[i]) << ((i % 8) * 8);
+	}
+
+	// Shuffle
+	std::mt19937_64 Generator(Seed);
+	std::shuffle(Output.begin(), Output.end(), Generator);
+
+	return Output;
 }
 
-std::string FEncryptionUtil::RemovePKCS7Padding(const std::string& text)
+std::vector<uint8_t> FEncryptionUtil::UnshuffleWithKey(const std::vector<uint8_t>& Shuffled,
+	const std::vector<uint8_t>& Key)
 {
-	if (text.empty())
-	{
-		return text;
+	// Generate same permutation
+	uint64_t Seed = 0;
+	for (size_t i = 0; i < Key.size(); i++) {
+		Seed ^= static_cast<uint64_t>(Key[i]) << ((i % 8) * 8);
 	}
 
-	unsigned char paddingSize = static_cast<unsigned char>(text.back());
+	std::mt19937_64 Generator(Seed);
 
-	// Validation
-	if (paddingSize > 8 || paddingSize == 0)
-	{
-		return text;
+	std::vector<size_t> Permutation(Shuffled.size());
+	std::iota(Permutation.begin(), Permutation.end(), 0);
+	std::shuffle(Permutation.begin(), Permutation.end(), Generator);
+
+	// Reverse shuffle
+	std::vector<uint8_t> Output(Shuffled.size());
+	for (size_t i = 0; i < Shuffled.size(); i++) {
+		Output[Permutation[i]] = Shuffled[i];
 	}
 
-	// Check if bytes correct
-	for (size_t i = text.size() - paddingSize; i < text.size(); i++)
-	{
-		if (static_cast<unsigned char>(text[i]) != paddingSize)
-		{
-			// Incorrect padding
-			return text;
-		}
-	}
-
-	return text.substr(0, text.size() - paddingSize);
+	return Output;
 }
 
-char FEncryptionUtil::NormalizeChar(int32 InChar)
+std::vector<uint8_t> FEncryptionUtil::StringToBytes(const std::string& Str)
 {
-	if (InChar > 127)
+	return { Str.begin(), Str.end() };
+}
+
+std::string FEncryptionUtil::BytesToString(const std::vector<uint8_t>& Bytes)
+{
+	return { Bytes.begin(), Bytes.end() };
+}
+
+Uint8 FEncryptionUtil::NormalizeByte(int32 InChar)
+{
+	if (InChar > UINT8_MAX)
 	{
-		InChar = (InChar - 127);
+		InChar = (InChar - UINT8_MAX);
 	}
 
 	if (InChar < 0)
 	{
-		InChar = (InChar + 127);
+		InChar = (InChar + UINT8_MAX);
 	}
 
-	return static_cast<char>(InChar);
+	return static_cast<Uint8>(InChar);
 }

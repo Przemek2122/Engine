@@ -117,8 +117,9 @@ public:
 	 */
 	static std::string EncryptCustomBaseValidated(std::string_view InString, std::string_view InCharSet, std::string_view InKey, bool bEncrypt = true, bool bValidateInput = false);
 
-	static std::string AddPKCS7Padding(const std::string & text);
-	static std::string RemovePKCS7Padding(const std::string& text);
-
-	static char NormalizeChar(int32 InChar);
+	static std::vector<uint8_t> ShuffleWithKey(const std::vector<uint8_t>& Input, const std::vector<uint8_t>& Key);
+	static std::vector<uint8_t> UnshuffleWithKey(const std::vector<uint8_t>& Shuffled, const std::vector<uint8_t>& Key);
+	static std::vector<uint8_t> StringToBytes(const std::string& Str);
+	static std::string BytesToString(const std::vector<uint8_t>& Bytes);
+	static Uint8 NormalizeByte(int32 InChar);
 };
