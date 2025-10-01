@@ -28,24 +28,29 @@ std::string FEncryptionUtil::EncryptDataCustom(const std::string& InData, const 
 {
 	std::string Out = InData;
 
-	int32 Offset = 0;
-	for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(InData.size()); i++)
+	if (!InEncryptionKey.empty())
 	{
-		char CurrentChar = Out[i];
-		const char& EncryptionChar = InEncryptionKey[i];
+		Out = ToBaseN(InData, PREDEFINED_CHARACTERSET_BASE62);
 
-		const int32 Value = static_cast<int32>(CurrentChar) + static_cast<int32>(EncryptionChar);
-		const char NormalizedValue = NormalizeChar(Value);
-
-		ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
-
-		Out[i] = NormalizedValue;
-
-		if (i -1 == static_cast<int32>(InEncryptionKey.size()))
+		int32 Offset = 0;
+		for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(Out.size()); i++)
 		{
-			Offset += static_cast<int32>(InEncryptionKey.size());
+			char CurrentChar = Out[i];
+			const char& EncryptionChar = InEncryptionKey[i];
 
-			i = 0;
+			const int32 Value = static_cast<int32>(CurrentChar) + static_cast<int32>(EncryptionChar);
+			const char NormalizedValue = NormalizeChar(Value);
+
+			ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
+
+			Out[i] = NormalizedValue;
+
+			if (i + 1 == static_cast<int32>(InEncryptionKey.size()))
+			{
+				Offset += static_cast<int32>(InEncryptionKey.size());
+
+				i = 0;
+			}
 		}
 	}
 
@@ -56,25 +61,30 @@ std::string FEncryptionUtil::DecryptDataCustom(const std::string& InData, const 
 {
 	std::string Out = InData;
 
-	int32 Offset = 0;
-	for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(InData.size()); i++)
+	if (!InEncryptionKey.empty())
 	{
-		char CurrentChar = Out[i];
-		const char& EncryptionChar = InEncryptionKey[i];
-
-		const int32 Value = static_cast<int32>(CurrentChar) - static_cast<int32>(EncryptionChar);
-		const char NormalizedValue = NormalizeChar(Value);
-
-		ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
-
-		Out[i] = NormalizedValue;
-
-		if (i - 1 == static_cast<int32>(InEncryptionKey.size()))
+		int32 Offset = 0;
+		for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(Out.size()); i++)
 		{
-			Offset += static_cast<int32>(InEncryptionKey.size());
+			char CurrentChar = Out[i];
+			const char& EncryptionChar = InEncryptionKey[i];
 
-			i = 0;
+			const int32 Value = static_cast<int32>(CurrentChar) - static_cast<int32>(EncryptionChar);
+			const char NormalizedValue = NormalizeChar(Value);
+
+			ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
+
+			Out[i] = NormalizedValue;
+
+			if (i + 1 == static_cast<int32>(InEncryptionKey.size()))
+			{
+				Offset += static_cast<int32>(InEncryptionKey.size());
+
+				i = 0;
+			}
 		}
+
+		Out = FromBaseN(Out, PREDEFINED_CHARACTERSET_BASE62);
 	}
 
 	return Out;
@@ -98,59 +108,57 @@ std::string FEncryptionUtil::FromBaseN(std::string_view InEncoded, std::string_v
 {
 	// Validate input
 	if (InCharSet.empty() || InEncoded.empty())
-	{
 		return "";
-	}
 
 	const size_t BaseSize = InCharSet.size();
 
-	// Create a lookup map for character to digit value
+	// Build char->value lookup
 	std::unordered_map<char, size_t> CharToDigit;
 	for (size_t i = 0; i < BaseSize; ++i)
-	{
 		CharToDigit[InCharSet[i]] = i;
-	}
 
-	// Convert encoded string to digit array
-	std::vector<size_t> Digits;
-	Digits.reserve(InEncoded.size());
-	for (char c : InEncoded)
+	// Result as big-endian bytes (most significant first)
+	std::vector<uint8_t> Result = { 0 };
+
+	// Process each digit: Result = Result * Base + Digit
+	for (char Ch : InEncoded)
 	{
-		auto it = CharToDigit.find(c);
-		if (it == CharToDigit.end())
-		{
+		auto It = CharToDigit.find(Ch);
+		if (It == CharToDigit.end())
 			return ""; // Invalid character
-		}
-		Digits.push_back(it->second);
-	}
 
-	// Convert digits from target base to bytes (base 256)
-	std::vector<unsigned char> Bytes;
+		size_t Digit = It->second;
 
-	for (size_t digit : Digits)
-	{
-		// Multiply current bytes by BaseSize and add digit
-		size_t Carry = digit;
-		for (unsigned char& byte : Bytes)
+		// Multiply entire Result by BaseSize
+		size_t Carry = 0;
+		for (int i = Result.size() - 1; i >= 0; --i) // Right-to-left
 		{
-			size_t Temp = byte * BaseSize + Carry;
-			byte = static_cast<unsigned char>(Temp % 256);
-			Carry = Temp / 256;
+			size_t Temp = Result[i] * BaseSize + Carry;
+			Result[i] = static_cast<uint8_t>(Temp & 0xFF);
+			Carry = Temp >> 8;
 		}
-
-		// Add new bytes if needed
 		while (Carry > 0)
 		{
-			Bytes.push_back(static_cast<unsigned char>(Carry % 256));
-			Carry /= 256;
+			Result.insert(Result.begin(), static_cast<uint8_t>(Carry & 0xFF));
+			Carry >>= 8;
+		}
+
+		// Add Digit to Result
+		Carry = Digit;
+		for (int i = Result.size() - 1; i >= 0 && Carry > 0; --i)
+		{
+			size_t Temp = Result[i] + Carry;
+			Result[i] = static_cast<uint8_t>(Temp & 0xFF);
+			Carry = Temp >> 8;
+		}
+		while (Carry > 0)
+		{
+			Result.insert(Result.begin(), static_cast<uint8_t>(Carry & 0xFF));
+			Carry >>= 8;
 		}
 	}
 
-	// Reverse bytes to get correct order
-	std::ranges::reverse(Bytes);
-
-	// Convert bytes to string
-	return std::string(reinterpret_cast<const char*>(Bytes.data()), Bytes.size());
+	return std::string(reinterpret_cast<const char*>(Result.data()), Result.size());
 }
 
 std::string FEncryptionUtil::ToBaseN(const std::string_view InData, const std::string_view InCharSet)
