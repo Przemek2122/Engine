@@ -60,6 +60,12 @@ public:
 	 */
 	static Uint64 FlipBits(const Uint64 InValue, const Uint64 FlipMask);
 
+	static std::string EncryptDataCustom(const std::string& InDataa, const std::string& InEncryptionKey);
+	static std::string DecryptDataCustom(const std::string& InData, const std::string& InEncryptionKey);
+
+	static Uint64 ConvertCharsIntoInt(char InCharArray[8]);
+	static std::array<char, 8> ConvertIntIntoChars(Uint64 InData);
+
 	/** Reverse code for ToBaseN */
 	static std::string FromBaseN(std::string_view InEncoded, std::string_view InCharSet);
 
@@ -110,4 +116,9 @@ public:
 	 * @throws std::invalid_argument If input contains invalid characters (when validation enabled)
 	 */
 	static std::string EncryptCustomBaseValidated(std::string_view InString, std::string_view InCharSet, std::string_view InKey, bool bEncrypt = true, bool bValidateInput = false);
+
+	static std::string AddPKCS7Padding(const std::string & text);
+	static std::string RemovePKCS7Padding(const std::string& text);
+
+	static char NormalizeChar(int32 InChar);
 };

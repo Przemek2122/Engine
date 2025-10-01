@@ -24,6 +24,76 @@ Uint64 FEncryptionUtil::FlipBits(uint64_t InValue, const Uint64 FlipMask)
 	return InValue ^ FlipMask;
 }
 
+std::string FEncryptionUtil::EncryptDataCustom(const std::string& InData, const std::string& InEncryptionKey)
+{
+	std::string Out = InData;
+
+	int32 Offset = 0;
+	for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(InData.size()); i++)
+	{
+		char CurrentChar = Out[i];
+		const char& EncryptionChar = InEncryptionKey[i];
+
+		const int32 Value = static_cast<int32>(CurrentChar) + static_cast<int32>(EncryptionChar);
+		const char NormalizedValue = NormalizeChar(Value);
+
+		ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
+
+		Out[i] = NormalizedValue;
+
+		if (i -1 == static_cast<int32>(InEncryptionKey.size()))
+		{
+			Offset += static_cast<int32>(InEncryptionKey.size());
+
+			i = 0;
+		}
+	}
+
+	return Out;
+}
+
+std::string FEncryptionUtil::DecryptDataCustom(const std::string& InData, const std::string& InEncryptionKey)
+{
+	std::string Out = InData;
+
+	int32 Offset = 0;
+	for (int32 i = 0; i < static_cast<int32>(InEncryptionKey.size()) && i < Offset + static_cast<int32>(InData.size()); i++)
+	{
+		char CurrentChar = Out[i];
+		const char& EncryptionChar = InEncryptionKey[i];
+
+		const int32 Value = static_cast<int32>(CurrentChar) - static_cast<int32>(EncryptionChar);
+		const char NormalizedValue = NormalizeChar(Value);
+
+		ENSURE_VALID(NormalizedValue >= 0 && NormalizedValue <= 127);
+
+		Out[i] = NormalizedValue;
+
+		if (i - 1 == static_cast<int32>(InEncryptionKey.size()))
+		{
+			Offset += static_cast<int32>(InEncryptionKey.size());
+
+			i = 0;
+		}
+	}
+
+	return Out;
+}
+
+Uint64 FEncryptionUtil::ConvertCharsIntoInt(char InCharArray[8])
+{
+	Uint64 Result;
+	memcpy(&Result, InCharArray, 8);
+	return Result;
+}
+
+std::array<char, 8> FEncryptionUtil::ConvertIntIntoChars(const Uint64 InData)
+{
+	std::array<char, 8> Result;
+	memcpy(Result.data(), &InData, 8);
+	return Result;
+}
+
 std::string FEncryptionUtil::FromBaseN(std::string_view InEncoded, std::string_view InCharSet)
 {
 	// Validate input
@@ -337,4 +407,57 @@ std::string FEncryptionUtil::EncryptCustomBaseValidated(const std::string_view I
 	}
 
 	return Result;
+}
+
+std::string FEncryptionUtil::AddPKCS7Padding(const std::string& text)
+{
+	const size_t Remaining = text.size() % 8;
+	const size_t PaddingSize = (Remaining == 0) ? 8 : (8 - Remaining);
+
+	std::string Padded = text;
+	Padded.append(PaddingSize, static_cast<char>(PaddingSize));
+	return Padded;
+}
+
+std::string FEncryptionUtil::RemovePKCS7Padding(const std::string& text)
+{
+	if (text.empty())
+	{
+		return text;
+	}
+
+	unsigned char paddingSize = static_cast<unsigned char>(text.back());
+
+	// Validation
+	if (paddingSize > 8 || paddingSize == 0)
+	{
+		return text;
+	}
+
+	// Check if bytes correct
+	for (size_t i = text.size() - paddingSize; i < text.size(); i++)
+	{
+		if (static_cast<unsigned char>(text[i]) != paddingSize)
+		{
+			// Incorrect padding
+			return text;
+		}
+	}
+
+	return text.substr(0, text.size() - paddingSize);
+}
+
+char FEncryptionUtil::NormalizeChar(int32 InChar)
+{
+	if (InChar > 127)
+	{
+		InChar = (InChar - 127);
+	}
+
+	if (InChar < 0)
+	{
+		InChar = (InChar + 127);
+	}
+
+	return static_cast<char>(InChar);
 }
