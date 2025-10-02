@@ -1,11 +1,6 @@
-﻿cmake_minimum_required(VERSION 3.8)
+﻿cmake_minimum_required(VERSION 4.1.2)
 
-# Create project
-project(Engine LANGUAGES CXX)
-
-# Config
-project(Engine VERSION 0.0.1)
-
+# Basic config
 # Create an option to switch between a system sdl library and a vendored SDL library
 option(ENGINE_VENDORED "Use vendored libraries" ON)
 option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable" ON)
@@ -20,13 +15,53 @@ set(ENGINE_SOURCE_PRIVATE_DIR "${ENGINE_SOURCE_DIR}/Private")
 set(ENGINE_SOURCE_PUBLIC_DIR "${ENGINE_SOURCE_DIR}/Public")
 set(ENGINE_SOURCE_THIRD_PARTY_DIR "${ENGINE_SOURCE_DIR}/ThirdParty")
 
+# Set the C++ standard to 20
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Hopefully temporary hack after upgrading CMAKE VERSION
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 # Set assets dir name for global access
 set(ASSETS_DIR_NAME "Assets")
 set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 
-# Set the C++ standard to 20
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(WIN32)
+        execute_process(
+            COMMAND where vcpkg
+            OUTPUT_VARIABLE VCPKG_EXE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+    else()
+        execute_process(
+            COMMAND which vcpkg
+            OUTPUT_VARIABLE VCPKG_EXE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+    endif()
+    
+    if(VCPKG_EXE)
+        # Get directory from vcpkg.exe path
+        get_filename_component(VCPKG_DIR "${VCPKG_EXE}" DIRECTORY)
+        set(VCPKG_TOOLCHAIN "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
+        
+        if(EXISTS "${VCPKG_TOOLCHAIN}")
+            set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}" CACHE FILEPATH "Vcpkg toolchain")
+            message(STATUS "Auto-detected vcpkg: ${VCPKG_DIR}")
+        endif()
+    else()
+        message(WARNING "vcpkg not found in PATH")
+    endif()
+endif()
+
+# Create project
+project(Engine LANGUAGES CXX)
+
+# Config
+project(Engine VERSION 0.0.1)
 
 if (APPLE OR EMSCRIPTEN)
 	# Disable shared builds on platforms where it does not make sense to use them
@@ -227,6 +262,26 @@ endforeach()
 
 set(ENGINE_LIB_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/lib/${ENGINE_CONFIGURATION}")
 
+message(STATUS "Adding prebuilt libraries...")
+
+message(STATUS "==== Debug CMake OpenSSL ====")
+message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "VCPKG_ROOT env = $ENV{VCPKG_ROOT}")
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
+message(STATUS "==== End Debug ====")
+
+# TODO: Could add 'winget' command to install packages
+
+# Try to find OpenSSL
+find_package(OpenSSL MODULE REQUIRED)
+
+if(NOT OpenSSL_FOUND)
+	message(FATAL_ERROR "OpenSSL missing! Check package, probably missing")
+endif()
+
 # Add SDL3
 message(STATUS "Adding SDL...")
     
@@ -383,11 +438,6 @@ if(USE_LIBRARY_ASIO)
 else()
 	add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
 endif()
-
-message(STATUS "Adding prebuilt OpenSSL...")
-
-find_package(OpenSSL REQUIRED)
-target_link_libraries(Engine PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 	
 if(USE_LIBRARY_CROW)
 	message(STATUS "Adding CROW...")
