@@ -264,7 +264,7 @@ set(ENGINE_LIB_DIRECTORY_PATH "${CMAKE_BINARY_DIR}/lib/${ENGINE_CONFIGURATION}")
 
 message(STATUS "Adding prebuilt libraries...")
 
-message(STATUS "==== Debug CMake OpenSSL ====")
+message(STATUS "==== Debug CMake paths ====")
 message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
@@ -273,10 +273,11 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "==== End Debug ====")
 
-# TODO: Could add 'winget' command to install packages
+# TODO: Could add vpkg and command to install packages??
 
 # Try to find OpenSSL
 find_package(OpenSSL MODULE REQUIRED)
+target_link_libraries(Engine PUBLIC OpenSSL::Crypto OpenSSL::SSL)
 
 if(NOT OpenSSL_FOUND)
 	message(FATAL_ERROR "OpenSSL missing! Check package, probably missing")
