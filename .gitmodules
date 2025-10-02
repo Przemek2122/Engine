@@ -22,6 +22,3 @@
 [submodule "ThirdParty/cpr"]
 	path = ThirdParty/cpr
 	url = https://github.com/libcpr/cpr
-[submodule "ThirdParty/openssl"]
-	path = ThirdParty/openssl
-	url = https://github.com/openssl/openssl

@@ -384,75 +384,16 @@ else()
 	add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
 endif()
 
-message(STATUS "Adding OpenSSL...")
+message(STATUS "Adding prebuilt OpenSSL...")
 
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/openssl")
-		set(OPENSSL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/openssl")
-		set(OPENSSL_BUILD_PATH "${CMAKE_BINARY_DIR}/openssl_build")
-
-		message(STATUS "Include external project - OpenSSL...")
-		include(ExternalProject)
-
-		message(STATUS "Build external project - OpenSSL...")
-
-		# OpenSSL build
-		if(WIN32)
-			ExternalProject_Add(
-				OpenSSL_Build
-				SOURCE_DIR ${OPENSSL_PATH}
-				CONFIGURE_COMMAND perl ${OPENSSL_PATH}/Configure VC-WIN64A --prefix=${OPENSSL_BUILD_PATH}
-				BUILD_COMMAND nmake
-				INSTALL_COMMAND nmake install
-				BUILD_IN_SOURCE 1
-			)
-			
-			set(OPENSSL_CRYPTO_LIBRARY ${OPENSSL_BUILD_PATH}/lib/libcrypto.lib)
-			set(OPENSSL_SSL_LIBRARY ${OPENSSL_BUILD_PATH}/lib/libssl.lib)
-		else()
-			ExternalProject_Add(
-				OpenSSL_Build
-				SOURCE_DIR ${OPENSSL_PATH}
-				CONFIGURE_COMMAND ${OPENSSL_PATH}/config --prefix=${OPENSSL_BUILD_PATH}
-				BUILD_COMMAND make
-				INSTALL_COMMAND make install
-				BUILD_IN_SOURCE 1
-			)
-			
-			set(OPENSSL_CRYPTO_LIBRARY ${OPENSSL_BUILD_PATH}/lib/libcrypto.a)
-			set(OPENSSL_SSL_LIBRARY ${OPENSSL_BUILD_PATH}/lib/libssl.a)
-		endif()
-
-		set(OPENSSL_INCLUDE_DIR ${OPENSSL_BUILD_PATH}/include)
-
-		message(STATUS "Build done")
-
-		# Link (without find_package)
-		target_include_directories(Engine PUBLIC ${OPENSSL_INCLUDE_DIR})
-		target_link_libraries(Engine PUBLIC ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
-		add_dependencies(Engine OpenSSL_Build)
-
-		# Copy includes
-		file(MAKE_DIRECTORY ${ENGINE_SOURCE_THIRD_PARTY_DIR}/openssl)
-		add_custom_command(
-			TARGET Engine POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_directory
-			${OPENSSL_INCLUDE_DIR}/openssl
-			${ENGINE_SOURCE_THIRD_PARTY_DIR}/openssl
-		)
-    else()
-        message(FATAL_ERROR "OpenSSL directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
-else()
-    find_package(OpenSSL REQUIRED)
-    target_link_libraries(Engine PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-endif()
+find_package(OpenSSL REQUIRED)
+target_link_libraries(Engine PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 	
 if(USE_LIBRARY_CROW)
 	message(STATUS "Adding CROW...")
 	
 	add_compile_definitions(USE_LIBRARY_CROW=TRUE)
+	add_compile_definitions(CROW_ENABLE_SSL)
 	
 	if(ENGINE_VENDORED)
 		set(CROW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
