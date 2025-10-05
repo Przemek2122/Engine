@@ -10,7 +10,9 @@ option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
 option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
 option(USE_LIBRARY_CROW "Should we use crow library?" ON)
 
-set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
+set(ENGINE_VERSION "0.1")
+
+set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Sources")
 set(ENGINE_SOURCE_PRIVATE_DIR "${ENGINE_SOURCE_DIR}/Private")
 set(ENGINE_SOURCE_PUBLIC_DIR "${ENGINE_SOURCE_DIR}/Public")
 set(ENGINE_SOURCE_THIRD_PARTY_DIR "${ENGINE_SOURCE_DIR}/ThirdParty")
@@ -26,6 +28,7 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(ASSETS_DIR_NAME "Assets")
 set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 
+# Find VCPKG  (BEFORE project())
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(WIN32)
         execute_process(
@@ -50,6 +53,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         
         if(EXISTS "${VCPKG_TOOLCHAIN}")
             set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}" CACHE FILEPATH "Vcpkg toolchain")
+			set(VCPKG_ROOT "${VCPKG_DIR}" CACHE PATH "Vcpkg root")
             message(STATUS "Auto-detected vcpkg: ${VCPKG_DIR}")
         endif()
     else()
@@ -57,11 +61,18 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-# Create project
-project(Engine LANGUAGES CXX)
+# Set triplet for VCPKG (BEFORE project())
+if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
+    else()
+        set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
+    endif()
+    message(STATUS "Set VCPKG_TARGET_TRIPLET to: ${VCPKG_TARGET_TRIPLET}")
+endif()
 
-# Config
-project(Engine VERSION 0.0.1)
+# Create project
+project(Engine VERSION ${ENGINE_VERSION} LANGUAGES CXX)
 
 if (APPLE OR EMSCRIPTEN)
 	# Disable shared builds on platforms where it does not make sense to use them
@@ -141,9 +152,9 @@ target_sources(Engine
 )
 
 # Source dirs
-source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Source" FILES ${ENGINE_SOURCE_FILES_PRIVATE_INTERNAL})
-source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Source" FILES ${ENGINE_SOURCE_FILES_PUBLIC_INTERNAL})
-source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Source" FILES ${ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL})
+source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Sources" FILES ${ENGINE_SOURCE_FILES_PRIVATE_INTERNAL})
+source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Sources" FILES ${ENGINE_SOURCE_FILES_PUBLIC_INTERNAL})
+source_group(TREE ${ENGINE_SOURCE_DIR} PREFIX "Sources" FILES ${ENGINE_SOURCE_FILES_THIRDPARTY_INTERNAL})
 
 # Platform flags
 if(WIN32)
@@ -274,6 +285,14 @@ message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "==== End Debug ====")
 
 # TODO: Could add vpkg and command to install packages??
+
+# Help CMake find OpenSSL from vcpkg
+if(WIN32 AND VCPKG_ROOT AND VCPKG_TARGET_TRIPLET)
+    set(OPENSSL_ROOT_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}")
+    message(STATUS "OPENSSL_ROOT_DIR set to: ${OPENSSL_ROOT_DIR}")
+elseif (WIN32)
+    message(STATUS "OPENSSL_ROOT_DIR not set!")
+endif()
 
 # Try to find OpenSSL
 find_package(OpenSSL MODULE REQUIRED)
@@ -547,23 +566,9 @@ target_link_libraries(Engine PUBLIC
 	SDL3::SDL3
 )
 
-# Enable testing
-enable_testing()
-
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG v1.15.2  # Use the latest stable release
-)
-
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-# Target for build all (To use from config script)
-add_custom_target(BuildAllEngine ALL
-    DEPENDS Engine SDL3::SDL3 SDL3_image SDL3_mixer SDL3_ttf
-)
+#==============================================================================
+# FUNCTIONS
+#==============================================================================
 
 function(set_property_if_not_alias target_name folder_name)
     get_property(aliased_target TARGET "${target_name}" PROPERTY ALIASED_TARGET)
@@ -598,6 +603,126 @@ function(group_remaining_targets folder_name)
         endif()
     endforeach()
 endfunction()
+
+#==============================================================================
+# TESTS
+#==============================================================================
+
+set(TESTS_ENABLED FALSE)
+
+# Decide if we want tests (for now only windows x64)
+if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
+    if(CMAKE_GENERATOR_PLATFORM STREQUAL "x64" OR (NOT DEFINED CMAKE_GENERATOR_PLATFORM AND CMAKE_SIZEOF_VOID_P EQUAL 8))
+		message(STATUS "Get google tests")
+		
+        set(TESTS_ENABLED TRUE)
+
+		# Enable testing
+		enable_testing()
+
+		include(FetchContent)
+		FetchContent_Declare(
+			googletest
+			GIT_REPOSITORY https://github.com/google/googletest.git
+			GIT_TAG v1.15.2  # Use the latest stable release
+		)
+
+		set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+		FetchContent_MakeAvailable(googletest)
+		
+		message(STATUS "Adding engine google tests")
+		
+		# Create test executable
+		add_executable(
+			EngineTests
+
+			# Sources for Test
+			SourcesTest/MainTestFile.cpp
+		)
+
+		set_target_properties(EngineTests PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY            "${CMAKE_BINARY_DIR}/bin/Debug/EngineTest"
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG      "${CMAKE_BINARY_DIR}/bin/Debug/EngineTest"
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE    "${CMAKE_BINARY_DIR}/bin/Release/EngineTest"
+		)
+
+		# Link test libraries
+		target_link_libraries(EngineTests
+			PUBLIC Engine
+			PUBLIC GTest::gtest_main
+		)
+		
+		 # Add the files to your target
+		target_sources(EngineTests
+			PUBLIC      ${ENGINE_SOURCE_FILES_PUBLIC}
+			PRIVATE     ${ENGINE_SOURCE_FILES_PRIVATE}
+		)
+
+		# Include directories
+		target_include_directories(EngineTests PRIVATE
+			# Project source files (for testing)
+			PRIVATE     ${ENGINE_SOURCE_DIR}  
+			PUBLIC      ${ENGINE_SOURCE_PUBLIC_DIR}
+			PRIVATE     ${ENGINE_SOURCE_PRIVATE_DIR} 
+			PRIVATE     ${ENGINE_SOURCE_THIRD_PARTY_DIR} 
+		)
+		
+		# Skip project run as we run tests instead, a bit hacky but simple
+		target_compile_definitions(EngineTests PRIVATE
+			FLAGS_TESTING_PROJECT
+		)
+
+		# Discover and register tests
+		include(GoogleTest)
+
+		# Copy Engine library to output directory
+		# Must be done after linking!
+		add_custom_command(TARGET EngineTests POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				$<TARGET_FILE:Engine>
+				$<TARGET_FILE_DIR:EngineTests>
+			COMMENT "Copying Engine libraries to output directory"
+		)
+		
+		message(STATUS "Added google tests!")
+    endif()
+endif()
+
+function(copy_runtime_engine_dlls target)
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3-shared> $<TARGET_FILE_DIR:${target}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_ttf-shared> $<TARGET_FILE_DIR:${target}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_mixer-shared> $<TARGET_FILE_DIR:${target}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_image-shared> $<TARGET_FILE_DIR:${target}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Engine> $<TARGET_FILE_DIR:${target}>
+    )
+endfunction()
+
+# Target for build all (To use from config script)
+if(TESTS_ENABLED)
+	add_custom_target(BuildAllEngine ALL
+		DEPENDS Engine SDL3::SDL3 SDL3_image SDL3_mixer SDL3_ttf EngineTests
+	)
+	
+    copy_runtime_engine_dlls(EngineTests)
+
+    # Special test dlls copy
+    add_custom_command(TARGET EngineTests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:gtest> $<TARGET_FILE_DIR:EngineTests>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:gtest_main> $<TARGET_FILE_DIR:EngineTests>
+    )
+
+    # Discover after DLLs are copied
+    gtest_discover_tests(EngineTests)
+
+	group_targets("Test" EngineTests)
+
+    message(STATUS "Discovered gtests")
+else()	
+	add_custom_target(BuildAllEngine ALL
+		DEPENDS Engine SDL3::SDL3 SDL3_image SDL3_mixer SDL3_ttf
+	)
+endif()
 
 set_property(TARGET Engine PROPERTY FOLDER "Core")
 group_targets("Core" Engine)
