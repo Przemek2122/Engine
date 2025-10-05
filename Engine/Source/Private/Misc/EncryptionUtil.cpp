@@ -4,6 +4,412 @@
 #include "Misc/EncryptionUtil.h"
 #include <unordered_set>
 
+FHuffmanNode::FHuffmanNode(uint8_t D, uint32_t F)
+	: Data(D)
+	, Frequency(F)
+	, Left(nullptr)
+	, Right(nullptr)
+{
+}
+
+FHuffmanNode::~FHuffmanNode()
+{
+	delete Left;
+	delete Right;
+}
+
+std::vector<uint8_t> FHuffmanCompressor::Compress(const std::vector<uint8_t>& Input)
+{
+	if (Input.empty()) return {};
+
+	std::map<uint8_t, uint32_t> Frequencies;
+	for (uint8_t Byte : Input)
+	{
+		Frequencies[Byte]++;
+	}
+
+	auto Compare = [](FHuffmanNode* A, FHuffmanNode* B)
+	{
+		return A->Frequency > B->Frequency;
+	};
+	std::priority_queue<FHuffmanNode*, std::vector<FHuffmanNode*>, decltype(Compare)> Queue(Compare);
+
+	for (auto& Pair : Frequencies)
+	{
+		Queue.push(new FHuffmanNode(Pair.first, Pair.second));
+	}
+
+	while (Queue.size() > 1)
+	{
+		FHuffmanNode* Left = Queue.top(); Queue.pop();
+		FHuffmanNode* Right = Queue.top(); Queue.pop();
+
+		FHuffmanNode* Parent = new FHuffmanNode(0, Left->Frequency + Right->Frequency);
+		Parent->Left = Left;
+		Parent->Right = Right;
+		Queue.push(Parent);
+	}
+
+	FHuffmanNode* Root = Queue.top();
+
+	std::map<uint8_t, std::string> Codes;
+	FHuffmanCompressor::GenerateCodes(Root, "", Codes);
+
+	std::string BitString;
+	for (uint8_t Byte : Input)
+	{
+		BitString += Codes[Byte];
+	}
+
+	std::vector<uint8_t> Compressed;
+
+	Compressed.push_back(static_cast<uint8_t>(Frequencies.size()));
+	for (auto& Pair : Frequencies)
+	{
+		Compressed.push_back(Pair.first);
+
+		for (int i = 0; i < 4; ++i) {
+			Compressed.push_back((Pair.second >> (i * 8)) & 0xFF);
+		}
+	}
+
+	uint32_t BitCount = BitString.size();
+	for (int i = 0; i < 4; ++i)
+	{
+		Compressed.push_back((BitCount >> (i * 8)) & 0xFF);
+	}
+
+	for (size_t i = 0; i < BitString.size(); i += 8)
+	{
+		uint8_t Byte = 0;
+		for (int j = 0; j < 8 && i + j < BitString.size(); ++j)
+		{
+			if (BitString[i + j] == '1')
+			{
+				Byte |= (1 << (7 - j));
+			}
+		}
+		Compressed.push_back(Byte);
+	}
+
+	delete Root;
+	return Compressed;
+}
+
+std::vector<uint8_t> FHuffmanCompressor::Decompress(const std::vector<uint8_t>& Compressed)
+{
+	size_t Pos = 0;
+
+	uint8_t TableSize = Compressed[Pos++];
+	std::map<uint8_t, uint32_t> Frequencies;
+
+	for (uint8_t i = 0; i < TableSize; ++i)
+	{
+		uint8_t Byte = Compressed[Pos++];
+		uint32_t Freq = 0;
+		for (int j = 0; j < 4; ++j)
+		{
+			Freq |= (static_cast<uint32_t>(Compressed[Pos++]) << (j * 8));
+		}
+		Frequencies[Byte] = Freq;
+	}
+
+	uint32_t BitCount = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		BitCount |= (static_cast<uint32_t>(Compressed[Pos++]) << (i * 8));
+	}
+
+	auto Compare = [](FHuffmanNode* A, FHuffmanNode* B)
+	{
+		return A->Frequency > B->Frequency;
+	};
+	std::priority_queue<FHuffmanNode*, std::vector<FHuffmanNode*>, decltype(Compare)> Queue(Compare);
+
+	for (auto& Pair : Frequencies)
+	{
+		Queue.push(new FHuffmanNode(Pair.first, Pair.second));
+	}
+
+	while (Queue.size() > 1)
+	{
+		FHuffmanNode* Left = Queue.top(); Queue.pop();
+		FHuffmanNode* Right = Queue.top(); Queue.pop();
+
+		FHuffmanNode* Parent = new FHuffmanNode(0, Left->Frequency + Right->Frequency);
+		Parent->Left = Left;
+		Parent->Right = Right;
+		Queue.push(Parent);
+	}
+
+	FHuffmanNode* Root = Queue.top();
+
+	std::vector<uint8_t> Decompressed;
+	FHuffmanNode* Current = Root;
+	uint32_t BitIndex = 0;
+
+	while (BitIndex < BitCount)
+	{
+		uint8_t Byte = Compressed[Pos + BitIndex / 8];
+		bool Bit = (Byte >> (7 - (BitIndex % 8))) & 1;
+
+		Current = Bit ? Current->Right : Current->Left;
+
+		if (!Current->Left && !Current->Right)
+		{
+			Decompressed.push_back(Current->Data);
+			Current = Root;
+		}
+
+		BitIndex++;
+	}
+
+	delete Root;
+	return Decompressed;
+}
+
+void FHuffmanCompressor::GenerateCodes(FHuffmanNode* Node, std::string Code, std::map<uint8_t, std::string>& Codes)
+{
+	if (!Node) return;
+
+	if (!Node->Left && !Node->Right)
+	{
+		Codes[Node->Data] = Code.empty() ? "0" : Code;
+		return;
+	}
+
+	GenerateCodes(Node->Left, Code + "0", Codes);
+	GenerateCodes(Node->Right, Code + "1", Codes);
+}
+
+void FXORCascade::CascadeForward(std::vector<uint8_t>& Data)
+{
+	for (size_t i = 1; i < Data.size(); ++i)
+	{
+		Data[i] ^= Data[i - 1];
+	}
+}
+
+void FXORCascade::CascadeBackward(std::vector<uint8_t>& Data)
+{
+	for (size_t i = Data.size() - 1; i > 0; --i)
+	{
+		Data[i] ^= Data[i - 1];
+	}
+}
+
+void FXORCascade::FullDiffusion(std::vector<uint8_t>& Data, int Rounds)
+{
+	for (int Round = 0; Round < Rounds; ++Round)
+	{
+		// W prawo
+		CascadeForward(Data);
+
+		// Rotate
+		std::rotate(Data.begin(), Data.begin() + 1, Data.end());
+
+		// W lewo  
+		CascadeBackward(Data);
+
+		// Rotate z powrotem
+		std::rotate(Data.rbegin(), Data.rbegin() + 1, Data.rend());
+	}
+}
+
+uint8_t FBitRotation::RotateLeft(uint8_t Value, int Bits)
+{
+	return (Value << Bits) | (Value >> (8 - Bits));
+}
+
+uint8_t FBitRotation::RotateRight(uint8_t Value, int Bits)
+{
+	return (Value >> Bits) | (Value << (8 - Bits));
+}
+
+void FBitRotation::RotateDependingOnKey(std::vector<uint8_t>& Data, const std::vector<uint8_t>& Key)
+{
+	for (size_t i = 0; i < Data.size(); ++i)
+	{
+		int RotAmount = Key[i % Key.size()] % 8;
+		Data[i] = RotateLeft(Data[i], RotAmount);
+	}
+}
+
+void FBitRotation::UnrotateDependingOnKey(std::vector<uint8_t>& Data, const std::vector<uint8_t>& Key)
+{
+	for (size_t i = 0; i < Data.size(); ++i)
+	{
+		int RotAmount = Key[i % Key.size()] % 8;
+		Data[i] = RotateRight(Data[i], RotAmount);
+	}
+}
+
+std::vector<uint64_t> FPredefinedXORMasks::GetEightMasks()
+{
+	std::vector<uint64_t> AllMasks = {
+		ALTERNATING_1,
+		ALTERNATING_2,
+		CHECKERBOARD,
+		INVERSE_CHECKER,
+		NIBBLE_FLIP,
+		NIBBLE_LOW,
+		BYTE_HIGH,
+		BYTE_LOW,
+		PI_BASED,
+	};
+
+	return AllMasks;
+}
+
+Uint64 FBitFlipping::FlipBits(uint64_t InValue, const Uint64 FlipMask)
+{
+	// XOR mask: alternating bit pattern for reproducible flipping
+	return InValue ^ FlipMask;
+}
+
+std::vector<uint8_t> FBitFlipping::FlipData(const std::vector<uint8_t>& InFlipData, const std::vector<uint8_t>& FlipKey)
+{
+	std::vector<uint8_t> OutData;
+	std::vector<uint64_t> Masks = FPredefinedXORMasks::GetEightMasks();
+
+	std::vector<uint64_t> InFlipData64Array = FChunkConverter::BytesToChunks(InFlipData);
+	std::vector<uint64_t> FlipKey64Array = FChunkConverter::BytesToChunks(FlipKey);
+
+	if (Masks.size() == 8)
+	{
+		for (uint32 i = 0; i < InFlipData64Array.size(); i++)
+		{
+			uint64_t FlipData64 = InFlipData64Array[i];
+			const uint64_t& FlipKeyData64 = FlipKey64Array[i % FlipKey.size()];
+
+			InFlipData64Array[i] = FlipBits(FlipData64, Masks[FlipKeyData64 % 8]);
+		}
+	}
+
+	OutData = FChunkConverter::ChunksToBytes(InFlipData64Array, InFlipData.size());
+
+	return OutData;
+}
+
+void FShuffle::Forward(std::vector<uint8_t>& InputBytes, const std::vector<uint8_t>& EncryptionKeyBytes)
+{
+	if (InputBytes.empty() || EncryptionKeyBytes.empty())
+	{
+		return;
+	}
+
+	// Generate seed from key
+	uint64_t Seed = GenerateSeed(EncryptionKeyBytes);
+
+	// Shuffle bytes deterministically
+	std::mt19937_64 Rng(Seed);
+	std::shuffle(InputBytes.begin(), InputBytes.end(), Rng);
+}
+
+void FShuffle::Backward(std::vector<uint8_t>& InputBytes, const std::vector<uint8_t>& EncryptionKeyBytes)
+{
+	if (InputBytes.empty() || EncryptionKeyBytes.empty())
+	{
+		return;
+	}
+
+	// Generate same seed from key
+	uint64_t Seed = GenerateSeed(EncryptionKeyBytes);
+
+	// Recreate the shuffle permutation
+	std::vector<size_t> Indices(InputBytes.size());
+	std::iota(Indices.begin(), Indices.end(), 0);
+
+	std::mt19937_64 Rng(Seed);
+	std::shuffle(Indices.begin(), Indices.end(), Rng);
+
+	// Create inverse permutation
+	std::vector<size_t> InverseIndices(InputBytes.size());
+	for (size_t i = 0; i < Indices.size(); ++i)
+	{
+		InverseIndices[Indices[i]] = i;
+	}
+
+	// Apply inverse permutation to restore original order
+	std::vector<uint8_t> Result(InputBytes.size());
+	for (size_t i = 0; i < InputBytes.size(); ++i)
+	{
+		Result[i] = InputBytes[InverseIndices[i]];
+	}
+
+	InputBytes = Result;
+}
+
+uint64_t FShuffle::GenerateSeed(const std::vector<uint8_t>& EncryptionKeyBytes)
+{
+	uint64_t Seed = 5381; // DJB2 hash initial value
+
+	for (uint8_t Byte : EncryptionKeyBytes)
+	{
+		Seed = ((Seed << 5) + Seed) + Byte; // Hash = Hash * 33 + Byte
+	}
+
+	return Seed;
+}
+
+void FFeistelCipher::FeistelRound(std::vector<uint8_t>& Data, const std::vector<uint8_t>& Key, int Round)
+{
+	size_t Half = Data.size() / 2;
+
+	std::vector<uint8_t> Left(Data.begin(), Data.begin() + Half);
+	std::vector<uint8_t> Right(Data.begin() + Half, Data.end());
+
+	std::vector<uint8_t> FResult = FFunction(Right, Key, Round);
+
+	// NewLeft = Right
+	// NewRight = Left XOR F(Right, Key)
+	for (size_t i = 0; i < Half; ++i) {
+		uint8_t Temp = Left[i];
+		Left[i] = Right[i];
+		Right[i] = Temp ^ FResult[i % FResult.size()];
+	}
+
+	std::copy(Left.begin(), Left.end(), Data.begin());
+	std::copy(Right.begin(), Right.end(), Data.begin() + Half);
+}
+
+void FFeistelCipher::Encrypt(std::vector<uint8_t>& Data, const std::vector<uint8_t>& Key)
+{
+	for (int Round = 0; Round < 4; ++Round)
+	{
+		FeistelRound(Data, Key, Round);
+	}
+}
+
+void FFeistelCipher::Decrypt(std::vector<uint8_t>& Data, const std::vector<uint8_t>& Key)
+{
+	for (int Round = 3; Round >= 0; --Round)
+	{
+		FeistelRound(Data, Key, Round);
+	}
+}
+
+std::vector<uint8_t> FFeistelCipher::FFunction(const std::vector<uint8_t>& Input, const std::vector<uint8_t>& Key,
+	int Round)
+{
+	std::vector<uint8_t> Result = Input;
+
+	for (size_t i = 0; i < Result.size(); ++i)
+	{
+		Result[i] ^= Key[(i + Round) % Key.size()];
+		Result[i] = RotateLeft(Result[i], Round + 1);
+		Result[i] ^= static_cast<uint8_t>(Round * 17);
+	}
+
+	return Result;
+}
+
+uint8_t FFeistelCipher::RotateLeft(uint8_t Value, int Bits)
+{
+	Bits %= 8;
+	return (Value << Bits) | (Value >> (8 - Bits));
+}
+
 std::string FEncryptionUtil::GenerateSecureSalt(const size_t Length)
 {
 	std::random_device rd;  // Hardware entropy
@@ -18,87 +424,101 @@ std::string FEncryptionUtil::GenerateSecureSalt(const size_t Length)
 	return salt;
 }
 
-Uint64 FEncryptionUtil::FlipBits(uint64_t InValue, const Uint64 FlipMask)
-{
-	// XOR mask: alternating bit pattern for reproducible flipping
-	return InValue ^ FlipMask;
-}
-
-std::string FEncryptionUtil::EncryptDataCustom(const std::string& InData, const std::string& InEncryptionKey)
+std::string FEncryptionUtil::EncryptDataCustom(const std::string& InData, const std::string& InEncryptionKey, const FEncryptionSettings& EncryptionSettings)
 {
 	std::string Out = InData;
 
-	if (!InEncryptionKey.empty())
+	if (InEncryptionKey.size() > 16)
 	{
-		Out = ToBaseN(InData, PREDEFINED_CHARACTERSET_BASE62);
+		const int32 NumberOfIV = EncryptionSettings.RandomIVSize + static_cast<int32>(InEncryptionKey.size());
+		const std::vector<uint8_t> KeyIV = GenerateRandomIV(NumberOfIV);
 
-		const std::vector<uint8_t> InputBytes = StringToBytes(Out);
+		// 0 Add EncryptionWord and IV
+		Out = EncryptionSettings.EncryptionWord + BytesToString(KeyIV) + Out;
+
+		std::vector<uint8_t> InputBytes = StringToBytes(Out);
 		const std::vector<uint8_t> EncryptionKeyBytes = StringToBytes(InEncryptionKey);
-		std::vector<uint8_t> OutBytes;
-		OutBytes.reserve(InputBytes.size());
 
-		// First base encryption
-		for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(InputBytes.size()); InputBytesIndex++)
+		// 1. Reverse
+		std::ranges::reverse(InputBytes.begin(), InputBytes.end());
+
+		// 2. Add random bytes
+		InputBytes = AddRandomBytes(InputBytes, InEncryptionKey);
+
+		// 3. Let's do some shuffle
+		FShuffle::Forward(InputBytes, EncryptionKeyBytes);
+
+		// XOR Operations
+		for (int32 i = 0; i < EncryptionSettings.NumberOfOperations; i++)
 		{
-			const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
+			// Base encryption
+			InputBytes = BasicEncryptionWork(InputBytes, EncryptionKeyBytes);
 
-			int32 Result;
-			if (InputBytesIndex % 2)
-			{
-				Result = static_cast<int32>(InputBytes[InputBytesIndex]) + static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
-			}
-			else
-			{
-				Result = static_cast<int32>(InputBytes[InputBytesIndex]) - static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
-			}
-
-			OutBytes.push_back(NormalizeByte(Result));
+			FBitFlipping::FlipData(InputBytes, EncryptionKeyBytes);
+			FXORCascade::CascadeForward(InputBytes);
+			std::ranges::reverse(InputBytes.begin(), InputBytes.end());
 		}
 
-		// Let's do some shuffle
-		const std::vector<uint8_t> Shuffled = ShuffleWithKey(OutBytes, EncryptionKeyBytes);
+		InputBytes = BasicEncryptionWork(InputBytes, EncryptionKeyBytes);
 
-		Out = BytesToString(Shuffled);
+		Out = BytesToString(InputBytes);
 	}
 
 	return Out;
 }
 
-std::string FEncryptionUtil::DecryptDataCustom(const std::string& InData, const std::string& InEncryptionKey)
+std::string FEncryptionUtil::DecryptDataCustom(const std::string& InData, const std::string& InEncryptionKey, const FEncryptionSettings& EncryptionSettings)
 {
 	std::string Out = InData;
 
-	if (!InEncryptionKey.empty())
+	if (InEncryptionKey.size() > 16)
 	{
-		const std::vector<uint8_t> InputBytes = StringToBytes(Out);
+		std::vector<uint8_t> InputBytes = StringToBytes(Out);
 		const std::vector<uint8_t> EncryptionKeyBytes = StringToBytes(InEncryptionKey);
-		std::vector<uint8_t> OutBytes;
-		OutBytes.reserve(InputBytes.size());
 
-		// Let's undo shuffle
-		const std::vector<uint8_t> Unshuffled = UnshuffleWithKey(InputBytes, EncryptionKeyBytes);
-
-		// First base encryption
-		for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(Unshuffled.size()); InputBytesIndex++)
+		// Cascade XOR backward
+		for (int32 i = 0; i < EncryptionSettings.NumberOfOperations; i++)
 		{
-			const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
+			std::ranges::reverse(InputBytes.begin(), InputBytes.end());
+			FXORCascade::CascadeBackward(InputBytes);
+			FBitFlipping::FlipData(InputBytes, EncryptionKeyBytes);
 
-			int32 Result;
-			if (InputBytesIndex % 2)
+			// Base decryption
+			InputBytes = BasicDecryptionWork(InputBytes, EncryptionKeyBytes);
+		}
+
+		// 3. Let's undo shuffle
+		FShuffle::Backward(InputBytes, EncryptionKeyBytes);
+
+		// 2. Remove random bytes
+		InputBytes = RemoveRandomBytes(InputBytes, InEncryptionKey);
+
+		// 1. Reverse
+		std::ranges::reverse(InputBytes.begin(), InputBytes.end());
+
+		// 0. Check and remove EncryptionWord and IV
+		Out = BytesToString(InputBytes);
+		size_t SearchResult = Out.find(EncryptionSettings.EncryptionWord);
+		if (SearchResult != std::string::npos)
+		{
+			const std::string PotentialEncryptionWord = Out.substr(SearchResult, EncryptionSettings.EncryptionWord.size());
+			Out.erase(SearchResult, EncryptionSettings.EncryptionWord.size());
+			if (PotentialEncryptionWord == EncryptionSettings.EncryptionWord)
 			{
-				Result = static_cast<int32>(Unshuffled[InputBytesIndex]) - static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+				const int32 NumberOfIV = EncryptionSettings.RandomIVSize + static_cast<int32>(InEncryptionKey.size());
+
+				// Remove IV
+				Out.erase(0, NumberOfIV);
 			}
 			else
 			{
-				Result = static_cast<int32>(Unshuffled[InputBytesIndex]) + static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+				Out = "";
 			}
-
-			OutBytes.push_back(NormalizeByte(Result));
 		}
-
-		const std::string StringConverted = BytesToString(OutBytes);
-
-		Out = FromBaseN(StringConverted, PREDEFINED_CHARACTERSET_BASE62);
+		else
+		{
+			Out = "";
+		}
 	}
 
 	return Out;
@@ -368,108 +788,67 @@ uintmax_t FEncryptionUtil::FromBaseNNum(const std::string_view InEncoded, const 
 	return Result;
 }
 
-std::string FEncryptionUtil::EncryptCustomBaseValidated(const std::string_view InString, const std::string_view InCharSet, const std::string_view InKey, bool bEncrypt, bool bValidateInput)
+std::vector<uint8_t> FEncryptionUtil::BasicEncryptionWork(std::vector<uint8_t> InputBytes, const std::vector<uint8_t>& EncryptionKeyBytes)
 {
-	if (InString.empty() || InCharSet.empty() || InKey.empty())
+	std::vector<uint8_t> OutBytes;
+
+	for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(InputBytes.size()); InputBytesIndex++)
 	{
-		return std::string(InString);
+		const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
+
+		int32 Result = static_cast<int32>(InputBytes[InputBytesIndex]);
+
+		Result = Result ^ static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+
+		OutBytes.push_back(static_cast<uint8_t>(InputBytes[InputBytesIndex]));
 	}
 
-	// Optional input validation
-	if (bValidateInput)
-	{
-		std::unordered_set<char> ValidChars(InCharSet.begin(), InCharSet.end());
-
-		for (char c : InString)
-		{
-			if (ValidChars.find(c) == ValidChars.end())
-			{
-				throw std::invalid_argument("Input string contains invalid character: '" +
-					std::string(1, c) + "'");
-			}
-		}
-	}
-
-	// Rest of the function is the same as EncryptCustomBase...
-	const size_t CharSetSize = InCharSet.size();
-
-	std::vector<char> ShuffledChars(InCharSet.begin(), InCharSet.end());
-
-	uint64_t Seed = 0;
-	for (char c : InKey)
-	{
-		Seed = Seed * 31 + static_cast<uint64_t>(c);
-	}
-
-	for (size_t i = CharSetSize - 1; i > 0; --i)
-	{
-		Seed = Seed * 1103515245 + 12345;
-		size_t j = Seed % (i + 1);
-		std::swap(ShuffledChars[i], ShuffledChars[j]);
-	}
-
-	std::unordered_map<char, char> EncryptMap;
-	std::unordered_map<char, char> DecryptMap;
-
-	for (size_t i = 0; i < CharSetSize; ++i)
-	{
-		EncryptMap[InCharSet[i]] = ShuffledChars[i];
-		DecryptMap[ShuffledChars[i]] = InCharSet[i];
-	}
-
-	std::string Result;
-	Result.reserve(InString.size());
-
-	const auto& UseMap = bEncrypt ? EncryptMap : DecryptMap;
-
-	for (char c : InString)
-	{
-		auto it = UseMap.find(c);
-		Result += (it != UseMap.end()) ? it->second : c;
-	}
-
-	return Result;
+	return OutBytes;
 }
 
-std::vector<uint8_t> FEncryptionUtil::ShuffleWithKey(const std::vector<uint8_t>& Input, const std::vector<uint8_t>& Key)
+std::vector<uint8_t> FEncryptionUtil::BasicDecryptionWork(std::vector<uint8_t> InputBytes, const std::vector<uint8_t>& EncryptionKeyBytes)
 {
-	std::vector<uint8_t> Output = Input;
+	std::vector<uint8_t> OutBytes;
 
-	// Generate seed
-	uint64_t Seed = 0;
-	for (size_t i = 0; i < Key.size(); i++) {
-		Seed ^= static_cast<uint64_t>(Key[i]) << ((i % 8) * 8);
+	for (int32 InputBytesIndex = 0; InputBytesIndex < static_cast<int32>(InputBytes.size()); InputBytesIndex++)
+	{
+		const int32 EncryptionBytesIndex = InputBytesIndex % static_cast<int32>(EncryptionKeyBytes.size());
+
+		int32 Result = static_cast<int32>(InputBytes[InputBytesIndex]);
+
+		Result = Result ^ static_cast<int32>(EncryptionKeyBytes[EncryptionBytesIndex]);
+
+		OutBytes.push_back(static_cast<uint8_t>(InputBytes[InputBytesIndex]));
 	}
 
-	// Shuffle
-	std::mt19937_64 Generator(Seed);
-	std::shuffle(Output.begin(), Output.end(), Generator);
-
-	return Output;
+	return OutBytes;
 }
 
-std::vector<uint8_t> FEncryptionUtil::UnshuffleWithKey(const std::vector<uint8_t>& Shuffled,
-	const std::vector<uint8_t>& Key)
+std::vector<uint8_t> FEncryptionUtil::AddRandomBytes(const std::vector<uint8_t>& InputBytes, const std::string& InEncryptionKey)
 {
-	// Generate same permutation
-	uint64_t Seed = 0;
-	for (size_t i = 0; i < Key.size(); i++) {
-		Seed ^= static_cast<uint64_t>(Key[i]) << ((i % 8) * 8);
+	std::vector<uint8_t> OutBytes = InputBytes;
+
+	const int32 WhereAddRandom = FMath::Max(FMath::Abs(InEncryptionKey[0] % 5), 2);
+	for (int32 i = WhereAddRandom; i < static_cast<int32>(OutBytes.size()); i += WhereAddRandom + 1)
+	{
+		const uint8_t RandomInt = static_cast<uint8_t>(NormalizeByte((InEncryptionKey[i % InEncryptionKey.size()] ^ i) + static_cast<int32>(InEncryptionKey[i % InEncryptionKey.size()]) + static_cast<int32>(InEncryptionKey[WhereAddRandom])));
+		OutBytes.insert(OutBytes.begin() + i, RandomInt);
 	}
 
-	std::mt19937_64 Generator(Seed);
+	return OutBytes;
+}
 
-	std::vector<size_t> Permutation(Shuffled.size());
-	std::iota(Permutation.begin(), Permutation.end(), 0);
-	std::shuffle(Permutation.begin(), Permutation.end(), Generator);
+std::vector<uint8_t> FEncryptionUtil::RemoveRandomBytes(const std::vector<uint8_t>& InputBytes, const std::string& InEncryptionKey)
+{
+	std::vector<uint8_t> OutBytes = InputBytes;
 
-	// Reverse shuffle
-	std::vector<uint8_t> Output(Shuffled.size());
-	for (size_t i = 0; i < Shuffled.size(); i++) {
-		Output[Permutation[i]] = Shuffled[i];
+	const int32 WhereAddRandom = FMath::Max(FMath::Abs(InEncryptionKey[0] % 5), 2);
+	for (int32 i = WhereAddRandom; i < static_cast<int32>(OutBytes.size()); i += WhereAddRandom)
+	{
+		OutBytes.erase(OutBytes.begin() + i);
 	}
 
-	return Output;
+	return OutBytes;
 }
 
 std::vector<uint8_t> FEncryptionUtil::StringToBytes(const std::string& Str)
@@ -482,7 +861,7 @@ std::string FEncryptionUtil::BytesToString(const std::vector<uint8_t>& Bytes)
 	return { Bytes.begin(), Bytes.end() };
 }
 
-Uint8 FEncryptionUtil::NormalizeByte(int32 InChar)
+int32 FEncryptionUtil::NormalizeByte(int32 InChar)
 {
 	if (InChar > UINT8_MAX)
 	{
@@ -494,5 +873,19 @@ Uint8 FEncryptionUtil::NormalizeByte(int32 InChar)
 		InChar = (InChar + UINT8_MAX);
 	}
 
-	return static_cast<Uint8>(InChar);
+	return InChar;
+}
+
+std::vector<uint8_t> FEncryptionUtil::GenerateRandomIV(size_t Size)
+{
+	std::vector<uint8_t> RandomIV(Size);
+	std::random_device Rd;
+	std::mt19937 Gen(Rd());
+	std::uniform_int_distribution<> Dist(0, 255);
+
+	for (auto& Byte : RandomIV)
+	{
+		Byte = static_cast<uint8_t>(Dist(Gen));
+	}
+	return RandomIV;
 }
