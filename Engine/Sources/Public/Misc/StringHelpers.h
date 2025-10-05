@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-class FStringHelpers
+class ENGINE_API FStringHelpers
 {
 public:
 	static bool CompareStringCaseInsensitive(const std::string& A, const std::string& B);
