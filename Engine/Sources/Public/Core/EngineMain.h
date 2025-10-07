@@ -26,7 +26,7 @@ public:
 	template<typename TEngineClass>
 	static TEngineClass* Get()
 	{
-		return static_cast<TEngineClass>(FGlobalDefines::GEngine);
+		return static_cast<TEngineClass*>(Get());
 	}
 
 	FClassStorage<FEngine> EngineClass;

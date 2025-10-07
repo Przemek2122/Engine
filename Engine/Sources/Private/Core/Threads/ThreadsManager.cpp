@@ -56,6 +56,21 @@ void FThreadsManager::DeInitialize()
 	while (AllThreadsArray.Size())
 	{
 		THREAD_WAIT_SHORT_TIME;
+
+		if (AllThreadsArray.Size())
+		{
+			LOG_ERROR("Unable to stop all threads!");
+
+			for (FThreadData* ThreadData : AllThreadsArray)
+			{
+				if (ThreadData != nullptr && ThreadData->ThreadInputData != nullptr)
+				{
+					LOG_ERROR("Unable to close thread: " << ThreadData->ThreadInputData->GetThreadName());
+				}
+			}
+
+			THREAD_WAIT_MS(2000);
+		}
 	}
 
 	ENSURE_VALID(AllThreadsArray.Size() == 0);
