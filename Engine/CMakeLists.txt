@@ -704,6 +704,7 @@ if(TESTS_ENABLED)
 		DEPENDS Engine SDL3::SDL3 SDL3_image SDL3_mixer SDL3_ttf EngineTests
 	)
 	
+    # Use it to copy engine libraries
     copy_runtime_engine_dlls(EngineTests)
 
     # Special test dlls copy
@@ -713,7 +714,7 @@ if(TESTS_ENABLED)
     )
 
     # Discover after DLLs are copied
-    gtest_discover_tests(EngineTests)
+    add_test(NAME EngineTests COMMAND EngineTests)
 
 	group_targets("Test" EngineTests)
 
