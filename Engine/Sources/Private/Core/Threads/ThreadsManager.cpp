@@ -52,24 +52,29 @@ void FThreadsManager::DeInitialize()
 
 	COUNTER_START(StopThreadsCoutnerStart);
 
+	for (FThreadData* ThreadData : AllThreadsArray)
+	{
+		if (ThreadData != nullptr && ThreadData->ThreadInputData != nullptr)
+		{
+			LOG_WARN("Closing threads: " << ThreadData->ThreadInputData->GetThreadName());
+		}
+	}
+
+	static constexpr int32 TimeToWaitEachLoopIterationInMS = 2;
+	static constexpr int32 TimeToWaitBeforeWarn = 2000;
+
+	int32 WaitTime = 0;
+
 	// Wait for all threads to finish
 	while (AllThreadsArray.Size())
 	{
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(TimeToWaitEachLoopIterationInMS);
 
-		if (AllThreadsArray.Size())
+		WaitTime += TimeToWaitEachLoopIterationInMS;
+
+		if (WaitTime > TimeToWaitBeforeWarn)
 		{
 			LOG_ERROR("Unable to stop all threads!");
-
-			for (FThreadData* ThreadData : AllThreadsArray)
-			{
-				if (ThreadData != nullptr && ThreadData->ThreadInputData != nullptr)
-				{
-					LOG_ERROR("Unable to close thread: " << ThreadData->ThreadInputData->GetThreadName());
-				}
-			}
-
-			THREAD_WAIT_MS(2000);
 		}
 	}
 
@@ -78,7 +83,7 @@ void FThreadsManager::DeInitialize()
 
 	COUNTER_END(StopThreadsCoutnerStart, StopThreadsCoutnerEnd);
 
-	LOG_INFO("Stopping threads took: " << COUNTER_GET_MS(StopThreadsCoutnerEnd) << " ms");
+	std::cout << "Stopping threads took: " << COUNTER_GET_MS(StopThreadsCoutnerEnd) << " ms" << std::endl;
 }
 
 void FThreadsManager::TickThreadCallbacks()
