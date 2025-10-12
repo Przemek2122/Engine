@@ -73,7 +73,7 @@ void FEngineManager::Exit()
 
 	delete FGlobalDefines::GEngine;
 
-	std::cout << "Game engine end." << std::endl;
+	std::cout << "Engine end." << std::endl;
 }
 
 FEngine* FEngineManager::Get()
