@@ -604,6 +604,38 @@ function(group_remaining_targets folder_name)
     endforeach()
 endfunction()
 
+# Copies files to destination, skipping hidden files and invalid paths
+function(CopyAssetFiles FilesList DestinationPath)
+    foreach(File ${FilesList})
+        get_filename_component(FileName ${File} NAME)
+        
+        # Skip hidden files (starting with .) and non-existent files
+        if (NOT FileName MATCHES "^\\..*" AND EXISTS ${File})
+            file(COPY ${File} 
+                 DESTINATION ${DestinationPath} 
+                 FILE_PERMISSIONS OWNER_READ OWNER_WRITE)
+        else()
+            message(WARNING "Could not access file: ${File} (skipping)")
+        endif()
+    endforeach()
+endfunction()
+
+# Copies assets to target output directory after build
+# (Only then we know if it's debug/release)
+function(CopyAssetsPostBuild TargetName SourcePath)
+    set(DestSubfolder "Assets")
+    if(ARGC GREATER 2)
+        set(DestSubfolder ${ARGV2})
+    endif()
+    
+    add_custom_command(TARGET ${TargetName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${SourcePath}" 
+            "$<TARGET_FILE_DIR:${TargetName}>/${DestSubfolder}"
+        COMMENT "Copying assets..."
+    )
+endfunction()
+
 #==============================================================================
 # TESTS
 #==============================================================================
