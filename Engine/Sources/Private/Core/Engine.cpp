@@ -47,6 +47,7 @@ FEngine::FEngine()
 	, TestManager(nullptr)
 #endif
 	, bContinueMainLoop(true)
+	, bIsEventHandlerEnabled(true)
 	, TicksThisSecond(0)
 	, Second(0)
 {
@@ -240,11 +241,14 @@ void FEngine::EngineTick()
 {
 	UpdateFrameRateCounter();
 
-	EventHandler->HandleEvents();
-
-	if (EventHandler->QuitInputDetected())
+	if (bIsEventHandlerEnabled)
 	{
-		FGlobalDefines::GEngine->RequestExit();
+		EventHandler->HandleEvents();
+
+		if (EventHandler->QuitInputDetected())
+		{
+			FGlobalDefines::GEngine->RequestExit();
+		}
 	}
 
 	// Tick functions for next tick
@@ -323,6 +327,16 @@ bool FEngine::IsFrameRateLimited() const
 void FEngine::RequestExit()
 {
 	bContinueMainLoop = false;
+}
+
+void FEngine::DisableInput()
+{
+	bIsEventHandlerEnabled = false;
+}
+
+void FEngine::EnableInput()
+{
+	bIsEventHandlerEnabled = true;
 }
 
 void FEngine::ForceExit(const EEngineErrorCode OptionalErrorCode)

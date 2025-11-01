@@ -65,6 +65,12 @@ public:
 	/** Call to stop main loop. (Exit engine) */
 	virtual void RequestExit();
 
+	/** Disable event handler */
+	virtual void DisableInput();
+
+	/** Enable event handler */
+	virtual void EnableInput();
+
 	/** Call to force stopping app */
 	virtual void ForceExit(const EEngineErrorCode OptionalErrorCode = EEngineErrorCode::ForceExit);
 
@@ -250,6 +256,7 @@ protected:
 
 private:
 	bool bContinueMainLoop;
+	bool bIsEventHandlerEnabled;
 	int TicksThisSecond;
 	size_t Second;
 
