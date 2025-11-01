@@ -28,8 +28,8 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(ASSETS_DIR_NAME "Assets")
 set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 
-# Find VCPKG  (BEFORE project())
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+# Find VCPKG OR INSTALL FOR THIS BUILD ONLY (must be BEFORE project())
+if(NOT DEFINED VCPKG_ROOT AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(WIN32)
         execute_process(
             COMMAND where vcpkg
@@ -57,7 +57,26 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
             message(STATUS "Auto-detected vcpkg: ${VCPKG_DIR}")
         endif()
     else()
-        message(WARNING "vcpkg not found in PATH")
+        message(WARNING "VCPKG not found in PATH")
+        message(STATUS "Will install VCPKG for this build")
+		
+		execute_process(COMMAND git clone https://github.com/microsoft/vcpkg.git)
+        execute_process(
+			COMMAND cmd /c bootstrap-vcpkg.bat
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/vcpkg
+			RESULT_VARIABLE result
+			OUTPUT_VARIABLE output
+			ERROR_VARIABLE error
+		)
+		if(result)
+			message(FATAL_ERROR "Were runnning  ${PROJECT_BINARY_DIR}/vcpkg/bootstrap-vcpkg.bat")
+			message(FATAL_ERROR "vcpkg bootstrap failed: ${result}\n${output}\n${error}")
+		else()
+			set(VCPKG_ROOT "${PROJECT_BINARY_DIR}/vcpkg" CACHE INTERNAL "Path to vcpkg")
+			
+			message(STATUS "VCPKG installed for this build successfully.")
+			message(WARNING "Global VCPKG would speed up the build.")
+		endif()
     endif()
 endif()
 
@@ -69,6 +88,10 @@ if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
         set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
     endif()
     message(STATUS "Set VCPKG_TARGET_TRIPLET to: ${VCPKG_TARGET_TRIPLET}")
+	
+	if (DEFINED VCPKG_ROOT)
+		execute_process(COMMAND ${VCPKG_ROOT}/vcpkg.exe install OpenSSL)
+	endif()
 endif()
 
 # Create project
@@ -284,15 +307,16 @@ message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "==== End Debug ====")
 
-# TODO: Could add vpkg and command to install packages??
+# Set location for VCPKG content
+if(WIN32 AND NOT DEFINED VCPKG_INSTALLED_LOCATION AND VCPKG_ROOT AND VCPKG_TARGET_TRIPLET)
+    set(VCPKG_INSTALLED_LOCATION "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}" CACHE INTERNAL "")
+    message(STATUS "VCPKG_INSTALLED_LOCATION set to: ${VCPKG_INSTALLED_LOCATION}")
+elseif (WIN32)
+    message(STATUS "VCPKG_INSTALLED_LOCATION not set!")
+endif()
 
 # Help CMake find OpenSSL from vcpkg
-if(WIN32 AND VCPKG_ROOT AND VCPKG_TARGET_TRIPLET)
-    set(OPENSSL_ROOT_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}")
-    message(STATUS "OPENSSL_ROOT_DIR set to: ${OPENSSL_ROOT_DIR}")
-elseif (WIN32)
-    message(STATUS "OPENSSL_ROOT_DIR not set!")
-endif()
+set(OPENSSL_ROOT_DIR "${VCPKG_INSTALLED_LOCATION}")
 
 # Try to find OpenSSL
 find_package(OpenSSL MODULE REQUIRED)
@@ -721,6 +745,25 @@ if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
 endif()
 
 function(copy_runtime_engine_dlls target)
+	if(WIN32)
+		if (VCPKG_ROOT AND VCPKG_INSTALLED_LOCATION)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_LOCATION}/bin/libcrypto-3-x64.dll"
+					$<TARGET_FILE_DIR:${target}>
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_LOCATION}/bin/libssl-3-x64.dll"
+					$<TARGET_FILE_DIR:${target}>
+			)
+		else()
+			message(STATUS "VCPKG_ROOT: '${VCPKG_ROOT}'")
+			message(STATUS "VCPKG_INSTALLED_LOCATION: '${VCPKG_INSTALLED_LOCATION}'")
+			message(FATAL_ERROR "VCPKG or VCPKG_INSTALLED_LOCATION not found.")
+		endif()
+	else()
+		message(FATAL_ERROR "OpenSSL might not be configured for this platform!")
+	endif()
+
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3-shared> $<TARGET_FILE_DIR:${target}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_ttf-shared> $<TARGET_FILE_DIR:${target}>
@@ -760,6 +803,9 @@ endif()
 set_property(TARGET Engine PROPERTY FOLDER "Core")
 group_targets("Core" Engine)
 group_targets("ThirdParty/SDL3" SDL3::SDL3 SDL3-shared SDL3_mixer-shared SDL3_ttf-shared)
+group_targets("ThirdParty/gtest" GTest::gmock GTest::gmock_main GTest::gtest GTest::gtest_main)
+group_targets("ThirdParty/encryption" argon2 OpenSSL::Crypto OpenSSL::SSL)
+group_targets("CustomCommands" BuildAllEngine)
 
 if(USE_LIBRARY_ASIO)
 	if(USE_LIBRARY_CROW)
