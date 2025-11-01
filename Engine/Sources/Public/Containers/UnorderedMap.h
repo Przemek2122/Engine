@@ -15,6 +15,17 @@ template<typename TKey, typename TValue, typename TSizeType = int>
 class CUnorderedMap : public CContainerBase<TValue, TSizeType>
 {
 public:
+	/** Default constructor */
+	CUnorderedMap()
+	{
+	}
+
+	/** Init list */
+	CUnorderedMap(std::initializer_list<std::pair<const std::string, std::string>> init_list)
+		: Map(init_list)
+	{
+	}
+
 	/** Begin CContainerBase interface */
 	NO_DISCARD TSizeType Size() const override
 	{
@@ -134,6 +145,23 @@ public:
 		}
 
 		return false;
+	}
+
+	NO_DISCARD bool ContainsByPredicate(FFunctorLambda<bool, TKey, TValue> Delegate) const
+	{
+		bool bContains = false;
+
+		for (auto it = Map.begin(); it != Map.end(); ++it)
+		{
+			if (Delegate(it->first, it->second))
+			{
+				bContains = true;
+
+				break;
+			}
+		}
+
+		return bContains;
 	}
 	
 	template<typename TAutoType>

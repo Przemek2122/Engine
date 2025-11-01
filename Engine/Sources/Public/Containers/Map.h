@@ -183,7 +183,7 @@ public:
 			{
 				bContains = true;
 
-				continue;
+				break;
 			}
 		}
 
