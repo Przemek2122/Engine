@@ -20,7 +20,7 @@ public:
 	std::string GetName() const;
 
 	/** @returns value of the field - most efficient way, returns string */
-	std::string GetValueAsString() const;
+	const std::string& GetValueAsString() const;
 
 	/** Performs atoi to int if possible */
 	int GetValueAsInt() const;
@@ -55,17 +55,17 @@ public:
 	[[nodiscard]] bool ContainsFieldByValue(const std::string& FieldValue) const;
 
 	/** Recommended. Find field by name in map. */
-	FIniField FindFieldByName(const std::string& FieldName);
+	[[nodiscard]] FIniField FindFieldByName(const std::string& FieldName);
 
 	/** Avoid if possible because it will iterate all records until value is found. Find field by value in map. */
-	FIniField FindFieldByValue(const std::string& FieldValue);
+	[[nodiscard]] FIniField FindFieldByValue(const std::string& FieldValue);
 
 	/** Add or update field using given struct. */
 	void AddOrUpdateField(const FIniField& IniField);
 
 protected:
 	/** Fields map of ini file. */
-	CMap<std::string, std::shared_ptr<FIniField>> FieldsMap;
+	CUnorderedMap<std::string, std::shared_ptr<FIniField>> FieldsMap;
 
 	/** Owner manager */
 	FIniManager* IniManager;

@@ -16,7 +16,7 @@ std::string FIniField::GetName() const
 	return Name;
 }
 
-std::string FIniField::GetValueAsString() const
+const std::string& FIniField::GetValueAsString() const
 {
 	return Value;
 }
