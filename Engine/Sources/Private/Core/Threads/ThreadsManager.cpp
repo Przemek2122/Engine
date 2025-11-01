@@ -142,7 +142,9 @@ void FThreadsManager::AddAsyncWork(const FAsyncWorkStructure& AsyncRunWithCallba
 
 void FThreadsManager::TryStopThread(FThreadData* ThreadData)
 {
-	if (ThreadData != nullptr && ThreadData->ThreadInputData->IsThreadAlive())
+	// Check if engine is closing or just session is being closed
+	// If engine is closing thread will be closed by threads manager
+	if (FGlobalDefines::GEngine->CanContinueMainLoop() && ThreadData != nullptr && ThreadData->ThreadInputData->IsThreadAlive())
 	{
 		ThreadData->GetThread()->StopThread();
 	}
