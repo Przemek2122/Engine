@@ -8,14 +8,7 @@
 FMutexScopeLock::FMutexScopeLock(FMutex& InMutex)
 	: Mutex(InMutex)
 {
-	if (Mutex.IsLocked())
-	{
-		LOG_ERROR("Mutex already locked, this should never happen");
-	}
-	else
-	{
-		Mutex.Lock();
-	}
+	THREAD_WAIT_FOR_MUTEX_LOCK(Mutex);
 }
 
 FMutexScopeLock::~FMutexScopeLock()

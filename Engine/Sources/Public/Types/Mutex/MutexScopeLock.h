@@ -6,6 +6,9 @@
 
 class FMutex;
 
+/**
+ * Will wait until mutex is locked and unlock when it disappears from scope
+ */
 class ENGINE_API FMutexScopeLock
 {
 public:
