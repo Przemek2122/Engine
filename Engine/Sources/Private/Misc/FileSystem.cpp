@@ -122,6 +122,16 @@ void FFileSystem::File::Clear(const std::string& InPath)
     File.close();
 }
 
+void FFileSystem::File::Rename(const std::string& InFromPath, const std::string& InToPath)
+{
+    std::error_code EC;
+    fs::copy(InFromPath, InToPath, EC);
+    if (EC)
+    {
+        LOG_ERROR("Copy failed: " << EC.message());
+    }
+}
+
 bool FFileSystem::File::ReadLine(SDL_IOStream *IOStream, std::string& CurrentLine)
 {
     CurrentLine = "";

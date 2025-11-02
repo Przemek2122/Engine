@@ -212,3 +212,8 @@ void FIniObject::AddOrUpdateField(const FIniField& IniField)
 		}
 	}
 }
+
+int32 FIniObject::GetNumberOfFields() const
+{
+	return FieldsMap.Size();
+}

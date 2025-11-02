@@ -1,4 +1,4 @@
-// Created by Przemys�aw Wiewi�ra 2020
+// Created by Przemysław Wiewióra 2020
 
 #pragma once
 
@@ -43,6 +43,8 @@ public:
 
 		/** Remove all content. */
 		static void Clear(const std::string& InPath);
+
+		static void Rename(const std::string& InFromPath, const std::string& InToPath);
 
 		/** Calls delegate with each line separately */
 		static void GetFileContentLineByLine(FDelegateSafe<void, const std::string&>& DelegateCalledForEachLine, const std::string& InPath);

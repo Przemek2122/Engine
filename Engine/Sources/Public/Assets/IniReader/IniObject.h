@@ -63,6 +63,9 @@ public:
 	/** Add or update field using given struct. */
 	void AddOrUpdateField(const FIniField& IniField);
 
+	/** Get size of fields array */
+	int32 GetNumberOfFields() const;
+
 protected:
 	/** Fields map of ini file. */
 	CUnorderedMap<std::string, std::shared_ptr<FIniField>> FieldsMap;
