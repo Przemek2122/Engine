@@ -162,6 +162,11 @@ void FThreadsManager::ResetAllJobs()
 	AsyncJobQueue.Clear();
 }
 
+int32 FThreadsManager::GetNumberOfLogicalCPU()
+{
+	return SDL_GetNumLogicalCPUCores();
+}
+
 FThreadWorkerData* FThreadsManager::CreateThreadWorker(const std::string& NewThreadName)
 {
 	return CreateThread<FThreadWorker, FThreadWorkerData>(NewThreadName);

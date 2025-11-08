@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2024
+// Created by https://www.linkedin.com/in/przemek2122/ 2024
 
 #include "CoreEngine.h"
 #include "Assets/Assets/IniAsset.h"

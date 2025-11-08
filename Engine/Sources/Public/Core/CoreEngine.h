@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by https://www.linkedin.com/in/przemek2122/ 2020
 
 // This should be included once in each .cpp file at the top before other includes.
 // In case of subproject including this files it should be under ProjectPCH.h but still above everything else than that.

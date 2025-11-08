@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2025
+// Created by https://www.linkedin.com/in/przemek2122/ 2025
 
 #pragma once
 
@@ -14,6 +14,106 @@
  */
 #define SERIALIZE_FIELD(Data, Field) FSerializer::WriteField(Data, FIELD_ID(Field), Field)
 #define DESERIALIZE_FIELD(Data, Offset, Field) FSerializer::ReadField(Data, Offset, FIELD_ID(Field), Field)
+
+/** Helper functions for serializer */
+class FSerializerHelper
+{
+public:
+    // Helper: Write string to buffer
+    static void WriteString(std::vector<char>& Data, const std::string& Str)
+    {
+        uint32 Length = static_cast<uint32>(Str.size());
+        // Write length
+        Data.insert(Data.end(),
+            reinterpret_cast<const char*>(&Length),
+            reinterpret_cast<const char*>(&Length) + sizeof(Length));
+        // Write string data
+        Data.insert(Data.end(), Str.begin(), Str.end());
+    }
+
+    // Helper: Read string from buffer
+    static bool ReadString(const std::vector<char>& Data, size_t& Offset, std::string& OutStr)
+    {
+        if (Offset + sizeof(uint32) > Data.size())
+            return false;
+
+        // Read length
+        uint32 Length;
+        std::memcpy(&Length, Data.data() + Offset, sizeof(Length));
+        Offset += sizeof(Length);
+
+        if (Offset + Length > Data.size())
+            return false;
+
+        // Read string data
+        OutStr.resize(Length);
+        std::memcpy(&OutStr[0], Data.data() + Offset, Length);
+        Offset += Length;
+
+        return true;
+    }
+
+    // Helper: Write any value (POD or string)
+    template<typename T>
+    static void WriteValue(std::vector<char>& Data, const T& Value)
+    {
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            WriteString(Data, Value);
+        }
+        else if constexpr (std::is_trivially_copyable_v<T>)
+        {
+            // POD type - direct binary write
+            Data.insert(Data.end(),
+                reinterpret_cast<const char*>(&Value),
+                reinterpret_cast<const char*>(&Value) + sizeof(T));
+        }
+        else
+        {
+            static_assert(std::is_same_v<T, std::string>, "Type must be POD or std::string");
+        }
+    }
+
+    // Helper: Read any value (POD or string)
+    template<typename T>
+    static bool ReadValue(const std::vector<char>& Data, size_t& Offset, T& OutValue)
+    {
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            return ReadString(Data, Offset, OutValue);
+        }
+        else if constexpr (std::is_trivially_copyable_v<T>)
+        {
+            // POD type - direct binary read
+            if (Offset + sizeof(T) > Data.size())
+                return false;
+
+            std::memcpy(&OutValue, Data.data() + Offset, sizeof(T));
+            Offset += sizeof(T);
+            return true;
+        }
+        else
+        {
+            static_assert(std::is_same_v<T, std::string>, "Type must be POD or std::string");
+            return false;
+        }
+    }
+
+    // Helper: Calculate size of value
+    template<typename T>
+    static uint32 GetValueSize(const T& Value)
+    {
+        if constexpr (std::is_same_v<T, std::string>)
+        {
+            return sizeof(uint32) + static_cast<uint32>(Value.size());
+        }
+        else
+        {
+            return sizeof(T);
+        }
+    }
+
+};
 
 /** Utility class for saving */
 class FSerializer
@@ -54,29 +154,41 @@ public:
         uint64 ObjectSize;
     };
 
+    // Write single value field (supports POD and string)
     template<typename T>
     static void WriteFieldSingle(std::vector<char>& Data, uint32 FieldId, const T& Value)
     {
+        // Compile-time check: must be POD or string
+        static_assert(
+            std::is_trivially_copyable_v<T> || std::is_same_v<T, std::string>,
+            "Type must be POD (trivially copyable) or std::string"
+            );
+
         // Write field ID
         Data.insert(Data.end(),
             reinterpret_cast<const char*>(&FieldId),
             reinterpret_cast<const char*>(&FieldId) + sizeof(FieldId));
 
         // Write data size
-        uint32 Size = sizeof(T);
+        uint32 Size = FSerializerHelper::GetValueSize(Value);
         Data.insert(Data.end(),
             reinterpret_cast<const char*>(&Size),
             reinterpret_cast<const char*>(&Size) + sizeof(Size));
 
-        // Write actual data
-        Data.insert(Data.end(),
-            reinterpret_cast<const char*>(&Value),
-            reinterpret_cast<const char*>(&Value) + sizeof(Value));
+        // Write actual data using helper
+        FSerializerHelper::WriteValue(Data, Value);
     }
 
+    // Read single value field (supports POD and string)
     template<typename T>
     static bool ReadFieldSingle(const std::vector<char>& Data, size_t& Offset, uint32 FieldId, T& OutValue)
     {
+        // Compile-time check: must be POD or string
+        static_assert(
+            std::is_trivially_copyable_v<T> || std::is_same_v<T, std::string>,
+            "Type must be POD (trivially copyable) or std::string"
+            );
+
         while (Offset < Data.size())
         {
             // Read field ID
@@ -92,20 +204,27 @@ public:
             // Check if this is the field we want
             if (CurrentId == FieldId)
             {
-                std::memcpy(&OutValue, Data.data() + Offset, sizeof(T));
-                Offset += Size;
-                return true; // Found it
+                // Use helper to read value
+                return FSerializerHelper::ReadValue(Data, Offset, OutValue);
             }
 
             // Skip this field
             Offset += Size;
         }
+
         return false; // Not found
     }
 
+    // Write vector field (supports POD and string)
     template<typename T>
     void WriteFieldVector(std::vector<char>& Data, uint32 FieldId, const std::vector<T>& Values)
     {
+        // Compile-time check: must be POD or string
+        static_assert(
+            std::is_trivially_copyable_v<T> || std::is_same_v<T, std::string>,
+            "Type must be POD (trivially copyable) or std::string"
+            );
+
         // Write field ID
         Data.insert(Data.end(),
             reinterpret_cast<const char*>(&FieldId),
@@ -113,7 +232,12 @@ public:
 
         // Calculate total size (count + all elements)
         uint32 Count = static_cast<uint32>(Values.size());
-        uint32 TotalSize = sizeof(Count) + (Count * sizeof(T));
+        uint32 TotalSize = sizeof(Count);
+
+        for (const auto& Value : Values)
+        {
+            TotalSize += GetValueSize(Value);
+        }
 
         // Write total size
         Data.insert(Data.end(),
@@ -125,18 +249,23 @@ public:
             reinterpret_cast<const char*>(&Count),
             reinterpret_cast<const char*>(&Count) + sizeof(Count));
 
-        // Write all elements
+        // Write all elements using helper
         for (const auto& Value : Values)
         {
-            Data.insert(Data.end(),
-                reinterpret_cast<const char*>(&Value),
-                reinterpret_cast<const char*>(&Value) + sizeof(T));
+            FSerializerHelper::WriteValue(Data, Value);
         }
     }
 
+    // Read vector field (supports POD and string)
     template<typename T>
     static bool ReadFieldVector(const std::vector<char>& Data, size_t& Offset, uint32 FieldId, std::vector<T>& OutValues)
     {
+        // Compile-time check: must be POD or string
+        static_assert(
+            std::is_trivially_copyable_v<T> || std::is_same_v<T, std::string>,
+            "Type must be POD (trivially copyable) or std::string"
+            );
+
         while (Offset < Data.size())
         {
             // Read field ID
@@ -157,19 +286,129 @@ public:
                 std::memcpy(&Count, Data.data() + Offset, sizeof(Count));
                 Offset += sizeof(Count);
 
-                // Read elements
+                // Read elements using helper
                 OutValues.resize(Count);
                 for (uint32 i = 0; i < Count; ++i)
                 {
-                    std::memcpy(&OutValues[i], Data.data() + Offset, sizeof(T));
-                    Offset += sizeof(T);
+                    if (!FSerializerHelper::ReadValue(Data, Offset, OutValues[i]))
+                        return false;
                 }
+
                 return true;
             }
 
             // Skip this field
             Offset += Size;
         }
+
+        return false;
+    }
+
+    // Write unordered_map to binary data buffer
+    template<typename K, typename V>
+    static void WriteFieldUnorderedMap(std::vector<char>& Data, uint32 FieldId, const std::unordered_map<K, V>& Map)
+    {
+        // Compile-time checks for both K and V
+        static_assert(
+            std::is_trivially_copyable_v<K> || std::is_same_v<K, std::string>,
+            "Map key type must be POD (trivially copyable) or std::string"
+            );
+        static_assert(
+            std::is_trivially_copyable_v<V> || std::is_same_v<V, std::string>,
+            "Map value type must be POD (trivially copyable) or std::string"
+            );
+
+        // Write field ID
+        Data.insert(Data.end(),
+            reinterpret_cast<const char*>(&FieldId),
+            reinterpret_cast<const char*>(&FieldId) + sizeof(FieldId));
+
+        // Calculate total size
+        uint32 Count = static_cast<uint32>(Map.size());
+        uint32 TotalSize = sizeof(Count);
+
+        for (const auto& [Key, Value] : Map)
+        {
+            TotalSize += FSerializerHelper::GetValueSize(Key);
+            TotalSize += FSerializerHelper::GetValueSize(Value);
+        }
+
+        // Write total size
+        Data.insert(Data.end(),
+            reinterpret_cast<const char*>(&TotalSize),
+            reinterpret_cast<const char*>(&TotalSize) + sizeof(TotalSize));
+
+        // Write count
+        Data.insert(Data.end(),
+            reinterpret_cast<const char*>(&Count),
+            reinterpret_cast<const char*>(&Count) + sizeof(Count));
+
+        // Write all key-value pairs
+        for (const auto& [Key, Value] : Map)
+        {
+            FSerializerHelper::WriteValue(Data, Key);
+            FSerializerHelper::WriteValue(Data, Value);
+        }
+    }
+
+    // Read unordered_map from binary data buffer
+    template<typename K, typename V>
+    static bool ReadFieldUnorderedMap(const std::vector<char>& Data, size_t& Offset, uint32 FieldId, std::unordered_map<K, V>& OutMap)
+    {
+        // Compile-time checks for both K and V
+        static_assert(
+            std::is_trivially_copyable_v<K> || std::is_same_v<K, std::string>,
+            "Map key type must be POD (trivially copyable) or std::string"
+            );
+        static_assert(
+            std::is_trivially_copyable_v<V> || std::is_same_v<V, std::string>,
+            "Map value type must be POD (trivially copyable) or std::string"
+            );
+
+        while (Offset < Data.size())
+        {
+            // Read field ID
+            uint32 CurrentId;
+            std::memcpy(&CurrentId, Data.data() + Offset, sizeof(CurrentId));
+            Offset += sizeof(CurrentId);
+
+            // Read total size
+            uint32 Size;
+            std::memcpy(&Size, Data.data() + Offset, sizeof(Size));
+            Offset += sizeof(Size);
+
+            if (CurrentId == FieldId)
+            {
+                // Read count
+                uint32 Count;
+                std::memcpy(&Count, Data.data() + Offset, sizeof(Count));
+                Offset += sizeof(Count);
+
+                OutMap.clear();
+                OutMap.reserve(Count);
+
+                // Read all key-value pairs
+                for (uint32 i = 0; i < Count; ++i)
+                {
+                    K Key;
+                    V Value;
+
+                    if (!FSerializerHelper::ReadValue(Data, Offset, Key))
+                        return false;
+
+                    if (!FSerializerHelper::ReadValue(Data, Offset, Value))
+                        return false;
+
+                    OutMap[Key] = Value;
+                }
+
+                return true;
+            }
+
+            // Skip this field
+            Offset += Size;
+        }
+
         return false;
     }
 
@@ -195,6 +434,11 @@ public:
     {
         WriteFieldVector(Data, FieldId, Values);
     }
+    template<typename K, typename V>
+    static void WriteField(std::vector<char>& Data, uint32 FieldId, const std::unordered_map<K, V>& Values)
+    {
+        WriteFieldUnorderedMap(Data, FieldId, Values);
+    }
     // More types supported for serialization can be added here
 
     // Overloaded ReadField - automatically picks correct version
@@ -207,6 +451,11 @@ public:
     static bool ReadField(const std::vector<char>& Data, size_t& Offset, uint32 FieldId, std::vector<T>& OutValues)
     {
         return ReadFieldVector(Data, Offset, FieldId, OutValues);
+    }
+    template<typename K, typename V>
+    static bool ReadField(const std::vector<char>& Data, size_t& Offset, uint32 FieldId, std::unordered_map<K, V>& OutMap)
+    {
+        return ReadFieldUnorderedMap(Data, Offset, FieldId, OutMap);
     }
     // More types supported for de-serialization can be added here
 

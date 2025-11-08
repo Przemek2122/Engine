@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by https://www.linkedin.com/in/przemek2122/ 2020
 
 #pragma once
 
@@ -42,11 +42,17 @@ public:
 	{
 		Map.clear();
 	}
+
+	template<typename TTypeAuto>
+	void SetNum(TTypeAuto NewSize)
+	{
+		Map.resize(NewSize);
+	}
 	
 	template<typename TAutoType>
 	NO_DISCARD bool IsValidKey(TAutoType Key)
 	{
-		return Map.find(Key) != Map.end();
+		return Map.contains(Key);
 	}
 
 	template<typename TAutoType>
@@ -97,53 +103,40 @@ public:
 	template<typename TAutoType>
 	NO_DISCARD bool ContainsKey(TAutoType Key)
 	{
-		for (auto& Pair : Map)
-		{
-			if (Pair.first == Key)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return Map.contains(Key);
 	}
+
 	template<typename TAutoType>
 	NO_DISCARD bool ContainsKey(TAutoType Key) const
 	{
-		for (auto& Pair : Map)
-		{
-			if (Pair.first == Key)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return Map.contains(Key);
 	}
+
+	/** Very slow iterator */
 	template<typename TAutoType>
 	NO_DISCARD bool ContainsValue(TAutoType Value)
 	{
-		for (auto& Pair : Map)
+		for (const auto& Pair : Map)
 		{
 			if (Pair.second == Value)
 			{
 				return true;
 			}
 		}
-
 		return false;
 	}
+
+	/** Very slow iterator */
 	template<typename TAutoType>
 	NO_DISCARD bool ContainsValue(TAutoType Value) const
 	{
-		for (auto& Pair : Map)
+		for (const auto& Pair : Map)
 		{
 			if (Pair.second == Value)
 			{
 				return true;
 			}
 		}
-
 		return false;
 	}
 

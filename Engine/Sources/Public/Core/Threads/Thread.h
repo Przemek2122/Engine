@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2024
+// Created by https://www.linkedin.com/in/przemek2122/ 2024
 
 #pragma once
 
@@ -50,8 +50,13 @@ protected:
 	FThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
 	virtual ~FThread();
 
+	/** Called once from new async thread before first tick */
+	virtual void InitThread();
+
 	/** Called on main thread */
 	virtual void StartThread();
+
+	virtual void InternalStartThread();
 
 	/** Called on main thread */
 	virtual void StopThread();
@@ -97,27 +102,40 @@ protected:
 
 /**
  * Generic thread with task of your choice,
- * simply bind your code to GenericThreadTask (Your task will be removed when done).
+ * simply bind your code to GenericThreadTask (Your task will be removed when done, you can disable removing by calling SetShouldRemoveDoneJobs).
  */
 class ENGINE_API FGenericThread : public FThread
 {
 	friend FThreadData;
 
 public:
+	/** Add task to be executed before async task */
+	void AddBeginTask(const FFunctorLambda<void>& Task);
+
+	/** Async task to be done by async thread */
 	void AddTask(const FFunctorLambda<void>& Task);
 
-	/** By default we remove done jobs, but we can remove it when we want to run it in loop */
+	/** By default, we remove done jobs, but we can remove it when we want to run it in loop */
 	void SetShouldRemoveDoneJobs(const bool bShouldRemove);
+
+	void BeginAsyncWork();
 
 protected:
 	FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
 
+	void InitThread() override;
+	void StartThread() override;
 	void TickThread() override;
 
 	/** Queue which is removed after execution */
 	CQueueSafe<FFunctorLambda<void>> GenericThreadTaskQueue;
 
+	/** Queue of tasks called before starting working on GenericThreadTaskQueue */
+	CQueueSafe<FFunctorLambda<void>> InitThreadTaskQueue;
+
 	/** By default we remove done jobs, but we can remove it when we want to run it in loop */
 	bool bShouldRemoveDoneJobs;
+
+	bool bIsRunning;
 	
 };

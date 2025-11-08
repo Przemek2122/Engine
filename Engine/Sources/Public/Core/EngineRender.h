@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020-2022 https://github.com/Przemek2122/GameEngine
+// Created by https://www.linkedin.com/in/przemek2122/ 2020-2022 https://github.com/Przemek2122/GameEngine
 
 #pragma once
 

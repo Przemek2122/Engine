@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2024
+// Created by https://www.linkedin.com/in/przemek2122/ 2024
 
 #pragma once
 
@@ -59,6 +59,8 @@ public:
 
 	/** Kill all pending tasks, will be called when gamemode changes for example */
 	virtual void ResetAllJobs();
+
+	static int32 GetNumberOfLogicalCPU();
 
 protected:
 	/** Creates thread for use, use StopThread to disable and automatically delete thread */

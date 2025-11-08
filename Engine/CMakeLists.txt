@@ -7,8 +7,24 @@ option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable
 option(ENGINE_COPY_ASSETS "Copy asssets to target" ON)
 option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
 
+# Crow and asio are for HTTP, 
+# Note: using sockets from Crow is higly NOT recomended
 option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
 option(USE_LIBRARY_CROW "Should we use crow library?" ON)
+
+# Socket library support
+option(USE_LIBRARY_WEB_SOCKETS "Should we use uWebSockets library?" ON)
+
+# SOCI is for MySQL (db connection)
+option(USE_LIBRARY_SOCI "Should we use SOCI library for db connecions?" ON)
+option(SOCI_ENABLE_MYSQL "Enable MySQL backend" ON)
+set(MYSQL_CONNECTOR_PATH "C:/Program Files/MySQL/MySQL Connector C++ 9.5" CACHE PATH "MYSQL Connector path")
+option(SOCI_ENABLE_POSTGRESQL "Enable PostgreSQL backend" OFF)
+option(SOCI_ENABLE_SQLITE3 "Enable SQLite3 backend" OFF)
+option(SOCI_ENABLE_ORACLE "Enable Oracle backend" OFF)
+option(SOCI_ENABLE_ODBC "Enable ODBC backend" OFF)
+option(SOCI_ENABLE_FIREBIRD "Enable Firebird backend" OFF)
+option(SOCI_ENABLE_DB2 "Enable DB2 backend" OFF)
 
 set(ENGINE_VERSION "0.1")
 
@@ -29,7 +45,7 @@ set(ASSETS_DIR_NAME "Assets")
 set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 
 # Find VCPKG OR INSTALL FOR THIS BUILD ONLY (must be BEFORE project())
-if(NOT DEFINED VCPKG_ROOT AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+if(NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(WIN32)
         execute_process(
             COMMAND where vcpkg
@@ -49,11 +65,11 @@ if(NOT DEFINED VCPKG_ROOT AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(VCPKG_EXE)
         # Get directory from vcpkg.exe path
         get_filename_component(VCPKG_DIR "${VCPKG_EXE}" DIRECTORY)
-        set(VCPKG_TOOLCHAIN "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
+        set(VCPKG_TOOLCHAIN CACHE FILEPATH "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
         
         if(EXISTS "${VCPKG_TOOLCHAIN}")
             set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}" CACHE FILEPATH "Vcpkg toolchain")
-			set(VCPKG_ROOT "${VCPKG_DIR}" CACHE PATH "Vcpkg root")
+			set(VCPKG_ROOT_DIR "${VCPKG_DIR}" CACHE PATH "Vcpkg root")
             message(STATUS "Auto-detected vcpkg: ${VCPKG_DIR}")
         endif()
     else()
@@ -72,7 +88,8 @@ if(NOT DEFINED VCPKG_ROOT AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 			message(FATAL_ERROR "Were runnning  ${PROJECT_BINARY_DIR}/vcpkg/bootstrap-vcpkg.bat")
 			message(FATAL_ERROR "vcpkg bootstrap failed: ${result}\n${output}\n${error}")
 		else()
-			set(VCPKG_ROOT "${PROJECT_BINARY_DIR}/vcpkg" CACHE INTERNAL "Path to vcpkg")
+			set(VCPKG_ROOT_DIR "${PROJECT_BINARY_DIR}/vcpkg" CACHE INTERNAL "Path to vcpkg")
+			set(VCPKG_INSTALLED_DIR "${VCPKG_ROOT_DIR}/installed" CACHE INTERNAL "Path to vcpkg/installed")
 			
 			message(STATUS "VCPKG installed for this build successfully.")
 			message(WARNING "Global VCPKG would speed up the build.")
@@ -80,17 +97,49 @@ if(NOT DEFINED VCPKG_ROOT AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
+#if(EXISTS "${VCPKG_TOOLCHAIN}")
+#	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}")
+#else(EXISTS "${VCPKG_ROOT_DIR}")
+#	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT_DIR}/scripts/buildsystems/vcpkg.cmake")
+#endif()
+
 # Set triplet for VCPKG (BEFORE project())
-if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
-    else()
-        set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
+if(WIN32)
+	if (NOT DEFINED VCPKG_TARGET_TRIPLET)
+		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+			set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
+		else()
+			set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
+		endif()
+		
+		message(STATUS "Set VCPKG_TARGET_TRIPLET to: ${VCPKG_TARGET_TRIPLET}")
+		message(STATUS "Installing required vcpkg packages:")
+		
+		if (DEFINED VCPKG_ROOT_DIR)
+			# List of vcpkg packages to install
+			execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install OpenSSL)
+			execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install libmysql)
+			
+			if (USE_LIBRARY_WEB_SOCKETS)
+				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install uwebsockets[ssl,zlib])
+				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install uwebsockets)
+				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install libuv)
+				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install zlib)
+			endif()		
+		endif()
     endif()
-    message(STATUS "Set VCPKG_TARGET_TRIPLET to: ${VCPKG_TARGET_TRIPLET}")
 	
-	if (DEFINED VCPKG_ROOT)
-		execute_process(COMMAND ${VCPKG_ROOT}/vcpkg.exe install OpenSSL)
+	# Set location for VCPKG content
+	if(WIN32 AND NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND VCPKG_ROOT_DIR AND VCPKG_TARGET_TRIPLET)
+		set(VCPKG_INSTALLED_TRIPLET_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}" CACHE INTERNAL "vcpkg/installed/triplet where triplet is x64 or x86")
+		message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR set to: ${VCPKG_INSTALLED_TRIPLET_DIR}")
+	elseif (WIN32)
+		message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR not set!")
+	endif()
+	
+	if (DEFINED VCPKG_ROOT_DIR)
+		# Link libraries from VCPKG
+		link_directories("${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
 	endif()
 endif()
 
@@ -302,21 +351,16 @@ message(STATUS "==== Debug CMake paths ====")
 message(STATUS "CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "VCPKG_ROOT env = $ENV{VCPKG_ROOT}")
+message(STATUS "VCPKG_ROOT_DIR = ${VCPKG_ROOT_DIR}")
+message(STATUS "VCPKG_TARGET_TRIPLET = ${VCPKG_TARGET_TRIPLET}")
+message(STATUS "VCPKG_INSTALLED_DIR = ${VCPKG_INSTALLED_DIR}")
+message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR = ${VCPKG_INSTALLED_TRIPLET_DIR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "==== End Debug ====")
 
-# Set location for VCPKG content
-if(WIN32 AND NOT DEFINED VCPKG_INSTALLED_LOCATION AND VCPKG_ROOT AND VCPKG_TARGET_TRIPLET)
-    set(VCPKG_INSTALLED_LOCATION "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}" CACHE INTERNAL "")
-    message(STATUS "VCPKG_INSTALLED_LOCATION set to: ${VCPKG_INSTALLED_LOCATION}")
-elseif (WIN32)
-    message(STATUS "VCPKG_INSTALLED_LOCATION not set!")
-endif()
-
 # Help CMake find OpenSSL from vcpkg
-set(OPENSSL_ROOT_DIR "${VCPKG_INSTALLED_LOCATION}")
+set(OPENSSL_ROOT_DIR "${VCPKG_INSTALLED_TRIPLET_DIR}")
 
 # Try to find OpenSSL
 find_package(OpenSSL MODULE REQUIRED)
@@ -326,9 +370,38 @@ if(NOT OpenSSL_FOUND)
 	message(FATAL_ERROR "OpenSSL missing! Check package, probably missing")
 endif()
 
+# uWebSockets setup (manual since no CMake configs)
+if (USE_LIBRARY_WEB_SOCKETS)
+	
+	# Add include for uWebSockets headers
+	set(INCLUDES_DIR "${VCPKG_INSTALLED_TRIPLET_DIR}/include/uwebsockets")
+	set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+	
+	file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
+
+	if (WIN32)
+		# Link uSockets and Windows sockets
+		# Debug version handling is iportant
+		target_link_libraries(Engine PUBLIC 
+			$<IF:$<CONFIG:Debug>,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/uSockets.lib,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/uSockets.lib>
+			$<IF:$<CONFIG:Debug>,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/uv.lib,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/uv.lib>
+			$<IF:$<CONFIG:Debug>,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/zlibd.lib,
+				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/zlib.lib>
+			ws2_32
+		)
+	else()
+		message(FATAL_ERROR "Unsupported platform!")
+	endif()
+endif()
+
 # Add SDL3
 message(STATUS "Adding SDL...")
-    
+
 if(ENGINE_VENDORED)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL")
 		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -516,6 +589,133 @@ if(USE_LIBRARY_CROW)
 else()
 	add_compile_definitions(USE_LIBRARY_CROW=FALSE)
 endif()
+	
+if(USE_LIBRARY_SOCI)
+	message(STATUS "Adding SOCI with selected backends...")
+	
+	add_compile_definitions(USE_LIBRARY_SOCI=TRUE)
+	
+	if(ENGINE_VENDORED)
+		set(SOCI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SOCI")
+		set(SOCI_BUILD_PATH "${CMAKE_BINARY_DIR}/soci_build")
+		
+		if(EXISTS "${SOCI_PATH}")
+			set(SOCI_TESTS OFF CACHE BOOL "Disable SOCI tests")
+			set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+			set(SOCI_STATIC OFF CACHE BOOL "" FORCE)
+			
+			set(SOCI_BACKEND_LIBS soci_core)
+			
+			# MySQL
+			if(SOCI_ENABLE_MYSQL)
+				set(MySQL_INCLUDE_DIRS "${VCPKG_INSTALLED_TRIPLET_DIR}/include/mysql")
+				set(MySQL_LIBRARIES "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libmysql.lib")
+				
+				# Also set singular versions (some scripts check both)
+				set(MYSQL_INCLUDE_DIR "${MySQL_INCLUDE_DIRS}" CACHE PATH "")
+				set(MYSQL_LIBRARY "${MySQL_LIBRARIES}" CACHE FILEPATH "")
+			
+				set(SOCI_MYSQL ON CACHE BOOL "Enable MySQL backend")
+				add_compile_definitions(SOCI_SUPPORT_MYSQL=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_mysql)
+				message(STATUS "  - MySQL backend enabled")
+			else()
+				set(SOCI_MYSQL OFF CACHE BOOL "Disable MySQL backend")
+				add_compile_definitions(SOCI_SUPPORT_MYSQL=FALSE)
+				message(STATUS "  - MySQL backend disabled")
+			endif()
+
+			# PostgreSQL
+			if(SOCI_ENABLE_POSTGRESQL)
+				set(SOCI_POSTGRESQL ON CACHE BOOL "Enable PostgreSQL backend")
+				add_compile_definitions(SOCI_SUPPORT_POSTGRESQL=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_postgresql)
+				message(STATUS "  - PostgreSQL backend enabled")
+			else()
+				set(SOCI_POSTGRESQL OFF CACHE BOOL "Disable PostgreSQL backend")
+				add_compile_definitions(SOCI_SUPPORT_POSTGRESQL=FALSE)
+				message(STATUS "  - PostgreSQL backend disabled")
+			endif()
+
+			# SQLite3
+			if(SOCI_ENABLE_SQLITE3)
+				set(SOCI_SQLITE3 ON CACHE BOOL "Enable SQLite3 backend")
+				add_compile_definitions(SOCI_SUPPORT_SQLITE3=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_sqlite3)
+				message(STATUS "  - SQLite3 backend enabled")
+			else()
+				set(SOCI_SQLITE3 OFF CACHE BOOL "Disable SQLite3 backend")
+				add_compile_definitions(SOCI_SUPPORT_SQLITE3=FALSE)
+				message(STATUS "  - SQLite3 backend disabled")
+			endif()
+
+			# Oracle
+			if(SOCI_ENABLE_ORACLE)
+				set(SOCI_ORACLE ON CACHE BOOL "Enable Oracle backend")
+				add_compile_definitions(SOCI_SUPPORT_ORACLE=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_oracle)
+				message(STATUS "  - Oracle backend enabled")
+			else()
+				set(SOCI_ORACLE OFF CACHE BOOL "Disable Oracle backend")
+				add_compile_definitions(SOCI_SUPPORT_ORACLE=FALSE)
+				message(STATUS "  - Oracle backend disabled")
+			endif()
+
+			# ODBC (generic - can connect to many databases)
+			if(SOCI_ENABLE_ODBC)
+				set(SOCI_ODBC ON CACHE BOOL "Enable ODBC backend")
+				add_compile_definitions(SOCI_SUPPORT_ODBC=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_odbc)
+				message(STATUS "  - ODBC backend enabled")
+			else()
+				set(SOCI_ODBC OFF CACHE BOOL "Disable ODBC backend")
+				add_compile_definitions(SOCI_SUPPORT_ODBC=FALSE)
+				message(STATUS "  - ODBC backend disabled")
+			endif()
+
+			# Firebird
+			if(SOCI_ENABLE_FIREBIRD)
+				set(SOCI_FIREBIRD ON CACHE BOOL "Enable Firebird backend")
+				add_compile_definitions(SOCI_SUPPORT_FIREBIRD=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_firebird)
+				message(STATUS "  - Firebird backend enabled")
+			else()
+				set(SOCI_FIREBIRD OFF CACHE BOOL "Disable Firebird backend")
+				add_compile_definitions(SOCI_SUPPORT_FIREBIRD=FALSE)
+				message(STATUS "  - Firebird backend disabled")
+			endif()
+
+			# DB2
+			if(SOCI_ENABLE_DB2)
+				set(SOCI_DB2 ON CACHE BOOL "Enable DB2 backend")
+				add_compile_definitions(SOCI_SUPPORT_DB2=TRUE)
+				list(APPEND SOCI_BACKEND_LIBS soci_db2)
+				message(STATUS "  - DB2 backend enabled")
+			else()
+				set(SOCI_DB2 OFF CACHE BOOL "Disable DB2 backend")
+				add_compile_definitions(SOCI_SUPPORT_DB2=FALSE)
+				message(STATUS "  - DB2 backend disabled")
+			endif()
+			
+			add_subdirectory(${SOCI_PATH} ${SOCI_BUILD_PATH})
+			
+			target_link_libraries(Engine PUBLIC ${SOCI_BACKEND_LIBS})
+			
+			target_include_directories(Engine PUBLIC 
+				${SOCI_PATH}/include
+				${SOCI_BUILD_PATH}/include
+			)
+		else()
+			message(FATAL_ERROR "SOCI directory not found at ${SOCI_PATH}")
+		endif()
+	else()
+		find_package(SOCI REQUIRED)
+		target_include_directories(Engine PUBLIC ${SOCI_INCLUDE_DIRS})
+		target_link_libraries(Engine PUBLIC ${SOCI_LIBRARIES})
+	endif()
+else()
+	add_compile_definitions(USE_LIBRARY_SOCI=FALSE)
+endif()
 
 message(STATUS "Adding nlohmann/json...")
 
@@ -551,23 +751,18 @@ else()
 	target_link_libraries(Engine PUBLIC nlohmann_json::nlohmann_json)
 endif()
 
-if(ENGINE_VENDORED)
-    set(ARGON2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/argon2")
-    
-    if(EXISTS "${ARGON2_PATH}")
-        add_subdirectory(${ARGON2_PATH} ${CMAKE_BINARY_DIR}/argon2_build)
-        target_link_libraries(Engine PUBLIC argon2)
-        
-        # Copy headers
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-        file(COPY ${ARGON2_PATH}/include/ DESTINATION ${DESTINATION_DIR}/argon2)
-        
-    else()
-        message(FATAL_ERROR "Argon2 directory not found at ${ARGON2_PATH}")
-    endif()
+# Add argon
+set(ARGON2_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/argon2")
+if(EXISTS "${ARGON2_PATH}")
+	add_subdirectory(${ARGON2_PATH} ${CMAKE_BINARY_DIR}/argon2_build)
+	target_link_libraries(Engine PUBLIC argon2)
+	
+	# Copy headers
+	set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+	file(COPY ${ARGON2_PATH}/include/ DESTINATION ${DESTINATION_DIR}/argon2)
+	
 else()
-    find_library(ARGON2_LIBRARY argon2)
-    target_link_libraries(Engine PUBLIC ${ARGON2_LIBRARY})
+	message(FATAL_ERROR "Argon2 directory not found at ${ARGON2_PATH}")
 endif()
 
 if(ANDROID)
@@ -746,22 +941,66 @@ endif()
 
 function(copy_runtime_engine_dlls target)
 	if(WIN32)
-		if (VCPKG_ROOT AND VCPKG_INSTALLED_LOCATION)
+		if (VCPKG_ROOT_DIR AND VCPKG_INSTALLED_TRIPLET_DIR)
 			add_custom_command(TARGET ${target} POST_BUILD
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_LOCATION}/bin/libcrypto-3-x64.dll"
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libcrypto-3-x64.dll"
 					$<TARGET_FILE_DIR:${target}>
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_LOCATION}/bin/libssl-3-x64.dll"
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libssl-3-x64.dll"
 					$<TARGET_FILE_DIR:${target}>
 			)
+			if (USE_LIBRARY_WEB_SOCKETS)
+				add_custom_command(TARGET ${target} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+						"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/uv.dll"
+						$<TARGET_FILE_DIR:${target}>
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+						"${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/zlibd1.dll">
+						$<TARGET_FILE_DIR:${target}>
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+						"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll">
+						$<TARGET_FILE_DIR:${target}>
+				)
+			endif()
 		else()
-			message(STATUS "VCPKG_ROOT: '${VCPKG_ROOT}'")
-			message(STATUS "VCPKG_INSTALLED_LOCATION: '${VCPKG_INSTALLED_LOCATION}'")
-			message(FATAL_ERROR "VCPKG or VCPKG_INSTALLED_LOCATION not found.")
+			message(STATUS "VCPKG_ROOT_DIR: '${VCPKG_ROOT_DIR}'")
+			message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR: '${VCPKG_INSTALLED_TRIPLET_DIR}'")
+			message(FATAL_ERROR "VCPKG or VCPKG_INSTALLED_TRIPLET_DIR not found.")
 		endif()
 	else()
 		message(FATAL_ERROR "OpenSSL might not be configured for this platform!")
+	endif()
+
+	if (USE_LIBRARY_SOCI)
+		add_custom_command(TARGET ${target} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_core> $<TARGET_FILE_DIR:${target}>
+		)
+		if (SOCI_ENABLE_MYSQL)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_mysql> $<TARGET_FILE_DIR:${target}>
+			)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libmysql.dll"
+					$<TARGET_FILE_DIR:${target}>
+			)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/lz4.dll"
+					$<TARGET_FILE_DIR:${target}>
+			)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll"
+					$<TARGET_FILE_DIR:${target}>
+			)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zstd.dll"
+					$<TARGET_FILE_DIR:${target}>
+			)
+		endif()
 	endif()
 
     add_custom_command(TARGET ${target} POST_BUILD

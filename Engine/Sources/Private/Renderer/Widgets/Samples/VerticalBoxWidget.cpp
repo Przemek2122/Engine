@@ -1,4 +1,4 @@
-// Created by Przemysław Wiewióra 2020
+// Created by https://www.linkedin.com/in/przemek2122/ 2020
 
 #include "CoreEngine.h"
 #include "Renderer/Widgets/Samples/VerticalBoxWidget.h"

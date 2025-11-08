@@ -1,4 +1,4 @@
-// Created by Przemysław Wiewióra 2024
+// Created by https://www.linkedin.com/in/przemek2122/ 2024
 
 #pragma once
 

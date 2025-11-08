@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2023
+// Created by https://www.linkedin.com/in/przemek2122/ 2023
 
 #pragma once
 

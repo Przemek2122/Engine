@@ -40,7 +40,16 @@ FThread::~FThread()
 	delete ThreadData;
 }
 
+void FThread::InitThread()
+{
+}
+
 void FThread::StartThread()
+{
+	InternalStartThread();
+}
+
+void FThread::InternalStartThread()
 {
 	SDLThread = SDL_CreateThread(FThread::ThreadFunction, ThreadInputData->GetThreadName().c_str(), ThreadInputData);
 }
@@ -57,6 +66,8 @@ void FThread::TickThread()
 
 void FThread::ThreadManagerFunction()
 {
+	InitThread();
+
 	while (ThreadInputData->IsThreadAlive())
 	{
 		TickThread();
@@ -129,6 +140,11 @@ void FThreadWorker::OnFinishThread()
 	}
 }
 
+void FGenericThread::AddBeginTask(const FFunctorLambda<void>& Task)
+{
+	InitThreadTaskQueue.PushBackSafe(Task);
+}
+
 void FGenericThread::AddTask(const FFunctorLambda<void>& Task)
 {
 	GenericThreadTaskQueue.PushBackSafe(Task);
@@ -139,10 +155,33 @@ void FGenericThread::SetShouldRemoveDoneJobs(const bool bShouldRemove)
 	bShouldRemoveDoneJobs = bShouldRemove;
 }
 
+void FGenericThread::BeginAsyncWork()
+{
+	InternalStartThread();
+}
+
 FGenericThread::FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData)
 	: FThread(InThreadInputData, InThreadData)
 	, bShouldRemoveDoneJobs(true)
+	, bIsRunning(false)
 {
+}
+
+void FGenericThread::InitThread()
+{
+	while (!InitThreadTaskQueue.IsEmpty())
+	{
+		FFunctorLambda<void>& Task = InitThreadTaskQueue.PeekFirst();
+		Task.operator()();
+		InitThreadTaskQueue.DequeFrontSafe();
+	}
+
+	FThread::StartThread();
+}
+
+void FGenericThread::StartThread()
+{
+	// We skip start thread to allow user to start thread
 }
 
 void FGenericThread::TickThread()

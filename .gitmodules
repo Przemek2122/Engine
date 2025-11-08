@@ -22,3 +22,9 @@
 [submodule "ThirdParty/cpr"]
 	path = ThirdParty/cpr
 	url = https://github.com/libcpr/cpr
+[submodule "ThirdParty/soci"]
+	path = ThirdParty/soci
+	url = https://github.com/SOCI/soci
+[submodule "ThirdParty/uWebSockets"]
+	path = ThirdParty/uWebSockets
+	url = https://github.com/uNetworking/uWebSockets
