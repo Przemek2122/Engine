@@ -348,7 +348,7 @@ void FEngine::ForceExit(const EEngineErrorCode OptionalErrorCode)
 	// Wait for messages to be printed
 	while (!FUtil::HasEmptyMessagesQueue())
 	{
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(1);
 	}
 
 	exit(static_cast<int>(OptionalErrorCode));

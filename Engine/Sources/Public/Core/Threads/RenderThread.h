@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Types/Mutex/Mutex.h"
 #include "Threads/Thread.h"
 
 typedef FDelegateSafe<void> FRenderDelegate;
@@ -84,6 +83,6 @@ protected:
 	std::atomic_bool bIsRenderingNextFrameAllowed;
 
 	/** Mutex for RenderCommands */
-	FMutex RenderCommandsMutex;
+	std::mutex RenderCommandsMutex;
 
 };

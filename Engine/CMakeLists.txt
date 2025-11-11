@@ -13,7 +13,7 @@ option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
 option(USE_LIBRARY_CROW "Should we use crow library?" ON)
 
 # Socket library support
-option(USE_LIBRARY_WEB_SOCKETS "Should we use uWebSockets library?" ON)
+option(USE_LIBRARY_BOOST_BEAST "Should we use boost beast library?" ON)
 
 # SOCI is for MySQL (db connection)
 option(USE_LIBRARY_SOCI "Should we use SOCI library for db connecions?" ON)
@@ -97,11 +97,13 @@ if(NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-#if(EXISTS "${VCPKG_TOOLCHAIN}")
-#	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}")
-#else(EXISTS "${VCPKG_ROOT_DIR}")
-#	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT_DIR}/scripts/buildsystems/vcpkg.cmake")
-#endif()
+if(EXISTS "${VCPKG_TOOLCHAIN}")
+	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_TOOLCHAIN}")
+elseif(EXISTS "${VCPKG_ROOT_DIR}")
+	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT_DIR}/scripts/buildsystems/vcpkg.cmake")
+else()
+	message(FATAL_ERROR "Missing VCPKG!")
+endif()
 
 # Set triplet for VCPKG (BEFORE project())
 if(WIN32)
@@ -110,22 +112,6 @@ if(WIN32)
 			set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
 		else()
 			set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
-		endif()
-		
-		message(STATUS "Set VCPKG_TARGET_TRIPLET to: ${VCPKG_TARGET_TRIPLET}")
-		message(STATUS "Installing required vcpkg packages:")
-		
-		if (DEFINED VCPKG_ROOT_DIR)
-			# List of vcpkg packages to install
-			execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install OpenSSL)
-			execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install libmysql)
-			
-			if (USE_LIBRARY_WEB_SOCKETS)
-				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install uwebsockets[ssl,zlib])
-				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install uwebsockets)
-				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install libuv)
-				execute_process(COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install zlib)
-			endif()		
 		endif()
     endif()
 	
@@ -141,6 +127,40 @@ if(WIN32)
 		# Link libraries from VCPKG
 		link_directories("${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
 	endif()
+endif()
+
+function(install_package PACKAGE_NAME)
+    message(STATUS "Installing ${PACKAGE_NAME} via vcpkg...")
+    execute_process(
+        COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install ${PACKAGE_NAME}
+        RESULT_VARIABLE VCPKG_RESULT
+    )
+    
+    if(VCPKG_RESULT EQUAL 0)
+        message(STATUS "${PACKAGE_NAME} installed successfully")
+    else()
+        message(FATAL_ERROR "Failed to install ${PACKAGE_NAME}")
+    endif()
+endfunction()
+
+message(STATUS "VCPKG_TARGET_TRIPLET: '${VCPKG_TARGET_TRIPLET}'")
+message(STATUS "Installing required vcpkg packages:")
+
+if (DEFINED VCPKG_ROOT_DIR)
+	# List of vcpkg packages to install
+	install_package(OpenSSL)
+	install_package(libmysql)
+	
+	if (NOT ENGINE_VENDORED)
+		install_package(sdl3)
+		install_package(sdl3-image)
+		install_package(sdl3-image[jpeg, png])
+		install_package(sdl3-ttf)
+	endif()
+	
+	if (USE_LIBRARY_BOOST_BEAST)
+		install_package(boost-beast)
+	endif()			
 endif()
 
 # Create project
@@ -370,33 +390,10 @@ if(NOT OpenSSL_FOUND)
 	message(FATAL_ERROR "OpenSSL missing! Check package, probably missing")
 endif()
 
-# uWebSockets setup (manual since no CMake configs)
-if (USE_LIBRARY_WEB_SOCKETS)
-	
-	# Add include for uWebSockets headers
-	set(INCLUDES_DIR "${VCPKG_INSTALLED_TRIPLET_DIR}/include/uwebsockets")
-	set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-	
-	file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
-
-	if (WIN32)
-		# Link uSockets and Windows sockets
-		# Debug version handling is iportant
-		target_link_libraries(Engine PUBLIC 
-			$<IF:$<CONFIG:Debug>,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/uSockets.lib,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/uSockets.lib>
-			$<IF:$<CONFIG:Debug>,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/uv.lib,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/uv.lib>
-			$<IF:$<CONFIG:Debug>,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib/zlibd.lib,
-				${VCPKG_INSTALLED_TRIPLET_DIR}/lib/zlib.lib>
-			ws2_32
-		)
-	else()
-		message(FATAL_ERROR "Unsupported platform!")
-	endif()
+# Boost beast
+if (USE_LIBRARY_BOOST_BEAST)
+    find_path(BOOST_INCLUDE_DIR boost/beast.hpp)
+    target_include_directories(Engine PRIVATE ${BOOST_INCLUDE_DIR})
 endif()
 
 # Add SDL3
@@ -950,19 +947,6 @@ function(copy_runtime_engine_dlls target)
 					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libssl-3-x64.dll"
 					$<TARGET_FILE_DIR:${target}>
 			)
-			if (USE_LIBRARY_WEB_SOCKETS)
-				add_custom_command(TARGET ${target} POST_BUILD
-					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-						"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/uv.dll"
-						$<TARGET_FILE_DIR:${target}>
-					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-						"${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/zlibd1.dll">
-						$<TARGET_FILE_DIR:${target}>
-					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-						"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll">
-						$<TARGET_FILE_DIR:${target}>
-				)
-			endif()
 		else()
 			message(STATUS "VCPKG_ROOT_DIR: '${VCPKG_ROOT_DIR}'")
 			message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR: '${VCPKG_INSTALLED_TRIPLET_DIR}'")

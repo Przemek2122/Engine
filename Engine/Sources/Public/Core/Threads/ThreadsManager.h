@@ -6,7 +6,6 @@
 #include "Thread.h"
 #include "ThreadStructure.h"
 #include "ThreadData.h"
-#include "Types/Mutex/Mutex.h"
 
 /**
  * Class for managing threads using SDL2.
@@ -87,13 +86,13 @@ protected:
 	CDeque<FAsyncWorkStructure> AsyncJobQueue;
 
 	/** Mutex for param AsyncJobQueue */
-	FMutex AsyncJobQueueMutex;
+	std::mutex AsyncJobQueueMutex;
 
 	/** Callbacks from finishes async jobs */
 	CArray<FMainThreadCallbackStructure> MainThreadCallbacks;
 
 	/** Mutex for param MainThreadCallbacks */
-	FMutex MainThreadCallbacksMutex;
+	std::mutex MainThreadCallbacksMutex;
 
 	CArray<FMainThreadCallbackStructure> MainThreadCallbacksCopy;
 
@@ -110,7 +109,7 @@ private:
 	CArray<FThreadData*> AllThreadsArray;
 
 	/** Mutex for param WorkerThreadsArray */
-	FMutex WorkerThreadsArrayMutex;
+	std::mutex WorkerThreadsArrayMutex;
 
 	/** Number with thread Id for naming */
 	CArray<int> AvailableThreadsNumbers;

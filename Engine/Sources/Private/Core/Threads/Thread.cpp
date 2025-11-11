@@ -76,7 +76,7 @@ void FThread::ThreadManagerFunction()
 	// Wait for deletion
 	while (!GetThreadInputData()->GetThreadsManager()->InternalRemoveThread(this))
 	{
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(1);
 	}
 
 	OnFinishThread();
@@ -115,14 +115,12 @@ void FThreadWorker::TickThread()
 
 		if (AsyncWorkStructure.AsyncCallback)
 		{
-			THREAD_WAIT_FOR_MUTEX_LOCK(ThreadsManager->MainThreadCallbacksMutex);
-
-			ENSURE_VALID(ThreadsManager->MainThreadCallbacksMutex.IsLocked());
+			ThreadsManager->MainThreadCallbacksMutex.lock();
 
 			// Enqueue sync callback on main thread
 			ThreadsManager->MainThreadCallbacks.Push(FMainThreadCallbackStructure(AsyncWorkStructure.AsyncCallback));
 
-			ThreadsManager->MainThreadCallbacksMutex.Unlock();
+			ThreadsManager->MainThreadCallbacksMutex.unlock();
 		}
 	}
 
@@ -136,7 +134,7 @@ void FThreadWorker::OnFinishThread()
 	// Wait for deletion
 	while (!GetThreadInputData()->GetThreadsManager()->InternalRemoveWorkerThread(this))
 	{
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(1);
 	}
 }
 
@@ -189,7 +187,7 @@ void FGenericThread::TickThread()
 	if (GenericThreadTaskQueue.IsEmpty())
 	{
 		// Default wait if nothing to do
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(1);
 	}
 	else
 	{

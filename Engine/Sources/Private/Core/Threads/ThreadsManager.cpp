@@ -1,8 +1,6 @@
 #include "CoreEngine.h"
 #include "Threads/ThreadsManager.h"
 
-#include "Types/Mutex/MutexScopeLock.h"
-
 FThreadsManager::FThreadsManager()
 	: StartingNumberOfThreads(1)
 	, DefaultThreadName("DefaultThread_")
@@ -89,10 +87,7 @@ void FThreadsManager::DeInitialize()
 void FThreadsManager::TickThreadCallbacks()
 {
 	// Lock
-	while (MainThreadCallbacksMutex.TryLock())
-	{
-		THREAD_WAIT_NS(100);
-	}
+	MainThreadCallbacksMutex.lock();
 
 	// Make copy
 	MainThreadCallbacksCopy = MainThreadCallbacks;
@@ -101,7 +96,7 @@ void FThreadsManager::TickThreadCallbacks()
 	MainThreadCallbacks.Clear();
 
 	// Release mutex
-	MainThreadCallbacksMutex.Unlock();
+	MainThreadCallbacksMutex.unlock();
 
 	for (FMainThreadCallbackStructure& ThreadCallback : MainThreadCallbacksCopy)
 	{
@@ -130,12 +125,7 @@ void FThreadsManager::AddAsyncDelegate(FDelegateSafe<void>& DelegateToRunAsync, 
 
 void FThreadsManager::AddAsyncWork(const FAsyncWorkStructure& AsyncRunWithCallback)
 {
-	while (AsyncJobQueueMutex.IsLocked())
-	{
-		THREAD_WAIT_SHORT_TIME;
-	}
-
-	FMutexScopeLock MutexScopeLock(AsyncJobQueueMutex);
+	std::lock_guard<std::mutex> MutexScopeLock(AsyncJobQueueMutex);
 
 	AsyncJobQueue.PushBack(AsyncRunWithCallback);
 }
@@ -152,12 +142,7 @@ void FThreadsManager::TryStopThread(FThreadData* ThreadData)
 
 void FThreadsManager::ResetAllJobs()
 {
-	while (AsyncJobQueueMutex.IsLocked())
-	{
-		THREAD_WAIT_SHORT_TIME;
-	}
-
-	FMutexScopeLock MutexScopeLock(AsyncJobQueueMutex);
+	std::lock_guard<std::mutex> MutexScopeLock(AsyncJobQueueMutex);
 
 	AsyncJobQueue.Clear();
 }
@@ -176,7 +161,7 @@ void FThreadsManager::StartNewThread()
 {
 	if (!AvailableThreadsNumbers.IsEmpty())
 	{
-		FMutexScopeLock MutexScopeLock(WorkerThreadsArrayMutex);
+		std::lock_guard<std::mutex> MutexScopeLock(WorkerThreadsArrayMutex);
 
 		const int32 NewThreadIndex = AvailableThreadsNumbers[0];
 		AvailableThreadsNumbers.RemoveAt(0);
@@ -231,12 +216,10 @@ FAsyncWorkStructure FThreadsManager::GetFirstAvailableJob()
 {
 	// @TODO Remove mutex and find and smart way of distributing tasks
 
-	THREAD_WAIT_FOR_MUTEX_LOCK(AsyncJobQueueMutex);
+	std::lock_guard<std::mutex> Lock(AsyncJobQueueMutex);
 
 	if (AsyncJobQueue.Size() == 0)
 	{
-		AsyncJobQueueMutex.Unlock();
-
 		FAsyncWorkStructure AsyncWorkStructure;
 		AsyncWorkStructure.DelegateToRunAsync = std::make_shared<FDelegateSafe<>>();
 		AsyncWorkStructure.AsyncCallback = std::make_shared<FDelegateSafe<>>();
@@ -245,15 +228,11 @@ FAsyncWorkStructure FThreadsManager::GetFirstAvailableJob()
 	}
 	else
 	{
-		ENSURE_VALID(AsyncJobQueueMutex.IsLocked());
-
 		// Get first element
 		FAsyncWorkStructure AsyncWorkStructure = AsyncJobQueue.PeekFirst();
 
 		// Remove first element from list
 		AsyncJobQueue.DequeFront();
-
-		AsyncJobQueueMutex.Unlock();
 
 		return AsyncWorkStructure;
 	}
@@ -268,19 +247,12 @@ bool FThreadsManager::InternalRemoveWorkerThread(const FThread* InThread)
 {
 	bool bWasRemoved;
 
-	if (!WorkerThreadsArrayMutex.TryLock())
-	{
-		bWasRemoved = false;
-	}
-	else
-	{
-		// Remove thread data from array
-		WorkerThreadsArray.Remove(InThread->GetThreadData());
+	std::lock_guard<std::mutex> Lock(WorkerThreadsArrayMutex);
 
-		WorkerThreadsArrayMutex.Unlock();
+	// Remove thread data from array
+	WorkerThreadsArray.Remove(InThread->GetThreadData());
 
-		bWasRemoved = true;
-	}
+	bWasRemoved = true;
 
 	return bWasRemoved;
 }
@@ -289,19 +261,12 @@ bool FThreadsManager::InternalRemoveThread(const FThread* InThread)
 {
 	bool bWasRemoved;
 
-	if (!WorkerThreadsArrayMutex.TryLock())
-	{
-		bWasRemoved = false;
-	}
-	else
-	{
-		// Remove thread data from array
-		AllThreadsArray.Remove(InThread->GetThreadData());
+	std::lock_guard<std::mutex> Lock(WorkerThreadsArrayMutex);
 
-		WorkerThreadsArrayMutex.Unlock();
+	// Remove thread data from array
+	AllThreadsArray.Remove(InThread->GetThreadData());
 
-		bWasRemoved = true;
-	}
+	bWasRemoved = true;
 
 	return bWasRemoved;
 }

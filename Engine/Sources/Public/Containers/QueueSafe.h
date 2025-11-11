@@ -15,53 +15,33 @@ public:
 	/* Add element at end. */
 	inline void PushFrontSafe(const TType& Value)
 	{
-		while (!Mutex.try_lock())
-		{
-			THREAD_WAIT_SHORT_TIME;
-		}
+		std::lock_guard<std::mutex> Lock(Mutex);
 
 		CDeque<TType>::PushFront(Value);
-
-		Mutex.unlock();
 	}
 	inline void PushBackSafe(const TType& Value)
 	{
-		while (!Mutex.try_lock())
-		{
-			THREAD_WAIT_SHORT_TIME;
-		}
+		std::lock_guard<std::mutex> Lock(Mutex);
 
 		CDeque<TType>::PushBack(Value);
-
-		Mutex.unlock();
 	}
 
 	/* Delete first element. */
 	inline void DequeFrontSafe()
 	{
-		while (!Mutex.try_lock())
-		{
-			THREAD_WAIT_SHORT_TIME;
-		}
+		std::lock_guard<std::mutex> Lock(Mutex);
 
 		CDeque<TType>::DequeFront();
-
-		Mutex.unlock();
 	}
 	/* Delete last element. */
 	inline void DequeBackSafe()
 	{
-		while (!Mutex.try_lock())
-		{
-			THREAD_WAIT_SHORT_TIME;
-		}
+		std::lock_guard<std::mutex> Lock(Mutex);
 
 		CDeque<TType>::DequeBack();
-
-		Mutex.unlock();
 	}
 
 protected:
-	mutable std::mutex Mutex;
+	std::mutex Mutex;
 
 };

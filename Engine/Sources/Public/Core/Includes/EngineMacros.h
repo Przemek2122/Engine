@@ -141,11 +141,13 @@ SDL_FORCE_INLINE bool Inline_ENSURE_VALID_Lambda(auto Condition)
 #define ASSERT_IS_BASE_OF(BaseClass, CurrentClass, FailMessage) \
 	 static_assert(std::is_base_of_v<std::remove_pointer_t<BaseClass>, std::remove_pointer_t<CurrentClass>>, #FailMessage)
 
+/** Wait for 1/1,000-th of second */
 #define THREAD_WAIT_MS(TimeInMS)			std::this_thread::sleep_for(std::chrono::milliseconds(TimeInMS))
+
+/** Wait for 1/1,000,000,000-th of second,@Note: BE carefull with this! */
 #define THREAD_WAIT_NS(TimeInNS)			std::this_thread::sleep_for(std::chrono::nanoseconds(TimeInNS))
-/** Wait for 0.00001 second (or 0.01 ms) */
-#define THREAD_WAIT_SHORT_TIME				THREAD_WAIT_NS(10000)
-#define THREAD_WAIT_FOR_MUTEX_LOCK(MutexName)	while (!((MutexName).TryLock())) THREAD_WAIT_NS(1000)
+
+#define THREAD_WAIT_FOR_MUTEX_LOCK(MutexName)	((MutexName).Lock())
 
 #define COUNTER_START(PropertyNameStart)					const auto PropertyNameStart{ std::chrono::high_resolution_clock::now() }
 #define COUNTER_END(PropertyNameStart, PropertyNameEnd)		std::chrono::duration<double, std::nano> PropertyNameEnd{ std::chrono::high_resolution_clock::now() - PropertyNameStart }

@@ -9,9 +9,6 @@ class FEngine;
 class FEngineRender;
 class FFileSystem;
 
-class FMutex;
-class FMutexScopeLock;
-
 class FAssetsManager;
 class FAssetBase;
 

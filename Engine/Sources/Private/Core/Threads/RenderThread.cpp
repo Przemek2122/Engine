@@ -4,17 +4,12 @@
 FRenderCommandsWithScopeLock::FRenderCommandsWithScopeLock(FRenderThread* InRenderThread)
 	: RenderThread(InRenderThread)
 {
-	THREAD_WAIT_FOR_MUTEX_LOCK(RenderThread->RenderCommandsMutex);
+	// @TODO: Scope lock removed
 }
 
 FRenderCommandsWithScopeLock::~FRenderCommandsWithScopeLock()
 {
-#if _DEBUG
-	// Lock released before it should be released
-	ENSURE_VALID(RenderThread->RenderCommandsMutex.IsLocked());
-#endif
-
-	RenderThread->RenderCommandsMutex.Unlock();
+	// @TODO: Scope unlock removed
 }
 
 void FRenderCommandsWithScopeLock::GetRenderDelegate(const std::shared_ptr<FRenderableObject>& InRenderableObject, const ERenderOrder RenderOrder) const
@@ -52,7 +47,7 @@ void FRenderThread::TickThread()
 	bIsRenderingFrameFinished = false;
 
 	// Lock RenderCommandsMutex for copy
-	THREAD_WAIT_FOR_MUTEX_LOCK(RenderCommandsMutex);
+	RenderCommandsMutex.lock();
 
 	// Copy data for render
 	RenderCommandsCopy = std::move(RenderCommands);
@@ -60,7 +55,7 @@ void FRenderThread::TickThread()
 	// After move populate map with required data
 	InitializeMapWithDelegates();
 
-	RenderCommandsMutex.Unlock();
+	RenderCommandsMutex.unlock();
 
 	// Execute
 	for (std::pair<const ERenderOrder, FRenderableObjectsCollection>& RenderCommand : RenderCommandsCopy)
@@ -75,7 +70,7 @@ void FRenderThread::TickThread()
 
 	while (!bIsRenderingNextFrameAllowed)
 	{
-		THREAD_WAIT_SHORT_TIME;
+		THREAD_WAIT_MS(1);
 	}
 
 	bIsRenderingNextFrameAllowed = false;
