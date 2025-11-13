@@ -292,7 +292,9 @@ void FUtil::Debug(std::string Message)
 
 void FUtil::Debug(std::ostream& Message)
 {
+#ifdef _DEBUG
 	Debug(dynamic_cast<std::ostringstream&>(Message).str());
+#endif
 }
 
 void FUtil::Warn(std::string Message)

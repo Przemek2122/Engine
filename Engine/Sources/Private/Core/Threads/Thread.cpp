@@ -31,6 +31,8 @@ FThread::FThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData)
 
 FThread::~FThread()
 {
+	LOG_DEBUG("Destroying thread: '" << ThreadInputData->GetThreadName() << "'.");
+
 	if (SDLThread != nullptr)
 	{
 		SDL_DetachThread(SDLThread);
@@ -51,6 +53,8 @@ void FThread::StartThread()
 
 void FThread::InternalStartThread()
 {
+	LOG_DEBUG("Starting thread: '" << ThreadInputData->GetThreadName() << "'.");
+
 	SDLThread = SDL_CreateThread(FThread::ThreadFunction, ThreadInputData->GetThreadName().c_str(), ThreadInputData);
 }
 
@@ -138,11 +142,6 @@ void FThreadWorker::OnFinishThread()
 	}
 }
 
-void FGenericThread::AddBeginTask(const FFunctorLambda<void>& Task)
-{
-	InitThreadTaskQueue.PushBackSafe(Task);
-}
-
 void FGenericThread::AddTask(const FFunctorLambda<void>& Task)
 {
 	GenericThreadTaskQueue.PushBackSafe(Task);
@@ -165,23 +164,6 @@ FGenericThread::FGenericThread(FThreadInputData* InThreadInputData, FThreadData*
 {
 }
 
-void FGenericThread::InitThread()
-{
-	while (!InitThreadTaskQueue.IsEmpty())
-	{
-		FFunctorLambda<void>& Task = InitThreadTaskQueue.PeekFirst();
-		Task.operator()();
-		InitThreadTaskQueue.DequeFrontSafe();
-	}
-
-	FThread::StartThread();
-}
-
-void FGenericThread::StartThread()
-{
-	// We skip start thread to allow user to start thread
-}
-
 void FGenericThread::TickThread()
 {
 	if (GenericThreadTaskQueue.IsEmpty())
@@ -199,4 +181,9 @@ void FGenericThread::TickThread()
 			GenericThreadTaskQueue.DequeFrontSafe();
 		}
 	}
+}
+
+void FGenericThread::StartThread()
+{
+	// Overriden to do not start automatically
 }

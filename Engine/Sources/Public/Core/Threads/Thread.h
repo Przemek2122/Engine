@@ -109,9 +109,6 @@ class ENGINE_API FGenericThread : public FThread
 	friend FThreadData;
 
 public:
-	/** Add task to be executed before async task */
-	void AddBeginTask(const FFunctorLambda<void>& Task);
-
 	/** Async task to be done by async thread */
 	void AddTask(const FFunctorLambda<void>& Task);
 
@@ -123,15 +120,11 @@ public:
 protected:
 	FGenericThread(FThreadInputData* InThreadInputData, FThreadData* InThreadData);
 
-	void InitThread() override;
-	void StartThread() override;
 	void TickThread() override;
+	void StartThread() override;
 
 	/** Queue which is removed after execution */
 	CQueueSafe<FFunctorLambda<void>> GenericThreadTaskQueue;
-
-	/** Queue of tasks called before starting working on GenericThreadTaskQueue */
-	CQueueSafe<FFunctorLambda<void>> InitThreadTaskQueue;
 
 	/** By default we remove done jobs, but we can remove it when we want to run it in loop */
 	bool bShouldRemoveDoneJobs;

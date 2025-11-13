@@ -13,7 +13,8 @@ option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
 option(USE_LIBRARY_CROW "Should we use crow library?" ON)
 
 # Socket library support
-option(USE_LIBRARY_BOOST_BEAST "Should we use boost beast library?" ON)
+option(USE_LIBRARY_BOOST_BEAST "Should we use boost beast library?" OFF)
+option(USE_LIBRARY_UWEBSOCKETS "Should we use uWebSockets library?" ON)
 
 # SOCI is for MySQL (db connection)
 option(USE_LIBRARY_SOCI "Should we use SOCI library for db connecions?" ON)
@@ -47,20 +48,22 @@ set_property(GLOBAL PROPERTY ASSETS_DIR_NAME ${ASSETS_DIR_NAME})
 # Find VCPKG OR INSTALL FOR THIS BUILD ONLY (must be BEFORE project())
 if(NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(WIN32)
-        execute_process(
-            COMMAND where vcpkg
-            OUTPUT_VARIABLE VCPKG_EXE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-        )
-    else()
-        execute_process(
-            COMMAND which vcpkg
-            OUTPUT_VARIABLE VCPKG_EXE
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
-        )
-    endif()
+		execute_process(
+			COMMAND cmd /c bootstrap-vcpkg.bat
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/vcpkg
+			RESULT_VARIABLE result
+			OUTPUT_VARIABLE output
+			ERROR_VARIABLE error
+		)
+	else()
+		execute_process(
+			COMMAND bash bootstrap-vcpkg.sh
+			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/vcpkg
+			RESULT_VARIABLE result
+			OUTPUT_VARIABLE output
+			ERROR_VARIABLE error
+		)
+	endif()
     
     if(VCPKG_EXE)
         # Get directory from vcpkg.exe path
@@ -106,33 +109,44 @@ else()
 endif()
 
 # Set triplet for VCPKG (BEFORE project())
-if(WIN32)
-	if (NOT DEFINED VCPKG_TARGET_TRIPLET)
-		if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
-		else()
-			set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
-		endif()
+if(NOT DEFINED VCPKG_TARGET_TRIPLET)
+    if(WIN32)
+        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "")
+        else()
+            set(VCPKG_TARGET_TRIPLET "x86-windows" CACHE STRING "")
+        endif()
+    else()
+        # Linux/Mac
+        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "")
+        else()
+            set(VCPKG_TARGET_TRIPLET "x86-linux" CACHE STRING "")
+        endif()
     endif()
-	
-	# Set location for VCPKG content
-	if(WIN32 AND NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND VCPKG_ROOT_DIR AND VCPKG_TARGET_TRIPLET)
-		set(VCPKG_INSTALLED_TRIPLET_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}" CACHE INTERNAL "vcpkg/installed/triplet where triplet is x64 or x86")
-		message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR set to: ${VCPKG_INSTALLED_TRIPLET_DIR}")
-	elseif (WIN32)
-		message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR not set!")
-	endif()
-	
-	if (DEFINED VCPKG_ROOT_DIR)
-		# Link libraries from VCPKG
-		link_directories("${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
-	endif()
+endif()
+
+# Set location for VCPKG content
+if(NOT DEFINED VCPKG_INSTALLED_TRIPLET_DIR AND VCPKG_ROOT_DIR AND VCPKG_TARGET_TRIPLET)
+    set(VCPKG_INSTALLED_TRIPLET_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}" CACHE INTERNAL "vcpkg/installed/triplet")
+    message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR: ${VCPKG_INSTALLED_TRIPLET_DIR}")
+endif()
+
+if(DEFINED VCPKG_ROOT_DIR)
+    link_directories("${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
 endif()
 
 function(install_package PACKAGE_NAME)
     message(STATUS "Installing ${PACKAGE_NAME} via vcpkg...")
+    
+    if(WIN32)
+        set(VCPKG_EXEC "${VCPKG_ROOT_DIR}/vcpkg.exe")
+    else()
+        set(VCPKG_EXEC "${VCPKG_ROOT_DIR}/vcpkg")
+    endif()
+    
     execute_process(
-        COMMAND ${VCPKG_ROOT_DIR}/vcpkg.exe install ${PACKAGE_NAME}
+        COMMAND ${VCPKG_EXEC} install ${PACKAGE_NAME}
         RESULT_VARIABLE VCPKG_RESULT
     )
     
@@ -160,7 +174,11 @@ if (DEFINED VCPKG_ROOT_DIR)
 	
 	if (USE_LIBRARY_BOOST_BEAST)
 		install_package(boost-beast)
-	endif()			
+	endif()		
+
+	if (USE_LIBRARY_UWEBSOCKETS)
+		install_package(uwebsockets[ssl,zlib])
+	endif()
 endif()
 
 # Create project
@@ -284,7 +302,7 @@ elseif(APPLE)
 elseif(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux...")
 
-    #target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
+    target_compile_definitions(Engine PUBLIC PLATFORM_UNIX)
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(CMAKE_PLATFORM_FLAGS "elf64")
@@ -394,6 +412,65 @@ endif()
 if (USE_LIBRARY_BOOST_BEAST)
     find_path(BOOST_INCLUDE_DIR boost/beast.hpp)
     target_include_directories(Engine PRIVATE ${BOOST_INCLUDE_DIR})
+	
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_BOOST_BEAST=1)
+else()
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_BOOST_BEAST=0)
+endif()
+
+# uWebSockets
+if(USE_LIBRARY_UWEBSOCKETS)
+    find_path(UWEBSOCKETS_INCLUDE_DIR uwebsockets/App.h)
+
+	find_library(ZLIB_LIB_DEBUG NAMES zlibd zlib z 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib" NO_DEFAULT_PATH
+	)
+	find_library(ZLIB_LIB_RELEASE NAMES zlib z 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/lib" NO_DEFAULT_PATH
+	)
+	
+	if(NOT ZLIB_LIB_DEBUG OR NOT ZLIB_LIB_RELEASE)
+		message(FATAL_ERROR "zlib lib not found!")
+	endif()
+	
+	find_library(LIBUV_LIB_DEBUG NAMES uv_a uv 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib" NO_DEFAULT_PATH
+	)
+	find_library(LIBUV_LIB_RELEASE NAMES uv_a uv 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/lib" NO_DEFAULT_PATH
+	)
+	
+	if(NOT LIBUV_LIB_DEBUG OR NOT LIBUV_LIB_RELEASE)
+		message(FATAL_ERROR "uv lib not found!")
+	endif()
+	
+	target_link_libraries(Engine PUBLIC 
+		$<$<CONFIG:Debug>:${LIBUV_LIB_DEBUG}>
+		$<$<CONFIG:Release>:${LIBUV_LIB_RELEASE}>
+		$<$<CONFIG:Debug>:${ZLIB_LIB_DEBUG}>
+		$<$<CONFIG:Release>:${ZLIB_LIB_RELEASE}>
+	)
+    
+    find_library(USOCKETS_LIB_DEBUG NAMES uSockets 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib" NO_DEFAULT_PATH
+	)
+    find_library(USOCKETS_LIB_RELEASE NAMES uSockets 
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/lib" NO_DEFAULT_PATH
+	)
+	
+	if(NOT USOCKETS_LIB_DEBUG OR NOT USOCKETS_LIB_RELEASE)
+		message(FATAL_ERROR "uSockets lib not found!")
+	endif()
+    
+    target_include_directories(Engine PUBLIC ${UWEBSOCKETS_INCLUDE_DIR})
+	target_link_libraries(Engine PUBLIC 
+		$<$<CONFIG:Debug>:${USOCKETS_LIB_DEBUG}>
+		$<$<CONFIG:Release>:${USOCKETS_LIB_RELEASE}>
+	)
+		
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_UWEBSOCKETS=1)
+else()
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_UWEBSOCKETS=0)
 endif()
 
 # Add SDL3
@@ -545,19 +622,19 @@ if(USE_LIBRARY_ASIO)
 		target_include_directories(Engine PUBLIC ${ASIO_INCLUDE_DIR})
 		target_compile_definitions(Engine PUBLIC ASIO_STANDALONE)
 
-		add_compile_definitions(USE_LIBRARY_ASIO=TRUE)
+		target_compile_definitions(Engine PUBLIC USE_LIBRARY_ASIO=1)
 	else()
-		add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
+		target_compile_definitions(Engine PUBLIC USE_LIBRARY_ASIO=0)
 	endif()
 else()
-	add_compile_definitions(USE_LIBRARY_ASIO=FALSE)
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_ASIO=FALSE)
 endif()
 	
 if(USE_LIBRARY_CROW)
 	message(STATUS "Adding CROW...")
 	
-	add_compile_definitions(USE_LIBRARY_CROW=TRUE)
-	add_compile_definitions(CROW_ENABLE_SSL)
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CROW=1)
+	target_compile_definitions(Engine PUBLIC CROW_ENABLE_SSL)
 	
 	if(ENGINE_VENDORED)
 		set(CROW_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Crow")
@@ -584,13 +661,13 @@ if(USE_LIBRARY_CROW)
 		find_package(Crow REQUIRED)
 	endif()
 else()
-	add_compile_definitions(USE_LIBRARY_CROW=FALSE)
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CROW=0)
 endif()
 	
 if(USE_LIBRARY_SOCI)
 	message(STATUS "Adding SOCI with selected backends...")
 	
-	add_compile_definitions(USE_LIBRARY_SOCI=TRUE)
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_SOCI=TRUE)
 	
 	if(ENGINE_VENDORED)
 		set(SOCI_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SOCI")
@@ -613,84 +690,84 @@ if(USE_LIBRARY_SOCI)
 				set(MYSQL_LIBRARY "${MySQL_LIBRARIES}" CACHE FILEPATH "")
 			
 				set(SOCI_MYSQL ON CACHE BOOL "Enable MySQL backend")
-				add_compile_definitions(SOCI_SUPPORT_MYSQL=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_MYSQL=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_mysql)
 				message(STATUS "  - MySQL backend enabled")
 			else()
 				set(SOCI_MYSQL OFF CACHE BOOL "Disable MySQL backend")
-				add_compile_definitions(SOCI_SUPPORT_MYSQL=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_MYSQL=FALSE)
 				message(STATUS "  - MySQL backend disabled")
 			endif()
 
 			# PostgreSQL
 			if(SOCI_ENABLE_POSTGRESQL)
 				set(SOCI_POSTGRESQL ON CACHE BOOL "Enable PostgreSQL backend")
-				add_compile_definitions(SOCI_SUPPORT_POSTGRESQL=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_POSTGRESQL=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_postgresql)
 				message(STATUS "  - PostgreSQL backend enabled")
 			else()
 				set(SOCI_POSTGRESQL OFF CACHE BOOL "Disable PostgreSQL backend")
-				add_compile_definitions(SOCI_SUPPORT_POSTGRESQL=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_POSTGRESQL=FALSE)
 				message(STATUS "  - PostgreSQL backend disabled")
 			endif()
 
 			# SQLite3
 			if(SOCI_ENABLE_SQLITE3)
 				set(SOCI_SQLITE3 ON CACHE BOOL "Enable SQLite3 backend")
-				add_compile_definitions(SOCI_SUPPORT_SQLITE3=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_SQLITE3=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_sqlite3)
 				message(STATUS "  - SQLite3 backend enabled")
 			else()
 				set(SOCI_SQLITE3 OFF CACHE BOOL "Disable SQLite3 backend")
-				add_compile_definitions(SOCI_SUPPORT_SQLITE3=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_SQLITE3=FALSE)
 				message(STATUS "  - SQLite3 backend disabled")
 			endif()
 
 			# Oracle
 			if(SOCI_ENABLE_ORACLE)
 				set(SOCI_ORACLE ON CACHE BOOL "Enable Oracle backend")
-				add_compile_definitions(SOCI_SUPPORT_ORACLE=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_ORACLE=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_oracle)
 				message(STATUS "  - Oracle backend enabled")
 			else()
 				set(SOCI_ORACLE OFF CACHE BOOL "Disable Oracle backend")
-				add_compile_definitions(SOCI_SUPPORT_ORACLE=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_ORACLE=FALSE)
 				message(STATUS "  - Oracle backend disabled")
 			endif()
 
 			# ODBC (generic - can connect to many databases)
 			if(SOCI_ENABLE_ODBC)
 				set(SOCI_ODBC ON CACHE BOOL "Enable ODBC backend")
-				add_compile_definitions(SOCI_SUPPORT_ODBC=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_ODBC=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_odbc)
 				message(STATUS "  - ODBC backend enabled")
 			else()
 				set(SOCI_ODBC OFF CACHE BOOL "Disable ODBC backend")
-				add_compile_definitions(SOCI_SUPPORT_ODBC=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_ODBC=FALSE)
 				message(STATUS "  - ODBC backend disabled")
 			endif()
 
 			# Firebird
 			if(SOCI_ENABLE_FIREBIRD)
 				set(SOCI_FIREBIRD ON CACHE BOOL "Enable Firebird backend")
-				add_compile_definitions(SOCI_SUPPORT_FIREBIRD=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_FIREBIRD=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_firebird)
 				message(STATUS "  - Firebird backend enabled")
 			else()
 				set(SOCI_FIREBIRD OFF CACHE BOOL "Disable Firebird backend")
-				add_compile_definitions(SOCI_SUPPORT_FIREBIRD=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_FIREBIRD=FALSE)
 				message(STATUS "  - Firebird backend disabled")
 			endif()
 
 			# DB2
 			if(SOCI_ENABLE_DB2)
 				set(SOCI_DB2 ON CACHE BOOL "Enable DB2 backend")
-				add_compile_definitions(SOCI_SUPPORT_DB2=TRUE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_DB2=TRUE)
 				list(APPEND SOCI_BACKEND_LIBS soci_db2)
 				message(STATUS "  - DB2 backend enabled")
 			else()
 				set(SOCI_DB2 OFF CACHE BOOL "Disable DB2 backend")
-				add_compile_definitions(SOCI_SUPPORT_DB2=FALSE)
+				target_compile_definitions(Engine PUBLIC SOCI_SUPPORT_DB2=FALSE)
 				message(STATUS "  - DB2 backend disabled")
 			endif()
 			
@@ -711,7 +788,7 @@ if(USE_LIBRARY_SOCI)
 		target_link_libraries(Engine PUBLIC ${SOCI_LIBRARIES})
 	endif()
 else()
-	add_compile_definitions(USE_LIBRARY_SOCI=FALSE)
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_SOCI=FALSE)
 endif()
 
 message(STATUS "Adding nlohmann/json...")
@@ -947,6 +1024,48 @@ function(copy_runtime_engine_dlls target)
 					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libssl-3-x64.dll"
 					$<TARGET_FILE_DIR:${target}>
 			)
+			
+			if (USE_LIBRARY_SOCI)
+				add_custom_command(TARGET ${target} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_core> $<TARGET_FILE_DIR:${target}>
+				)
+				if (SOCI_ENABLE_MYSQL)
+					add_custom_command(TARGET ${target} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_mysql> $<TARGET_FILE_DIR:${target}>
+					)
+					add_custom_command(TARGET ${target} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+							"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libmysql.dll"
+							$<TARGET_FILE_DIR:${target}>
+					)
+					add_custom_command(TARGET ${target} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+							"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/lz4.dll"
+							$<TARGET_FILE_DIR:${target}>
+					)
+					add_custom_command(TARGET ${target} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+							"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll"
+							$<TARGET_FILE_DIR:${target}>
+					)
+					add_custom_command(TARGET ${target} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+							"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zstd.dll"
+							$<TARGET_FILE_DIR:${target}>
+					)
+				endif()
+			endif()
+
+			if (USE_LIBRARY_UWEBSOCKETS)
+				add_custom_command(TARGET ${target} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+						"$<$<CONFIG:Debug>:${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/zlibd1.dll>$<$<CONFIG:Release>:${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll>"
+						$<TARGET_FILE_DIR:${target}>
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+						"$<$<CONFIG:Debug>:${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/uv.dll>$<$<CONFIG:Release>:${VCPKG_INSTALLED_TRIPLET_DIR}/bin/uv.dll>"
+						$<TARGET_FILE_DIR:${target}>
+				)
+			endif()
 		else()
 			message(STATUS "VCPKG_ROOT_DIR: '${VCPKG_ROOT_DIR}'")
 			message(STATUS "VCPKG_INSTALLED_TRIPLET_DIR: '${VCPKG_INSTALLED_TRIPLET_DIR}'")
@@ -954,37 +1073,6 @@ function(copy_runtime_engine_dlls target)
 		endif()
 	else()
 		message(FATAL_ERROR "OpenSSL might not be configured for this platform!")
-	endif()
-
-	if (USE_LIBRARY_SOCI)
-		add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_core> $<TARGET_FILE_DIR:${target}>
-		)
-		if (SOCI_ENABLE_MYSQL)
-			add_custom_command(TARGET ${target} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_mysql> $<TARGET_FILE_DIR:${target}>
-			)
-			add_custom_command(TARGET ${target} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libmysql.dll"
-					$<TARGET_FILE_DIR:${target}>
-			)
-			add_custom_command(TARGET ${target} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/lz4.dll"
-					$<TARGET_FILE_DIR:${target}>
-			)
-			add_custom_command(TARGET ${target} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll"
-					$<TARGET_FILE_DIR:${target}>
-			)
-			add_custom_command(TARGET ${target} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-					"${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zstd.dll"
-					$<TARGET_FILE_DIR:${target}>
-			)
-		endif()
 	endif()
 
     add_custom_command(TARGET ${target} POST_BUILD

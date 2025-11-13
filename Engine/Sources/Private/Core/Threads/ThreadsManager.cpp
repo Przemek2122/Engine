@@ -28,6 +28,12 @@ void FThreadsManager::Initialize()
 		AvailableThreadsNumbers.Push(ThreadIndex);
 	}
 
+	const int32 Cores = GetNumberOfCores();
+	if (Cores > 0)
+	{
+		StartingNumberOfThreads = Cores;
+	}
+
 	// Create default number of threads
 	for (int32 i = 0; i < StartingNumberOfThreads; i++)
 	{
