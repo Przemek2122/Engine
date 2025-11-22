@@ -60,6 +60,12 @@ public:
 		}
 	}
 
+	/** Other std vector init */
+	CArray(const std::vector<TType>& Other)
+	{
+		Vector = Other;
+	}
+
 	void operator=(const CArray<TType, TSizeType>& Other)
 	{
 		Vector = Other.Vector;

@@ -50,6 +50,54 @@ public:
 		return Deque.back();
 	}
 
+	/**
+	 * @Returns a vector of the first 'count' elements.
+	 * Useful for: Getting the first N messages in a queue.
+	 */
+	std::vector<TType> PeekFirst(int count) const
+	{
+		// 1. Safety: Don't try to get more than we have
+		size_t safeCount = std::min((size_t)count, Deque.size());
+
+		// 2. Create vector to hold results
+		std::vector<TType> result;
+		result.reserve(safeCount); // Optimization: reserve memory
+
+		// 3. Copy elements from the beginning
+		// Assuming Deque is std::deque or std::vector
+		for (size_t i = 0; i < safeCount; ++i) {
+			result.push_back(Deque[i]);
+		}
+
+		return result;
+	}
+
+	/**
+	 * @Returns a vector of the last 'count' elements.
+	 * Useful for: "Load last 10 messages" in chat history.
+	 * Returns them in chronological order (Oldest -> Newest).
+	 */
+	std::vector<TType> PeekLast(int count) const
+	{
+		// 1. Safety: Don't try to get more than we have
+		size_t safeCount = std::min((size_t)count, Deque.size());
+
+		// 2. Create vector
+		std::vector<TType> result;
+		result.reserve(safeCount);
+
+		// 3. Calculate start index
+		// If size is 100 and we want 5, we start at index 95
+		size_t startIndex = Deque.size() - safeCount;
+
+		// 4. Copy elements from start index to end
+		for (size_t i = startIndex; i < Deque.size(); ++i) {
+			result.push_back(Deque[i]);
+		}
+
+		return result;
+	}
+
 	template<typename TTypeAuto>
 	TType GetPositionOf(TTypeAuto Value) const
 	{
