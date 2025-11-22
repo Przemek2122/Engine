@@ -55,11 +55,13 @@ public:
 		return Map.contains(Key);
 	}
 
+	/** returns value or creates NEW index and returns value */
 	template<typename TAutoType>
 	TValue& operator[](TAutoType Index)
 	{
 		return Map[Index];
 	}
+	/** returns value or creates NEW index and returns value */
 	template<typename TAutoType>
 	TValue& operator[](TAutoType Index) const
 	{
@@ -158,14 +160,50 @@ public:
 	}
 	
 	template<typename TAutoType>
-	NO_DISCARD TValue FindValueByKey(TAutoType Key)
+	NO_DISCARD std::optional<TValue> FindValueByKey(TAutoType Key)
 	{
-		return Map.find(Key)->second;
+		auto It = Map.find(Key);
+		if (It != Map.end())
+		{
+			return std::optional<TValue>(It->second);
+		}
+
+		return std::nullopt;
 	}
 	template<typename TAutoType>
-	NO_DISCARD TValue FindKeyByValue(TAutoType Value)
+	NO_DISCARD std::optional<TValue> FindValueByKey(TAutoType Key) const
 	{
-		return Map.find(Value);
+		auto It = Map.find(Key);
+		if (It != Map.end())
+		{
+			return std::optional<TValue>(It->second);
+		}
+
+		return std::nullopt;
+	}
+	/** Inefficient, iterate everything */
+	template<typename TAutoType>
+	NO_DISCARD std::optional<TKey> FindKeyByValue(const TAutoType& Value)
+	{
+		for (const auto& [Key, Val] : Map)
+		{
+			if (Val == Value)
+				return std::optional<TKey>(Key);
+		}
+
+		return std::nullopt;
+	}
+	/** Inefficient, iterate everything */
+	template<typename TAutoType>
+	NO_DISCARD std::optional<TKey> FindKeyByValue(const TAutoType& Value) const
+	{
+		for (const auto& [Key, Val] : Map)
+		{
+			if (Val == Value)
+				return std::optional<TKey>(Key);
+		}
+
+		return std::nullopt;
 	}
 	
 	template<typename TAutoType>

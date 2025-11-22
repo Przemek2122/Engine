@@ -17,7 +17,7 @@ public:
             SSLApp = std::make_unique<uWS::SSLApp>(uWS::SocketContextOptions{
                 .key_file_name = InKeyPath.c_str(),
                 .cert_file_name = InCertPath.c_str()
-                });
+            });
         }
         else
         {

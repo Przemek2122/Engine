@@ -22,4 +22,17 @@ public:
 
 	static CArray<std::string> SplitString(const std::string& BaseString, const char Delimiter);
 
+    struct FStringValidationResult
+	{
+        bool bIsValid;
+        std::vector<char> InvalidChars;
+        std::string Message;
+
+		explicit operator bool() const
+		{
+			return bIsValid;
+		}
+    };
+
+	static FStringValidationResult ValidateString(std::string_view InString, std::string_view AllowedCharSet);
 };

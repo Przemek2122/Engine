@@ -127,3 +127,34 @@ CArray<std::string> FStringHelpers::SplitString(const std::string& BaseString, c
 
 	return OutArray;
 }
+
+FStringHelpers::FStringValidationResult FStringHelpers::ValidateString(std::string_view InString,
+	std::string_view AllowedCharSet)
+{
+	FStringValidationResult result;
+	result.bIsValid = true;
+
+	for (char c : InString) {
+		if (AllowedCharSet.find(c) == std::string_view::npos) {
+			result.bIsValid = false;
+			result.InvalidChars.push_back(c);
+		}
+	}
+
+	if (!result.bIsValid) {
+		result.Message = "Password contains invalid characters: ";
+		for (size_t i = 0; i < result.InvalidChars.size(); ++i) {
+			result.Message += "'";
+			result.Message += result.InvalidChars[i];
+			result.Message += "'";
+			if (i < result.InvalidChars.size() - 1) {
+				result.Message += ", ";
+			}
+		}
+	}
+	else {
+		result.Message = "Password is valid";
+	}
+
+	return result;
+}
