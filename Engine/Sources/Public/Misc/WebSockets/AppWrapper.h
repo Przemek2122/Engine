@@ -70,6 +70,11 @@ public:
         }
     }
 
+    uWS::Loop* GetLoop() const
+    {
+        return bUseSSL ? SSLApp->getLoop() : NoSSLApp->getLoop();
+    }
+
     bool IsUsingSSL() const { return bUseSSL; }
 
 private:
