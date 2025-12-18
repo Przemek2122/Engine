@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <cstring>
 
 /** Generate field Id, used by SERIALIZE_FIELD, does not need to be used manually */
 #define FIELD_ID(Name) FSerializer::HashFieldName(#Name)

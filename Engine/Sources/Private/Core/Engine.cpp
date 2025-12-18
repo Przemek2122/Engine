@@ -13,6 +13,11 @@
 #include "Test/Samples/TestTimers.h"
 #endif
 
+#if PLATFORM_LINUX
+#include <unistd.h>
+#include <limits.h>
+#endif
+
 #include "Assets/Assets/FontAsset.h"
 #include "Assets/IniReader/IniManager.h"
 #include "Engine/EngineRenderingManager.h"
@@ -81,6 +86,19 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 		}
 	}
 
+#if PLATFORM_LINUX
+	LOG_DEBUG("Overide start path for LINUX.");
+
+	char path[PATH_MAX];
+	ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+	if (count != -1)
+	{
+		path[count] = '\0';
+		LaunchFullPath = std::string(path);
+		LOG_INFO("Linux launch path: " << LaunchFullPath);
+	}
+#endif
+
 	// Print parameters
 	for (FEngineLaunchParameter& LaunchParameter : LaunchParameters)
 	{
@@ -134,7 +152,8 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	LaunchRelativePath = std::string("");
 #else
 	// Get launch location
-	LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of('\\')) + FFileSystem::GetPlatformSlash();
+	const char PlatformSlash = FFileSystem::GetPlatformSlash();
+	LaunchRelativePath = LaunchFullPath.substr(0, LaunchFullPath.find_last_of(PlatformSlash)) + PlatformSlash;
 #endif
 
 	EngineRender = CreateEngineRenderer();

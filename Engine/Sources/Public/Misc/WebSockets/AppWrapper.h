@@ -2,7 +2,7 @@
 
 #if defined(USE_LIBRARY_UWEBSOCKETS) && USE_LIBRARY_UWEBSOCKETS
 #include <variant>
-#include "uWebSockets/App.h"
+#include <uwebsockets/App.h>
 
 #define CALL_APP_METHOD(Object, method, ...) Object->method(__VA_ARGS__)
 

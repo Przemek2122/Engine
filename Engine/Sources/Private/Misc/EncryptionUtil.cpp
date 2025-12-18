@@ -3,6 +3,7 @@
 #include "CoreEngine.h"
 #include "Misc/EncryptionUtil.h"
 #include <unordered_set>
+#include <algorithm>
 
 FHuffmanNode::FHuffmanNode(uint8_t D, uint32_t F)
 	: Data(D)

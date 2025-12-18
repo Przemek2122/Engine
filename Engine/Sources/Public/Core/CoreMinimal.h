@@ -1,4 +1,4 @@
-// Created by Przemys³aw Wiewióra 2020
+// Created by Przemyslaw WiewiÃ³ra 2020-2025
 
 // This should be included once in each .h file at the top before other includes.
 
