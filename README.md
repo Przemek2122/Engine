@@ -21,10 +21,9 @@ Libraries in:
 
 ### Tested with fedora, debian has some issues even on latest version
  - Install cmake 4.1 at least from 'https://cmake.org/download/'
- - (dnf install) git wget nano
- - (dnf groupinstall -y) "Development Tools"
+ - (dnf install) git wget nano make gcc-c++
  - anytime but after git download: 'git submodule update --init --recursive'
- - 
+
 ### Latest cmake install:
  - https://cmake.org/download/
  - 'mkdir /var/tools && cd /var/tools'
