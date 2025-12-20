@@ -28,3 +28,6 @@
 # Ignore Output
 output/
 /Engine/Source/ThirdParty
+ThirdParty/SDL_image
+ThirdParty/SDL_mixer
+ThirdParty/SDL_ttf
