@@ -20,8 +20,7 @@ Libraries in:
 ## Required (linux packages list):
 
 ### Tested with fedora, debian has some issues even on latest version
- - Install cmake 4.1 at least from 'https://cmake.org/download/'
- - (dnf install) git wget nano make gcc-c++ curl zip unzip tar
+ - (dnf install -y) git wget curl tar zip unzip nano make gcc-c++ ninja-build pkgconfig xz patch sed openssl openssl-devel
  - anytime but after git download: 'git submodule update --init --recursive'
 
 ### Latest cmake install:
