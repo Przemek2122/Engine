@@ -1,15 +1,18 @@
 # Engine
 
-Basic setup: 
-Required: CMAKE, vcpkg, Some compiler + IDE
+# Basic setup: 
+Required: (linux packages list - tested with fedora, debian has some issues even on latest version)
+    cmake, git, buildtools 
+Optional: (vcpkg will be downloaded and installed by cmake with it's packages, but can be installed already to install it outside build dir to speedup in case where build dir needs to be deleted)
+    vcpkg, Some compiler + IDE
 
 Implemented partialy for gaming, partialy for applications.
 Libraries in:
  - SDL3 (can be disabled)
  - SSL, zlib
- - SOCI & MySQL support
+ - SOCI & MySQL support (can be disabled)
  - HTTP using CrowCPP (can be disabled)
- - Sockets using uWebSockets (Prefered linux but should work on windows too (but windows using experimental))
+ - Sockets using uWebSockets
  [.. more]
 
 Functions:
