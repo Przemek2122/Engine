@@ -26,9 +26,9 @@ Libraries in:
 ### Latest cmake install:
  - https://cmake.org/download/
  - 'mkdir /var/tools && cd /var/tools'
- - 'wget https://github.com/Kitware/CMake/releases/download/v4.2.1/cmake-4.2.1-linux-x86_64.sh'
- - Install cmake 'chmod +x cmake-4.2.1-linux-x86_64.sh && ./cmake-4.2.1-linux-x86_64.sh && rm cmake-4.2.1-linux-x86_64.sh'
- - 'export PATH="/var/tools/cmake-4.2.1-linux-x86_64/bin:$PATH"'
+ - 'wget https://github.com/Kitware/CMake/releases/download/v4.1.4/cmake-4.1.4-linux-x86_64.sh'
+ - Install cmake 'chmod +x cmake-4.1.4-linux-x86_64.sh && ./cmake-4.1.4-linux-x86_64.sh && rm cmake-4.1.4-linux-x86_64.sh'
+ - 'export PATH="/var/tools/cmake-4.1.4-linux-x86_64/bin:$PATH"'
  - Verify 'cmake --version'
  <img width="569" height="39" alt="image" src="https://github.com/user-attachments/assets/b3184f42-11da-40c9-8cd5-8634e5295d73" />
 
