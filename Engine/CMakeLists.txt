@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 4.1.2)
+﻿cmake_minimum_required(VERSION 3.1.1)
 
 # Basic config
 # Create an option to switch between a system sdl library and a vendored SDL library
@@ -175,7 +175,7 @@ function(install_package PACKAGE_NAME)
     endif()
     
     execute_process(
-        COMMAND ${VCPKG_EXEC} install ${PACKAGE_NAME}
+        COMMAND ${VCPKG_EXEC} install --recurse ${PACKAGE_NAME}
         RESULT_VARIABLE VCPKG_RESULT
     )
     
@@ -192,7 +192,10 @@ message(STATUS "Installing required vcpkg packages:")
 if (DEFINED VCPKG_ROOT_DIR)
 	# List of vcpkg packages to install
 	install_package(OpenSSL)
-	install_package(libmysql)
+	
+	if(WIN32 AND VCPKG_INSTALLED_TRIPLET_DIR AND SOCI_ENABLE_MYSQL)
+		install_package(libmysql)
+	endif()
 	
 	if (NOT ENGINE_VENDORED)
 		install_package(sdl3)
@@ -734,18 +737,23 @@ if(USE_LIBRARY_SOCI)
 					
 					set(MYSQL_INCLUDE_DIR "${MySQL_INCLUDE_DIRS}" CACHE PATH "")
 					set(MYSQL_LIBRARY "${MySQL_LIBRARIES}" CACHE FILEPATH "")
-				else()
-					# Linux/Unix - use OS MySQL
-					find_package(PkgConfig REQUIRED)
-					pkg_check_modules(MYSQL REQUIRED mysqlclient)
+				else() # Linux (detect vcpkg OR system):
+					find_path(VCPKG_MYSQL_INCLUDE mysql.h PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/include/mysql" NO_DEFAULT_PATH)
 					
-					set(MySQL_INCLUDE_DIRS "${MYSQL_INCLUDE_DIRS}")
-					set(MySQL_LIBRARIES "${MYSQL_LIBRARIES}")
+					if(VCPKG_MYSQL_INCLUDE)
+						set(MySQL_INCLUDE_DIRS "${VCPKG_INSTALLED_TRIPLET_DIR}/include/mysql")
+						set(MySQL_LIBRARIES "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libmysqlclient${CMAKE_SHARED_LIBRARY_SUFFIX}")
+					else()
+						find_package(PkgConfig REQUIRED)
+						pkg_check_modules(MYSQL REQUIRED mysqlclient)  # mariadb-devel provides
+						set(MySQL_INCLUDE_DIRS "${MYSQL_INCLUDE_DIRS}")
+						set(MySQL_LIBRARIES "${MYSQL_LIBRARIES}")
+					endif()
 					
-					set(MYSQL_INCLUDE_DIR "${MYSQL_INCLUDE_DIRS}" CACHE PATH "")
-					set(MYSQL_LIBRARY "${MYSQL_LIBRARIES}" CACHE FILEPATH "")
+					set(MYSQL_INCLUDE_DIR "${MySQL_INCLUDE_DIRS}" CACHE PATH "")
+					set(MYSQL_LIBRARY "${MySQL_LIBRARIES}" CACHE FILEPATH "")
 				endif()
-				
+								
 				# Check if MySQL was found
 				if(MySQL_INCLUDE_DIRS AND MySQL_LIBRARIES)
 					set(SOCI_MYSQL ON CACHE BOOL "Enable MySQL backend")
