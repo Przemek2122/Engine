@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.1.1)
+﻿cmake_minimum_required (VERSION 3.1.1...4.1.1)
 
 # Basic config
 # Create an option to switch between a system sdl library and a vendored SDL library
@@ -6,6 +6,9 @@ option(ENGINE_VENDORED "Use vendored libraries" ON)
 option(ENGINE_BUILD_AS_LIBRARY "ON - build as library, OFF - build as executable" ON)
 option(ENGINE_COPY_ASSETS "Copy asssets to target" ON)
 option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
+
+# Do this app use any video features?
+option(ENGINE_USING_VIDEO "Is this app using any video features? (liek SDL Video)" ON)
 
 # Crow and asio are for HTTP, 
 # Note: using sockets from Crow is higly NOT recomended
@@ -218,6 +221,12 @@ endif()
 
 # Create project
 project(Engine VERSION ${ENGINE_VERSION} LANGUAGES CXX)
+
+if (ENGINE_USING_VIDEO)
+	target_compile_definitions(Engine PUBLIC
+		ENGINE_USING_VIDEO
+	)
+endif()
 
 if (APPLE OR EMSCRIPTEN)
 	# Disable shared builds on platforms where it does not make sense to use them
