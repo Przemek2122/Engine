@@ -8,7 +8,8 @@ option(ENGINE_COPY_ASSETS "Copy asssets to target" ON)
 option(ENGINE_COPY_ENGINE_MAPS "Should copy asssets to target?" ON)
 
 # Do this app use any video features?
-option(ENGINE_USING_VIDEO "Is this app using any video features? (liek SDL Video)" ON)
+option(ENGINE_USING_VIDEO "Is this app using any video features? (like SDL Video)" ON)
+option(ENGINE_USING_AUDIO "Is this app using any audio features? (liek SDL Audio)" ON)
 
 # Crow and asio are for HTTP, 
 # Note: using sockets from Crow is higly NOT recomended
@@ -202,9 +203,11 @@ if (DEFINED VCPKG_ROOT_DIR)
 	
 	if (NOT ENGINE_VENDORED)
 		install_package(sdl3)
-		install_package(sdl3-image)
-		install_package(sdl3-image[jpeg, png])
-		install_package(sdl3-ttf)
+		if (ENGINE_USING_VIDEO)
+			install_package(sdl3-image)
+			install_package(sdl3-image[jpeg, png])
+			install_package(sdl3-ttf)
+		endif()
 	endif()
 	
 	if (USE_LIBRARY_BOOST_BEAST)
@@ -224,9 +227,17 @@ project(Engine VERSION ${ENGINE_VERSION} LANGUAGES CXX)
 
 if (ENGINE_USING_VIDEO)
 	target_compile_definitions(Engine PUBLIC
-		ENGINE_USING_VIDEO
+		ENGINE_USING_VIDEO=1
 	)
 endif()
+
+if (ENGINE_USING_AUDIO)
+	target_compile_definitions(Engine PUBLIC
+		ENGINE_USING_AUDIO=1
+	)
+endif()
+
+
 
 if (APPLE OR EMSCRIPTEN)
 	# Disable shared builds on platforms where it does not make sense to use them
@@ -569,104 +580,110 @@ else()
     # 3. fail if the shared component cannot be found.
     find_package(SDL3 REQUIRED)
 endif()
-
-# Add SDL_ttf
-message(STATUS "Adding SDL_ttf...")
     
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
-        #option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
-        #set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
-		#set(SDLTTF_SHARED ON CACHE BOOL "Build SDL3_ttf as a shared library" FORCE)
+if (ENGINE_USING_VIDEO)
+	# Add SDL_ttf
+	message(STATUS "Adding SDL_ttf...")
 
-        set(SDL_TTF_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
-        set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
+	if(ENGINE_VENDORED)
+		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
+			#option(SDLTTF_INSTALL "Enable SDL3_ttf install target" ON)
+			#set(SDLTTF_INSTALL ON CACHE BOOL "Enable SDL3_ttf install target" FORCE)
+			#set(SDLTTF_SHARED ON CACHE BOOL "Build SDL3_ttf as a shared library" FORCE)
 
-        add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
+			set(SDL_TTF_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_ttf")
+			set(SDL_TTF_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_ttf_build")
 
-        target_link_directories(Engine PUBLIC ${SDL_TTF_BUILD_PATH})
+			add_subdirectory(${SDL_TTF_PATH} ${SDL_TTF_BUILD_PATH})
 
-        # After build copy includes
-        set(INCLUDES_DIR ${SDL_TTF_PATH}/include/SDL3_ttf)
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-        
-        file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
-    else()
-        message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
-else()
-    # Not tested
-    find_package(SDL3_ttf REQUIRED)
+			target_link_directories(Engine PUBLIC ${SDL_TTF_BUILD_PATH})
+
+			# After build copy includes
+			set(INCLUDES_DIR ${SDL_TTF_PATH}/include/SDL3_ttf)
+			set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+			
+			file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
+		else()
+			message(FATAL_ERROR "SDL_ttf directory not found. Please check the path.")
+			message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+		endif()
+	else()
+		# Not tested
+		find_package(SDL3_ttf REQUIRED)
+	endif()
+endif()
+    
+if (ENGINE_USING_AUDIO)
+	# Add SDL_mixer
+	message(STATUS "Adding SDL_mixer...")
+
+	if(ENGINE_VENDORED)
+		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+			#option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
+			#set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
+			#set(SDLMIXER_SHARED ON CACHE BOOL "Build SDL3_mixer as a shared library" FORCE)
+
+			set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
+			set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
+
+			set(WAVPACK_ENABLE_ASM OFF CACHE BOOL "Disable assembly optimizations" FORCE)
+
+			add_subdirectory(${SDL_MIXER_PATH} ${SDL_MIXER_BUILD_PATH})
+
+			target_link_directories(Engine PUBLIC ${SDL_MIXER_BUILD_PATH})
+			
+			# After build copy includes
+			set(INCLUDES_DIR ${SDL_MIXER_PATH}/include/SDL3_mixer)
+			set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+			
+			file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
+		else()
+			message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
+			message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+		endif()
+	else()
+		# Not tested
+		find_package(SDL3_mixer REQUIRED)
+	endif()
 endif()
 
-# Add SDL_mixer
-message(STATUS "Adding SDL_mixer...")
-    
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
-        #option(SDLMIXER_INSTALL "Enable SDL3_mixer install target" ON)
-        #set(SDLMIXER_INSTALL ON CACHE BOOL "Enable SDL3_mixer install target" FORCE)
-		#set(SDLMIXER_SHARED ON CACHE BOOL "Build SDL3_mixer as a shared library" FORCE)
+if (ENGINE_USING_VIDEO)
+	# Add SDL_image
+	message(STATUS "Adding SDL_image...")
 
-        set(SDL_MIXER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_mixer")
-        set(SDL_MIXER_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_mixer_build")
+	if(ENGINE_VENDORED)
+		if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
+			# Disable library which causes compilation issue on windows
+			set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+			# Disable optional SDL_Image
+			set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
+			set(SDLIMAGE_TESTS_INSTALL OFF CACHE BOOL "" FORCE)
+			set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+			#set(SDLIMAGE_SHARED ON CACHE BOOL "Build SDL3_image as a shared library" FORCE)
 
-        set(WAVPACK_ENABLE_ASM OFF CACHE BOOL "Disable assembly optimizations" FORCE)
+			#option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
+			#set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
 
-        add_subdirectory(${SDL_MIXER_PATH} ${SDL_MIXER_BUILD_PATH})
+			set(SDL_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
+			set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
 
-        target_link_directories(Engine PUBLIC ${SDL_MIXER_BUILD_PATH})
-        
-        # After build copy includes
-        set(INCLUDES_DIR ${SDL_MIXER_PATH}/include/SDL3_mixer)
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-        
-        file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
-    else()
-        message(FATAL_ERROR "SDL_mixer directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
-else()
-    # Not tested
-    find_package(SDL3_mixer REQUIRED)
-endif()
+			add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
 
-# Add SDL_image
-message(STATUS "Adding SDL_image...")
-
-if(ENGINE_VENDORED)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
-        # Disable library which causes compilation issue on windows
-        set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
-        # Disable optional SDL_Image
-        set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
-        set(SDLIMAGE_TESTS_INSTALL OFF CACHE BOOL "" FORCE)
-        set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
-		#set(SDLIMAGE_SHARED ON CACHE BOOL "Build SDL3_image as a shared library" FORCE)
-
-        #option(SDLIMAGE_INSTALL "Enable SDL3_image install target" ON)
-        #set(SDLIMAGE_INSTALL ON CACHE BOOL "Enable SDL3_image install target" FORCE)
-
-        set(SDL_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/SDL_image")
-        set(SDL_IMAGE_BUILD_PATH "${CMAKE_BINARY_DIR}/SDL_image_build")
-
-        add_subdirectory(${SDL_IMAGE_PATH} ${SDL_IMAGE_BUILD_PATH})
-
-        target_link_directories(Engine PUBLIC ${SDL_IMAGE_BUILD_PATH})
-        
-        # After build copy includes
-        set(INCLUDES_DIR ${SDL_IMAGE_PATH}/include/SDL3_image)
-        set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
-        
-        file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
-    else()
-        message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
-        message(FATAL_ERROR "Missing directory could mean missing git submodules.")
-    endif()
-else()
-    # Not tested
-    find_package(SDL3_image REQUIRED)
+			target_link_directories(Engine PUBLIC ${SDL_IMAGE_BUILD_PATH})
+			
+			# After build copy includes
+			set(INCLUDES_DIR ${SDL_IMAGE_PATH}/include/SDL3_image)
+			set(DESTINATION_DIR ${ENGINE_SOURCE_THIRD_PARTY_DIR})
+			
+			file(COPY ${INCLUDES_DIR} DESTINATION ${DESTINATION_DIR})
+		else()
+			message(FATAL_ERROR "SDL_image directory not found. Please check the path.")
+			message(FATAL_ERROR "Missing directory could mean missing git submodules.")
+		endif()
+	else()
+		# Not tested
+		find_package(SDL3_image REQUIRED)
+	endif()
 endif()
 
 if(USE_LIBRARY_ASIO)
@@ -1038,8 +1055,8 @@ function(copy_library_files target)
 
 		if(EXISTS "${lib_file}")
 			add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different "${lib_file}" $<TARGET_FILE_DIR:${target}>
-		)
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different "${lib_file}" $<TARGET_FILE_DIR:${target}>
+			)
 		else()
 			message(WARNING "Library not found: ${lib_file}")
 		endif()
@@ -1164,7 +1181,7 @@ endif()
 
 function(copy_runtime_engine_dlls target)
 	if (NOT UNIX AND VCPKG_ROOT_DIR AND VCPKG_INSTALLED_TRIPLET_DIR)
-		copy_library_files(target LIBRARIES crypto-3-x64 ssl-3-x64)
+		copy_library_files(${target} LIBRARIES libcrypto-3-x64 libssl-3-x64)
 
 		add_custom_command(TARGET ${target} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3-shared> $<TARGET_FILE_DIR:${target}>
@@ -1184,7 +1201,7 @@ function(copy_runtime_engine_dlls target)
 					COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:soci_mysql> $<TARGET_FILE_DIR:${target}>
 				)
 
-				copy_library_files(target LIBRARIES libmysql lz4 zlib1 zstd)
+				copy_library_files(${target} LIBRARIES libmysql lz4 zlib1 zstd)
 
 			endif()
 
