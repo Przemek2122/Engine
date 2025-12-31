@@ -126,13 +126,16 @@ void FAudioPlayer::SetBackgroundMusicVolume(const int32 IntValue)
 
 void FAudioPlayer::SetNumberOfSupportedAudioChannels(const int32 NewNumberOfChannels)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	const int32 NewNumberOfChannelsGot = Mix_AllocateChannels(NewNumberOfChannels);
 
 	LOG_DEBUG("Changing number of audio channels, reguested: '" << NewNumberOfChannels << "', mixer returned: '" << NewNumberOfChannelsGot << "'.");
+#endif
 }
 
 void FAudioPlayer::ReadIniFiles()
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	AssetManager = FGlobalDefines::GEngine->GetAssetsManager();
 	FIniManager* IniManager = AssetManager->GetIniManager();
 	const std::shared_ptr<FIniObject> AudioSettingsConfigObject = IniManager->GetIniObject(DefaultAudioSettingsConfigFile);
@@ -158,10 +161,12 @@ void FAudioPlayer::ReadIniFiles()
 	{
 		LOG_WARN("AudioPlayer is missing required config file: '" << DefaultAudioSettingsConfigFile << "'. Audio will not be played.");
 	}
+#endif
 }
 
 void FAudioPlayer::GetAudioSettings(const std::shared_ptr<FIniObject>& InAudioSettingsConfigObject)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	FIniField BackgroundMusicVolumeField = InAudioSettingsConfigObject->FindFieldByName(BackgroundMusicVolumeFieldName);
 	if (BackgroundMusicVolumeField.IsValid())
 	{
@@ -177,10 +182,12 @@ void FAudioPlayer::GetAudioSettings(const std::shared_ptr<FIniObject>& InAudioSe
 
 		SetMasterVolume(MasterMusicVolume);
 	}
+#endif
 }
 
 void FAudioPlayer::CollectMusic(const std::shared_ptr<FIniObject>& InAudioListConfigObject)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	for (int32 i = 0; i < MaxNumberOfMusicToLoad; i++)
 	{
 		std::string CurrentMusicName = BackgroundMusicFieldName + std::to_string(i + 1);
@@ -201,4 +208,5 @@ void FAudioPlayer::CollectMusic(const std::shared_ptr<FIniObject>& InAudioListCo
 			break;
 		}
 	}
+#endif
 }
