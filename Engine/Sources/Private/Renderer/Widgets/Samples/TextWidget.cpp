@@ -53,14 +53,18 @@ FTextWidget::FTextWidget(IWidgetManagementInterface* InWidgetManagementInterface
 
 FTextWidget::~FTextWidget()
 {
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	SDL_DestroyTexture(TextTexture);
+#endif
 
 	delete SDLRect;
 }
 
 void FTextWidget::Render()
 {
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	SDL_RenderTexture(GetRenderer()->GetSDLRenderer(), TextTexture, nullptr, SDLRect);
+#endif
 
 	FWidget::Render();
 }
@@ -229,7 +233,9 @@ int32 FTextWidget::CalculateDefaultSizeForRenderText(FVector2D<int32>& InOutSize
 	TTF_Font* Font = FontAsset->GetFont(TextSize)->GetFont();
 	if (Font != nullptr)
 	{
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 		bIsRendering = TTF_GetStringSize(Font, RenderedText.c_str(), 0, &InOutSize.X, &InOutSize.Y);
+#endif
 	}
 	
 	if (!bIsRendering)
@@ -269,6 +275,7 @@ void FTextWidget::RedrawText()
 		{
 			RenderedTextSize = TextSize;
 
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 			switch (DesiredTextRenderMode)
 			{
 				case ETextRenderMode::Solid:
@@ -291,6 +298,7 @@ void FTextWidget::RedrawText()
 				}
 				default: ;
 			}
+#endif
 
 			CurrentTextRenderMode = DesiredTextRenderMode;
 		}

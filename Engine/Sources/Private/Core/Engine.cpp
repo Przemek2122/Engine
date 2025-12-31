@@ -128,7 +128,7 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	}
 
 	// Initialize SDL TTF
-#ifdef defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	if (!TTF_Init())
 	{
 		LOG_ERROR("TTF_Init: " << SDL_GetError());

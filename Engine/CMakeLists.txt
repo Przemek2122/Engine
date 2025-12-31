@@ -198,6 +198,7 @@ if (DEFINED VCPKG_ROOT_DIR)
 	install_package(OpenSSL)
 	
 	if(WIN32 AND VCPKG_INSTALLED_TRIPLET_DIR AND SOCI_ENABLE_MYSQL)
+		install_package(boost) # Soci + mysql requires boost
 		install_package(libmysql)
 	endif()
 	
@@ -224,20 +225,6 @@ endif()
 
 # Create project
 project(Engine VERSION ${ENGINE_VERSION} LANGUAGES CXX)
-
-if (ENGINE_USING_VIDEO)
-	target_compile_definitions(Engine PUBLIC
-		ENGINE_USING_VIDEO=1
-	)
-endif()
-
-if (ENGINE_USING_AUDIO)
-	target_compile_definitions(Engine PUBLIC
-		ENGINE_USING_AUDIO=1
-	)
-endif()
-
-
 
 if (APPLE OR EMSCRIPTEN)
 	# Disable shared builds on platforms where it does not make sense to use them
@@ -290,6 +277,18 @@ elseif(APPLE)
     set(RUNTIME_LIB_EXT ".dylib")
 else()
     set(RUNTIME_LIB_EXT ".so")
+endif()
+
+if (ENGINE_USING_VIDEO)
+	target_compile_definitions(Engine PUBLIC
+		ENGINE_USING_VIDEO=1
+	)
+endif()
+
+if (ENGINE_USING_AUDIO)
+	target_compile_definitions(Engine PUBLIC
+		ENGINE_USING_AUDIO=1
+	)
 endif()
 
 # Set global property
@@ -944,18 +943,32 @@ endif()
 
 if(ANDROID OR (UNIX AND NOT APPLE))
 	# Link shared on android
+	if (ENGINE_USING_VIDEO)
 	target_link_libraries(Engine PUBLIC
 		SDL3_ttf-shared
-		SDL3_mixer-shared
 		SDL3_image-shared
 	)
+	endif()
+	
+	if (ENGINE_USING_AUDIO)
+		target_link_libraries(Engine PUBLIC
+			SDL3_mixer-shared
+		)
+	endif()
 else()
 	# Link
-	target_link_libraries(Engine PUBLIC
-		SDL3_ttf
-		SDL3_mixer
-		SDL3_image
-	)
+	if (ENGINE_USING_VIDEO)
+		target_link_libraries(Engine PUBLIC
+			SDL3_ttf
+			SDL3_image
+		)
+	endif()
+	
+	if (ENGINE_USING_AUDIO)
+		target_link_libraries(Engine PUBLIC
+			SDL3_mixer
+		)
+	endif()
 endif()
 
 if(ANDROID OR (UNIX AND NOT APPLE))
@@ -1185,11 +1198,21 @@ function(copy_runtime_engine_dlls target)
 
 		add_custom_command(TARGET ${target} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3-shared> $<TARGET_FILE_DIR:${target}>
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_ttf-shared> $<TARGET_FILE_DIR:${target}>
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_mixer-shared> $<TARGET_FILE_DIR:${target}>
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_image-shared> $<TARGET_FILE_DIR:${target}>
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Engine> $<TARGET_FILE_DIR:${target}>
 		)
+		
+		if (ENGINE_USING_VIDEO)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_ttf-shared> $<TARGET_FILE_DIR:${target}>
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_image-shared> $<TARGET_FILE_DIR:${target}>
+			)
+		endif()
+		
+		if (ENGINE_USING_AUDIO)
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_mixer-shared> $<TARGET_FILE_DIR:${target}>
+			)
+		endif()
 
 		if (USE_LIBRARY_SOCI)
 			add_custom_command(TARGET ${target} POST_BUILD

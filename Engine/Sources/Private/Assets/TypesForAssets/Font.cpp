@@ -47,6 +47,7 @@ std::string FFont::GetFontAssetName() const
 
 void FFont::InitializeFont()
 {
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	if (FFileSystem::File::Exists(FontAsset->GetAssetPath()))
 	{
 		Font = TTF_OpenFont(FontAsset->GetAssetPath().c_str(), FontSize);
@@ -59,9 +60,12 @@ void FFont::InitializeFont()
 	{
 		LOG_ERROR("Font file does not exist: " << FontAsset->GetAssetPath());
 	}
+#endif
 }
 
 void FFont::DeInitializeFont()
 {
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	TTF_CloseFont(Font);
+#endif
 }
