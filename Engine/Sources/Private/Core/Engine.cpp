@@ -122,7 +122,7 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	}
 	else
 	{
-		LOG_ERROR("SDL_INIT_EVERYTHING error: " << SDL_GetError());
+		LOG_ERROR("SDL_INIT error: " << SDL_GetError());
 
 		ForceExit(EEngineErrorCode::SDL_InitFail);
 	}
@@ -511,7 +511,13 @@ void FEngine::UpdateFrameTime()
 
 	int TargetFrameRate;
 	SDL_DisplayMode DisplayMode;
-	if (GetPrimaryDisplaySettings(DisplayMode))
+
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
+	const bool bDisplay = GetPrimaryDisplaySettings(DisplayMode);
+#else
+	const bool bDisplay = false;
+#endif
+	if (bDisplay)
 	{
 		// Take refresh rate from display
 		TargetFrameRate = DisplayMode.refresh_rate;
@@ -519,8 +525,6 @@ void FEngine::UpdateFrameTime()
 	else
 	{
 		TargetFrameRate = DefaultTargetFrameRate;
-
-		LOG_ERROR("Unable to get target framerate. Default of " << DefaultTargetFrameRate << "Will be used instead.");
 	}
 
 	SetFrameRate(TargetFrameRate);
