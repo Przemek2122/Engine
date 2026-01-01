@@ -44,15 +44,15 @@ public:
     }
 
     // Listen
-    FSocketAppWrapper& listen(int port, auto&& handler)
+    FSocketAppWrapper& listen(std::string host, int port, auto&& handler)
     {
         if (bUseSSL)
         {
-            SSLApp->listen(port, std::forward<decltype(handler)>(handler));
+            SSLApp->listen(host, port, std::forward<decltype(handler)>(handler));
         }
         else
         {
-            NoSSLApp->listen(port, std::forward<decltype(handler)>(handler));
+            NoSSLApp->listen(host, port, std::forward<decltype(handler)>(handler));
         }
 
         return *this;
