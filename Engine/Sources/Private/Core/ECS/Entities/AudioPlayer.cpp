@@ -30,32 +30,38 @@ FMusicToPlay::~FMusicToPlay()
 
 void FMusicToPlay::Play()
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	if (!bIsLoaded)
 	{
 		Load();
 	}
 
 	Mix_FadeInMusic(MusicObject, 0, 500);
+#endif
 }
 
 void FMusicToPlay::Load()
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	if (!bIsLoaded)
 	{
 		bIsLoaded = true;
 
 		MusicObject = Mix_LoadMUS(MusicPath.c_str());
 	}
+#endif
 }
 
 void FMusicToPlay::UnLoad()
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	if (bIsLoaded)
 	{
 		bIsLoaded = false;
 
 		Mix_FreeMusic(MusicObject);
 	}
+#endif
 }
 
 FAudioPlayer::FAudioPlayer(FEntityManager* InEntityManager)
@@ -76,6 +82,7 @@ void FAudioPlayer::Tick(float DeltaTime)
 {
 	EEntity::Tick(DeltaTime);
 
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	if (bPlayAudioAutomatically && BackgroundMusicToPlayArray.Size() > 0)
 	{
 		if (Mix_PlayingMusic() == 0)
@@ -84,6 +91,7 @@ void FAudioPlayer::Tick(float DeltaTime)
 			RandomMusic.Play();
 		}
 	}
+#endif
 }
 
 void FAudioPlayer::SetPlayAudioAutomatic(const bool bInPlayAutomatically)
@@ -93,16 +101,19 @@ void FAudioPlayer::SetPlayAudioAutomatic(const bool bInPlayAutomatically)
 
 void FAudioPlayer::SetMasterVolume(const int32 IntValue)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	const int32 NewBackgroundMusicVolume = FMath::Clamp(IntValue, MusicVolumeInRange.X, MusicVolumeInRange.Y);
 	const int32 NewBackgroundMusicVolumeForMixer = FMath::MapRange(NewBackgroundMusicVolume, MusicVolumeInRange, MusicVolumeOutRange);
 
 	Mix_MasterVolume(NewBackgroundMusicVolumeForMixer);
 
 	LOG_DEBUG("Changed background music volume from input: '" << NewBackgroundMusicVolumeForMixer << "'.");
+#endif
 }
 
 void FAudioPlayer::SetBackgroundMusicVolume(const int32 IntValue)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	// Value should be between 0 and 100
 	const int32 NewBackgroundMusicVolume = FMath::Clamp(IntValue, MusicVolumeInRange.X, MusicVolumeInRange.Y);
 	const int32 NewBackgroundMusicVolumeForMixer = FMath::MapRange(NewBackgroundMusicVolume, MusicVolumeInRange, MusicVolumeOutRange);
@@ -110,17 +121,21 @@ void FAudioPlayer::SetBackgroundMusicVolume(const int32 IntValue)
 	Mix_VolumeMusic(NewBackgroundMusicVolumeForMixer);
 
 	LOG_DEBUG("Changed background music volume from input: '" << NewBackgroundMusicVolumeForMixer << "'.");
+#endif
 }
 
 void FAudioPlayer::SetNumberOfSupportedAudioChannels(const int32 NewNumberOfChannels)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	const int32 NewNumberOfChannelsGot = Mix_AllocateChannels(NewNumberOfChannels);
 
 	LOG_DEBUG("Changing number of audio channels, reguested: '" << NewNumberOfChannels << "', mixer returned: '" << NewNumberOfChannelsGot << "'.");
+#endif
 }
 
 void FAudioPlayer::ReadIniFiles()
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	AssetManager = FGlobalDefines::GEngine->GetAssetsManager();
 	FIniManager* IniManager = AssetManager->GetIniManager();
 	const std::shared_ptr<FIniObject> AudioSettingsConfigObject = IniManager->GetIniObject(DefaultAudioSettingsConfigFile);
@@ -146,10 +161,12 @@ void FAudioPlayer::ReadIniFiles()
 	{
 		LOG_WARN("AudioPlayer is missing required config file: '" << DefaultAudioSettingsConfigFile << "'. Audio will not be played.");
 	}
+#endif
 }
 
 void FAudioPlayer::GetAudioSettings(const std::shared_ptr<FIniObject>& InAudioSettingsConfigObject)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	FIniField BackgroundMusicVolumeField = InAudioSettingsConfigObject->FindFieldByName(BackgroundMusicVolumeFieldName);
 	if (BackgroundMusicVolumeField.IsValid())
 	{
@@ -165,10 +182,12 @@ void FAudioPlayer::GetAudioSettings(const std::shared_ptr<FIniObject>& InAudioSe
 
 		SetMasterVolume(MasterMusicVolume);
 	}
+#endif
 }
 
 void FAudioPlayer::CollectMusic(const std::shared_ptr<FIniObject>& InAudioListConfigObject)
 {
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	for (int32 i = 0; i < MaxNumberOfMusicToLoad; i++)
 	{
 		std::string CurrentMusicName = BackgroundMusicFieldName + std::to_string(i + 1);
@@ -189,4 +208,5 @@ void FAudioPlayer::CollectMusic(const std::shared_ptr<FIniObject>& InAudioListCo
 			break;
 		}
 	}
+#endif
 }

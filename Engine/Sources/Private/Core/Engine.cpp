@@ -106,27 +106,39 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 	}
 
 	// Initialize SDL
-	const bool SdlInitialized = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+	const bool SdlInitialized = SDL_Init(
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
+		SDL_INIT_AUDIO |
+#endif
+#ifdef defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
+		SDL_INIT_VIDEO |
+#endif
+		SDL_INIT_EVENTS
+	);
+
 	if (SdlInitialized)
 	{
 		LOG_INFO("SDL Subsystems Initialised!");
 	}
 	else
 	{
-		LOG_ERROR("SDL_INIT_EVERYTHING error: " << SDL_GetError());
+		LOG_ERROR("SDL_INIT error: " << SDL_GetError());
 
 		ForceExit(EEngineErrorCode::SDL_InitFail);
 	}
 
-	// Initialize SDL TTF 
+	// Initialize SDL TTF
+#if defined(ENGINE_USING_VIDEO) && ENGINE_USING_VIDEO
 	if (!TTF_Init())
 	{
 		LOG_ERROR("TTF_Init: " << SDL_GetError());
 
 		ForceExit(EEngineErrorCode::TTF_InitFail);
 	}
+#endif
 
 	// Initialize SDL - Load support for everything supported
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
 	constexpr auto MixFlags = MIX_INIT_OGG | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_FLAC | MIX_INIT_MID | MIX_INIT_OPUS;
 	const int MixInitialized = Mix_Init(MixFlags);
 	if (!MixInitialized)
@@ -146,6 +158,7 @@ void FEngine::EngineInit(int Argc, char* Argv[])
 
 		ForceExit(EEngineErrorCode::Mixer_OpenAudioFailed);
 	}
+#endif
 
 #if PLATFORM_ANDROID
 	// In Android, we use SDL to check paths, we do not specify them themselves
@@ -498,7 +511,13 @@ void FEngine::UpdateFrameTime()
 
 	int TargetFrameRate;
 	SDL_DisplayMode DisplayMode;
-	if (GetPrimaryDisplaySettings(DisplayMode))
+
+#if defined(ENGINE_USING_AUDIO) && ENGINE_USING_AUDIO
+	const bool bDisplay = GetPrimaryDisplaySettings(DisplayMode);
+#else
+	const bool bDisplay = false;
+#endif
+	if (bDisplay)
 	{
 		// Take refresh rate from display
 		TargetFrameRate = DisplayMode.refresh_rate;
@@ -506,8 +525,6 @@ void FEngine::UpdateFrameTime()
 	else
 	{
 		TargetFrameRate = DefaultTargetFrameRate;
-
-		LOG_ERROR("Unable to get target framerate. Default of " << DefaultTargetFrameRate << "Will be used instead.");
 	}
 
 	SetFrameRate(TargetFrameRate);
