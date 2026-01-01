@@ -326,6 +326,7 @@ if(WIN32)
     message(STATUS "Configuring for Windows...")
 	
     target_compile_definitions(Engine PUBLIC PLATFORM_WINDOWS)
+    target_compile_definitions(Engine PUBLIC _WIN32_WINNT=0x0601)
     
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(CMAKE_ASM_MASM_FLAGS "/nologo /Dx64")
