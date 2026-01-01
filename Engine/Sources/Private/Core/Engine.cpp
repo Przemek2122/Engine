@@ -673,7 +673,7 @@ bool FEngine::GetDisplaySettings(const int DisplayIndex, SDL_DisplayMode& InDisp
 	}
 	else
 	{
-		LOG_WARN("Error getting display settings: '" << SDL_GetError() << "'.");
+		LOG_WARN("Unable to get display settings: '" << SDL_GetError() << "'.");
 	}
 
 	return bIsSuccessful;
@@ -696,7 +696,7 @@ bool FEngine::GetPrimaryDisplaySettings(SDL_DisplayMode& InDisplayMode)
 	}
 	else
 	{
-		LOG_WARN("Error getting display settings: '" << SDL_GetError() << "'.");
+		LOG_WARN("Unable to get display settings: '" << SDL_GetError() << "'.");
 	}
 
 	return bIsSuccessful;
