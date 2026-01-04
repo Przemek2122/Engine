@@ -1051,6 +1051,17 @@ function(CopyAssetsPostBuild TargetName SourcePath)
     )
 endfunction()
 
+# Simple post build copy
+# Usage CopyPostBuild(your_target, fromPath, toPath)
+function(CopyPostBuild TargetName CopyFrom CopyTo)
+    add_custom_command(TARGET ${TargetName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CopyFrom}" 
+            "$<TARGET_FILE_DIR:${TargetName}>/${CopyTo}"
+        COMMENT "Copying ${CopyTo}..."
+    )
+endfunction()
+
 # Sample
 # copy_library_files(your_target LIBRARIES crypto-3-x64 ssl-3-x64)
 function(copy_library_files target)
@@ -1075,38 +1086,6 @@ function(copy_library_files target)
 		else()
 			message(WARNING "Library not found: ${lib_file}")
 		endif()
-	endforeach()
-endfunction()
-
-# More generic copy function
-#s
-# Sample
-# copy_libs(your_target
-#	WIN_LIBS libcrypto-3-x64.dll libssl-3-x64.dll
-#	UNIX_LIBS libcrypto.so.3 libssl.so.3
-#	APPLE_LIBS libcrypto.3.dylib libssl.3.dylib
-#)
-function(copy_libs target)
-	set(options "")
-	set(oneValueArgs "")
-	set(multiValueArgs WIN_LIBS UNIX_LIBS APPLE_LIBS)
-	cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-	if(WIN32)
-		set(libs ${ARG_WIN_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/bin")
-	elseif(APPLE)
-		set(libs ${ARG_APPLE_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
-	elseif(UNIX)
-		set(libs ${ARG_UNIX_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
-	endif()
-
-	foreach(lib ${libs})
-		add_custom_command(TARGET ${target} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${lib_dir}/${lib}" $<TARGET_FILE_DIR:${target}>
-	)
 	endforeach()
 endfunction()
 
@@ -1227,22 +1206,18 @@ function(copy_runtime_engine_dlls target)
 				)
 
 				copy_library_files(${target} LIBRARIES libmysql lz4 zlib1 zstd)
-
 			endif()
 
 			if (USE_LIBRARY_UWEBSOCKETS)
-				if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-					copy_libs(${target}
-						WIN_LIBS zlibd1.dll uv.dll
-						UNIX_LIBS libz.so.1 libuv.so.1
-						APPLE_LIBS libz.1.dylib libuv.1.dylib
-					)
-				else()
-					copy_libs(${target}
-						WIN_LIBS zlib1.dll uv.dll
-						UNIX_LIBS libz.so.1 libuv.so.1
-						APPLE_LIBS libz.1.dylib libuv.1.dylib
-					)
+				if (WIN32)
+					# Debug
+					CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/zlibd1.dll" "zlibd1.dll")
+					CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/uv.dll" "uv.dll")
+
+					# Release
+					CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll" "zlib1.dll")
+					CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/uv.dll" "uv.dll")
+
 				endif()
 			endif()
 		endif()
