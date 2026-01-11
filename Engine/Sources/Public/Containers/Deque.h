@@ -54,7 +54,7 @@ public:
 	 * @Returns a vector of the first 'count' elements.
 	 * Useful for: Getting the first N messages in a queue.
 	 */
-	std::vector<TType> PeekFirst(int count) const
+	std::vector<TType> PeekFirst(TSizeType count) const
 	{
 		// 1. Safety: Don't try to get more than we have
 		size_t safeCount = std::min((size_t)count, Deque.size());
@@ -77,7 +77,7 @@ public:
 	 * Useful for: "Load last 10 messages" in chat history.
 	 * Returns them in chronological order (Oldest -> Newest).
 	 */
-	std::vector<TType> PeekLast(int count) const
+	std::vector<TType> PeekLast(TSizeType count) const
 	{
 		// 1. Safety: Don't try to get more than we have
 		size_t safeCount = std::min((size_t)count, Deque.size());
@@ -96,6 +96,25 @@ public:
 		}
 
 		return result;
+	}
+
+	std::vector<TType> GetRange(TSizeType Offset, TSizeType Count) const
+	{
+		if (Offset >= Deque.size() || Count == 0)
+		{
+			return { };
+		}
+
+		Count = std::min(static_cast<TSizeType>(Count), static_cast<TSizeType>(Deque.size() - Offset));
+
+		std::vector<TType> OutResult;
+		OutResult.reserve(Count);
+
+		auto Start = Deque.begin() + Offset;
+		auto End = Start + Count;
+		OutResult.insert(OutResult.end(), Start, End);
+
+		return OutResult;
 	}
 
 	template<typename TTypeAuto>

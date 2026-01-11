@@ -5,7 +5,7 @@
 
 void FEngineManager::Start(const int InArgc, char* InArgv[])
 {
-	std::cout << "Game engine initializing ..." << std::endl;
+	std::cout << "Application starting ..." << std::endl;
 
 	FGlobalDefines::GEngine = EngineClass.Allocate();
 		

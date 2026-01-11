@@ -17,8 +17,11 @@ option(USE_LIBRARY_ASIO "Should we use asio library? (Crow requires asio)" ON)
 option(USE_LIBRARY_CROW "Should we use crow library?" ON)
 
 # Socket library support
-option(USE_LIBRARY_BOOST_BEAST "Should we use boost beast library?" OFF)
 option(USE_LIBRARY_UWEBSOCKETS "Should we use uWebSockets library?" ON)
+option(USE_LIBRARY_BOOST_BEAST "Should we use boost beast library?" OFF)
+
+# CPR Support (libcurl wrapper)
+option(USE_LIBRARY_CPR "Should we use CPR library?" ON)
 
 # SOCI is for MySQL (db connection)
 option(USE_LIBRARY_SOCI "Should we use SOCI library for db connecions?" ON)
@@ -221,6 +224,9 @@ if (DEFINED VCPKG_ROOT_DIR)
 		install_package(uSockets)
 		install_package(libuv)
 		install_package(uwebsockets[ssl,zlib])
+	endif()
+	if (USE_LIBRARY_CPR)
+		install_package(cpr)
 	endif()
 endif()
 
@@ -529,17 +535,41 @@ if(USE_LIBRARY_UWEBSOCKETS)
 		${USOCKETS_LIB_DEBUG}
 		${USOCKETS_LIB_RELEASE}
 	)
-
-	#[[
-	target_link_libraries(Engine PUBLIC
-		$<$<CONFIG:Debug>:${USOCKETS_LIB_DEBUG}>
-		$<$<CONFIG:Release>:${USOCKETS_LIB_RELEASE}>
-	)
-	]]
 		
 	target_compile_definitions(Engine PUBLIC USE_LIBRARY_UWEBSOCKETS=1)
 else()
 	target_compile_definitions(Engine PUBLIC USE_LIBRARY_UWEBSOCKETS=0)
+endif()
+
+# Add CPR
+if (USE_LIBRARY_CPR)
+	message(STATUS "Adding CPR...")
+	
+	find_path(CPR_INCLUDE_DIR cpr/cpr.h)
+
+	find_library(CPR_LIB_DEBUG NAMES cprd cpr
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib" NO_DEFAULT_PATH
+	)
+	find_library(CPR_LIB_RELEASE NAMES cpr
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/lib" NO_DEFAULT_PATH
+	)
+
+	if(NOT CPR_LIB_DEBUG OR NOT CPR_LIB_RELEASE)
+		message(FATAL_ERROR "cpr lib not found!")
+	endif()
+
+	if(CPR_INCLUDE_DIR AND EXISTS ${CPR_INCLUDE_DIR})
+		target_include_directories(Engine PRIVATE ${CPR_INCLUDE_DIR})
+	endif()
+
+	target_link_libraries(Engine PUBLIC
+		$<$<CONFIG:Debug>:${CPR_LIB_DEBUG}>
+		$<$<CONFIG:Release>:${CPR_LIB_RELEASE}>
+	)
+	
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CPR=1)
+else()
+	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CPR=0)
 endif()
 
 # Add SDL3
@@ -1051,6 +1081,37 @@ function(CopyAssetsPostBuild TargetName SourcePath)
     )
 endfunction()
 
+# Simple post build copy
+# It has optional DEBUG_ONLY or RELEASE_ONLY
+# Usage (copy always) 				- CopyPostBuild(your_target, fromPath, toPath)
+# Usage (copy in release only) 		- CopyPostBuild(your_target "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/cpr.dll" "cpr.dll" RELEASE_ONLY)
+function(CopyPostBuild TargetName CopyFrom CopyTo)
+    cmake_parse_arguments(ARG "DEBUG_ONLY;RELEASE_ONLY" "" "" ${ARGN})
+    
+    if(ARG_DEBUG_ONLY)
+        add_custom_command(TARGET ${TargetName} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_if_different,true>
+                "${CopyFrom}" 
+                "$<TARGET_FILE_DIR:${TargetName}>/${CopyTo}"
+            COMMENT "Copying ${CopyTo} (Debug only)..."
+        )
+    elseif(ARG_RELEASE_ONLY)
+        add_custom_command(TARGET ${TargetName} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Release>,copy_if_different,true>
+                "${CopyFrom}" 
+                "$<TARGET_FILE_DIR:${TargetName}>/${CopyTo}"
+            COMMENT "Copying ${CopyTo} (Release only)..."
+        )
+    else()
+        add_custom_command(TARGET ${TargetName} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CopyFrom}" 
+                "$<TARGET_FILE_DIR:${TargetName}>/${CopyTo}"
+            COMMENT "Copying ${CopyTo}..."
+        )
+    endif()
+endfunction()
+
 # Sample
 # copy_library_files(your_target LIBRARIES crypto-3-x64 ssl-3-x64)
 function(copy_library_files target)
@@ -1075,38 +1136,6 @@ function(copy_library_files target)
 		else()
 			message(WARNING "Library not found: ${lib_file}")
 		endif()
-	endforeach()
-endfunction()
-
-# More generic copy function
-#s
-# Sample
-# copy_libs(your_target
-#	WIN_LIBS libcrypto-3-x64.dll libssl-3-x64.dll
-#	UNIX_LIBS libcrypto.so.3 libssl.so.3
-#	APPLE_LIBS libcrypto.3.dylib libssl.3.dylib
-#)
-function(copy_libs target)
-	set(options "")
-	set(oneValueArgs "")
-	set(multiValueArgs WIN_LIBS UNIX_LIBS APPLE_LIBS)
-	cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-	if(WIN32)
-		set(libs ${ARG_WIN_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/bin")
-	elseif(APPLE)
-		set(libs ${ARG_APPLE_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
-	elseif(UNIX)
-		set(libs ${ARG_UNIX_LIBS})
-		set(lib_dir "${VCPKG_INSTALLED_TRIPLET_DIR}/lib")
-	endif()
-
-	foreach(lib ${libs})
-		add_custom_command(TARGET ${target} POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${lib_dir}/${lib}" $<TARGET_FILE_DIR:${target}>
-	)
 	endforeach()
 endfunction()
 
@@ -1227,23 +1256,22 @@ function(copy_runtime_engine_dlls target)
 				)
 
 				copy_library_files(${target} LIBRARIES libmysql lz4 zlib1 zstd)
-
 			endif()
 
-			if (USE_LIBRARY_UWEBSOCKETS)
-				if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-					copy_libs(${target}
-						WIN_LIBS zlibd1.dll uv.dll
-						UNIX_LIBS libz.so.1 libuv.so.1
-						APPLE_LIBS libz.1.dylib libuv.1.dylib
-					)
-				else()
-					copy_libs(${target}
-						WIN_LIBS zlib1.dll uv.dll
-						UNIX_LIBS libz.so.1 libuv.so.1
-						APPLE_LIBS libz.1.dylib libuv.1.dylib
-					)
-				endif()
+			if (USE_LIBRARY_UWEBSOCKETS AND WIN32)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/zlibd1.dll" "zlibd1.dll" DEBUG_ONLY)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/uv.dll" "uv.dll" DEBUG_ONLY)
+
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/zlib1.dll" "zlib1.dll" RELEASE_ONLY)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/uv.dll" "uv.dll" RELEASE_ONLY)
+			endif()
+			
+			if (USE_LIBRARY_CPR AND WIN32)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/cpr.dll" "cpr.dll" DEBUG_ONLY)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/bin/libcurl-d.dll" "libcurl-d.dll" DEBUG_ONLY)
+				
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/cpr.dll" "cpr.dll" RELEASE_ONLY)
+				CopyPostBuild(${target} "${VCPKG_INSTALLED_TRIPLET_DIR}/bin/libcurl.dll" "libcurl.dll" RELEASE_ONLY)
 			endif()
 		endif()
 	endif()
