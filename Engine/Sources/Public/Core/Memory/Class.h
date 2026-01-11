@@ -28,13 +28,23 @@ template<typename TBaseClass, typename... TArgs>
 class FClassStorage
 {
 	typedef TClass<TBaseClass, TArgs...> TClassTypeWithArgs;
+	typedef FClassStorage<TBaseClass, TArgs...> TSelf;
 
 public:
-	/** Default */
+	/** Default - empty */
 	FClassStorage()
 		: StoredClass(nullptr)
 		, bIsMoved(false)
 	{
+	}
+
+	/** Set default value */
+	template<typename TType>
+	FClassStorage()
+		: StoredClass(nullptr)
+		, bIsMoved(false)
+	{
+		Set<TType>();
 	}
 
 	/** Copy */
@@ -86,6 +96,15 @@ public:
 		{
 			delete TempClass;
 		}
+	}
+
+	/** Set stored class but inline. */
+	template<typename TType>
+	NO_DISCARD TSelf& InlineSet()
+	{
+		Set<TType>();
+
+		return *this;
 	}
 
 	/**

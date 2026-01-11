@@ -5,6 +5,7 @@
 // C/C++ includes
 #include <array>
 #include <cfloat>
+#include <cmath>
 #include <chrono>
 #include <climits>
 #include <filesystem>
