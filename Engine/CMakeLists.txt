@@ -228,6 +228,7 @@ if (DEFINED VCPKG_ROOT_DIR)
 
 	if (USE_LIBRARY_CPR)
 		install_package(cpr)
+		install_package(curl[ssl])
 	endif()
 endif()
 
@@ -559,6 +560,18 @@ if (USE_LIBRARY_CPR)
 		message(FATAL_ERROR "cpr lib not found!")
 	endif()
 
+	# Find CURL
+	find_library(CURL_LIB_DEBUG NAMES curl-d libcurl-d
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/debug/lib" NO_DEFAULT_PATH
+	)
+	find_library(CURL_LIB_RELEASE NAMES curl libcurl
+		PATHS "${VCPKG_INSTALLED_TRIPLET_DIR}/lib" NO_DEFAULT_PATH
+	)
+
+	if(NOT CURL_LIB_DEBUG OR NOT CURL_LIB_RELEASE)
+		message(FATAL_ERROR "curl lib not found!")
+	endif()
+
 	if(CPR_INCLUDE_DIR AND EXISTS ${CPR_INCLUDE_DIR})
 		target_include_directories(Engine PRIVATE ${CPR_INCLUDE_DIR})
 	endif()
@@ -566,6 +579,10 @@ if (USE_LIBRARY_CPR)
 	target_link_libraries(Engine PUBLIC
 		$<$<CONFIG:Debug>:${CPR_LIB_DEBUG}>
 		$<$<CONFIG:Release>:${CPR_LIB_RELEASE}>
+		$<$<CONFIG:Debug>:${CURL_LIB_DEBUG}>
+		$<$<CONFIG:Release>:${CURL_LIB_RELEASE}>
+    "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libssl.a"
+    "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libcrypto.a"
 	)
 	
 	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CPR=1)
