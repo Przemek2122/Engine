@@ -225,6 +225,7 @@ if (DEFINED VCPKG_ROOT_DIR)
 		install_package(libuv)
 		install_package(uwebsockets[ssl,zlib])
 	endif()
+
 	if (USE_LIBRARY_CPR)
 		install_package(cpr)
 	endif()
@@ -248,6 +249,21 @@ endif()
 # on Web targets, we need CMake to generate a HTML webpage. 
 if(EMSCRIPTEN)
 	set(CMAKE_EXECUTABLE_SUFFIX ".html" CACHE INTERNAL "")
+endif()
+
+# Enable debug symbols for Debug builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if(MSVC)
+		add_compile_options(/Od /Zi /RTC1)
+		add_link_options(/DEBUG)
+	else()
+		add_compile_options(-O0 -g3 -ggdb)
+		add_link_options(-g)
+	endif()
+endif()
+
+if(WIN32 AND NOT MSVC)
+	target_link_libraries(communicatorsrv PRIVATE ws2_32 wsock32)
 endif()
 
 # Enable solution folders
