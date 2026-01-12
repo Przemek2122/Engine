@@ -3,6 +3,8 @@
 #include "CoreEngine.h"
 #include "Misc/StringHelpers.h"
 
+#include "Misc/EncryptionUtil.h"
+
 bool FStringHelpers::CompareStringCaseInsensitive(const std::string& A, const std::string& B)
 {
     return A.size() == B.size() && std::equal(A.begin(), A.end(), B.begin(), CompareCharsCaseInsensitive);
@@ -128,8 +130,7 @@ CArray<std::string> FStringHelpers::SplitString(const std::string& BaseString, c
 	return OutArray;
 }
 
-FStringHelpers::FStringValidationResult FStringHelpers::ValidateString(std::string_view InString,
-	std::string_view AllowedCharSet)
+FStringHelpers::FStringValidationResult FStringHelpers::ValidateString(std::string_view InString, std::string_view AllowedCharSet)
 {
 	FStringValidationResult result;
 	result.bIsValid = true;
@@ -157,4 +158,34 @@ FStringHelpers::FStringValidationResult FStringHelpers::ValidateString(std::stri
 	}
 
 	return result;
+}
+
+bool FStringHelpers::ValidateMail(const std::string& InEMail)
+{
+	// Find @ sign
+	const size_t AtPos = InEMail.find('@');
+	if (AtPos == std::string::npos || AtPos == 0 || AtPos == InEMail.length() - 1)
+	{
+		return false;
+	}
+
+	// Check for multiple @
+	if (InEMail.find('@', AtPos + 1) != std::string::npos)
+	{
+		return false;
+	}
+
+	// Find dot in domain part (after @)
+	const size_t DotPos = InEMail.find('.', AtPos + 1);
+	if (DotPos == std::string::npos || DotPos == AtPos + 1 || DotPos == InEMail.length() - 1)
+	{
+		return false;
+	}
+
+	if (!ValidateString(InEMail, FPredefinedCharsets::BASE_EMAIL))
+	{
+		return false;
+	}
+
+	return true;
 }

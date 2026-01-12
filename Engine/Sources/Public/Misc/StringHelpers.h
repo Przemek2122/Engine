@@ -34,5 +34,10 @@ public:
 		}
     };
 
+	/** Check if given string consists only of given characters */
 	static FStringValidationResult ValidateString(std::string_view InString, std::string_view AllowedCharSet);
+
+	/** Check if given mail has @, i, etc... */
+	static bool ValidateMail(const std::string& InEMail);
+
 };
