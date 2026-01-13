@@ -252,6 +252,21 @@ if(EMSCRIPTEN)
 	set(CMAKE_EXECUTABLE_SUFFIX ".html" CACHE INTERNAL "")
 endif()
 
+# Enable debug symbols for Debug builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if(MSVC)
+		add_compile_options(/Od /Zi /RTC1)
+		add_link_options(/DEBUG)
+	else()
+		add_compile_options(-O0 -g3 -ggdb)
+		add_link_options(-g)
+	endif()
+endif()
+
+if(WIN32 AND NOT MSVC)
+	#target_link_libraries(communicatorsrv PRIVATE ws2_32 wsock32)
+endif()
+
 # Enable solution folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -581,9 +596,14 @@ if (USE_LIBRARY_CPR)
 		$<$<CONFIG:Release>:${CPR_LIB_RELEASE}>
 		$<$<CONFIG:Debug>:${CURL_LIB_DEBUG}>
 		$<$<CONFIG:Release>:${CURL_LIB_RELEASE}>
-    "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libssl.a"
-    "${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libcrypto.a"
 	)
+	
+	if(NOT WIN32)
+		target_link_libraries(Engine PUBLIC
+			"${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libssl.a"
+			"${VCPKG_INSTALLED_TRIPLET_DIR}/lib/libcrypto.a"
+		)
+	endif()
 	
 	target_compile_definitions(Engine PUBLIC USE_LIBRARY_CPR=1)
 else()
