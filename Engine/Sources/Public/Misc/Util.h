@@ -171,7 +171,8 @@ public:
 	}
 
 	static FColorRGBA GetRandomColor();
-	
+	static std::optional<std::string> GetEnvVariable(const std::string& VariableName, const std::string& DefaultValue);
+
 	template<typename TValue = int>
 	static FVector2D<TValue> GetPointAngle(const TValue Distance, const TValue Angle)
 	{

@@ -355,3 +355,9 @@ FColorRGBA FUtil::GetRandomColor()
 		255
 	);
 }
+
+std::optional<std::string> FUtil::GetEnvVariable(const std::string& VariableName, const std::string& DefaultValue)
+{
+	const char* Variable = std::getenv(VariableName.c_str());
+	return Variable ? std::string(Variable) : DefaultValue;
+}
